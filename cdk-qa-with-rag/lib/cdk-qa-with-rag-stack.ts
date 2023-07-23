@@ -119,6 +119,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       functionName: `lambda-chat-api-for-${projectName}`,
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../lambda-chat')),
       timeout: cdk.Duration.seconds(60),
+      memorySize: 4096,
       role: roleLambda,
       environment: {
         bedrock_region: bedrock_region,
