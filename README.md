@@ -2,7 +2,7 @@
 
 여기서는 문서들을 업로드하면 Vector store에 저장후 이를 이용하여 Question/Answering을 제공하는 챗봇을 만드는것을 설명합니다.
 
-<img src="https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/assets/52392004/95780f39-b732-4dd3-b5dc-0c32f60535ca" width="750">
+<img src="https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/assets/52392004/a7ae1478-7073-42b8-b26b-1f190c46cf6f" width="750">
 
 ## FAISS
 
