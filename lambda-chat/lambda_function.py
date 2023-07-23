@@ -211,7 +211,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm
+    global modelId, llm, vectorstore_faiss
     
     modelId = load_configuration(userId)
     if(modelId==""): 
@@ -278,8 +278,7 @@ def lambda_handler(event, context):
                 bedrock_embeddings,  # embeddings
             )
 
-            # merge
-            global vectorstore_faiss
+            # merge            
             vectorstore_faiss.merge_from(vectorstore_faiss_new)
             print('vector store size: ', len(vectorstore_faiss))
 
