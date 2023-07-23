@@ -14,17 +14,18 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 const debug = false;
 const stage = 'dev';
 const s3_prefix = 'docs';
-const bucketName = 'bedrock-contents-storage';
 const bedrock_region = "us-west-2";
 const endpoint_url = "https://prod.us-west-2.frontend.bedrock.aws.dev";
 const model_id = "amazon.titan-tg1-large"; // amazon.titan-e1t-medium, anthropic.claude-v1
+const projectName = "qa-chatbot-with-rag"
+const bucketName = `storage-for-${projectName}`;
 
 export class CdkQaWithRagStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // s3 
-    const s3Bucket = new s3.Bucket(this, "chatbot-storage",{
+    const s3Bucket = new s3.Bucket(this, `storage-${projectName}`,{
       bucketName: bucketName,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -48,23 +49,23 @@ export class CdkQaWithRagStack extends cdk.Stack {
     }
 
     // DynamoDB for call log
-    const callLogTableName = 'db-call-log';
-    const callLogDataTable = new dynamodb.Table(this, 'dynamodb-call-log', {
+    const callLogTableName = `db-call-log-for-${projectName}`;
+    const callLogDataTable = new dynamodb.Table(this, `db-call-log-for-${projectName}`, {
       tableName: callLogTableName,
       partitionKey: { name: 'user-id', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'request-id', type: dynamodb.AttributeType.STRING }, 
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    const callLogIndexName = 'index-type';
+    const callLogIndexName = `index-type-for-${projectName}`;
     callLogDataTable.addGlobalSecondaryIndex({ // GSI
       indexName: callLogIndexName,
       partitionKey: { name: 'type', type: dynamodb.AttributeType.STRING },
     });
 
     // DynamoDB for configuration
-    const configTableName = 'db-configuration';
-    const configDataTable = new dynamodb.Table(this, 'dynamodb-configuration', {
+    const configTableName = `db-configuration-for-${projectName}`;
+    const configDataTable = new dynamodb.Table(this, `dynamodb-configuration-for-${projectName}`, {
       tableName: configTableName,
       partitionKey: { name: 'user-id', type: dynamodb.AttributeType.STRING },      
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -72,13 +73,13 @@ export class CdkQaWithRagStack extends cdk.Stack {
     });
 
     // copy web application files into s3 bucket
-    new s3Deploy.BucketDeployment(this, "upload-HTML", {
+    new s3Deploy.BucketDeployment(this, `upload-HTML-for-${projectName}`, {
       sources: [s3Deploy.Source.asset("../html")],
       destinationBucket: s3Bucket,
     });
 
     // cloudfront
-    const distribution = new cloudFront.Distribution(this, 'cloudfront', {
+    const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
       defaultBehavior: {
         origin: new origins.S3Origin(s3Bucket),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
@@ -87,13 +88,13 @@ export class CdkQaWithRagStack extends cdk.Stack {
       },
       priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
     });
-    new cdk.CfnOutput(this, 'distributionDomainName', {
+    new cdk.CfnOutput(this, `distributionDomainName-for-${projectName}`, {
       value: distribution.domainName,
       description: 'The domain name of the Distribution',
     });
 
-    const roleLambda = new iam.Role(this, "role-lambda-chat", {
-      roleName: "role-lambda-for-chat",
+    const roleLambda = new iam.Role(this, `role-lambda-chat-for-${projectName}`, {
+      roleName: `role-lambda-chat-for-${projectName}`,
       assumedBy: new iam.CompositePrincipal(
         new iam.ServicePrincipal("lambda.amazonaws.com"),
         new iam.ServicePrincipal("bedrock.amazonaws.com"),
@@ -113,9 +114,9 @@ export class CdkQaWithRagStack extends cdk.Stack {
     );      
 
     // Lambda for chat using langchain (container)
-    const lambdaChatApi = new lambda.DockerImageFunction(this, "lambda-chat", {
+    const lambdaChatApi = new lambda.DockerImageFunction(this, `lambda-chat-for-${projectName}`, {
       description: 'lambda for chat api',
-      functionName: 'lambda-chat-api-bedrock',
+      functionName: `lambda-chat-api-for-${projectName}`,
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../lambda-chat')),
       timeout: cdk.Duration.seconds(60),
       role: roleLambda,
@@ -135,8 +136,8 @@ export class CdkQaWithRagStack extends cdk.Stack {
     configDataTable.grantReadWriteData(lambdaChatApi); // permission for dynamo
 
     // role
-    const role = new iam.Role(this, "api-role-chatbot-bedrock", {
-      roleName: "api-role-chatbot-bedrock",
+    const role = new iam.Role(this, `api-role-for-${projectName}`, {
+      roleName: `api-role-for-${projectName}`,
       assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com")
     });
     role.addToPolicy(new iam.PolicyStatement({
@@ -148,7 +149,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     }); 
 
     // API Gateway
-    const api = new apiGateway.RestApi(this, 'api-chatbot', {
+    const api = new apiGateway.RestApi(this, `api-chatbot-for-${projectName}`, {
       description: 'API Gateway for chatbot',
       endpointTypes: [apiGateway.EndpointType.REGIONAL],
       binaryMediaTypes: ['application/pdf', 'text/plain', 'text/csv'], 
@@ -182,11 +183,11 @@ export class CdkQaWithRagStack extends cdk.Stack {
     }); 
 
     if(debug) {
-      new cdk.CfnOutput(this, 'apiUrl-chat', {
+      new cdk.CfnOutput(this, `apiUrl-chat-for-${projectName}`, {
         value: api.url,
         description: 'The url of API Gateway',
       }); 
-      new cdk.CfnOutput(this, 'curlUrl-chat', {
+      new cdk.CfnOutput(this, `curlUrl-chat-for-${projectName}`, {
         value: "curl -X POST "+api.url+'chat -H "Content-Type: application/json" -d \'{"text":"who are u?"}\'',
         description: 'Curl commend of API Gateway',
       }); 
@@ -199,18 +200,18 @@ export class CdkQaWithRagStack extends cdk.Stack {
       viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
     });    
    
-    new cdk.CfnOutput(this, 'WebUrl', {
+    new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/chat.html',      
       description: 'The web url of request for chat',
     });
 
-    new cdk.CfnOutput(this, 'UpdateCommend', {
+    new cdk.CfnOutput(this, `UpdateCommend-for-${projectName}`, {
       value: 'aws s3 cp ../html/chat.js '+'s3://'+s3Bucket.bucketName,
       description: 'The url of web file upload',
     });
 
     // Lambda - Upload
-    const lambdaUpload = new lambda.Function(this, "lambda-upload-bedrock", {
+    const lambdaUpload = new lambda.Function(this, `lambda-upload-for-${projectName}`, {
       runtime: lambda.Runtime.NODEJS_16_X, 
       functionName: "lambda-upload-bedrock",
       code: lambda.Code.fromAsset("../lambda-upload"), 
@@ -245,7 +246,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       ]
     }); 
     if(debug) {
-      new cdk.CfnOutput(this, 'ApiGatewayUrl', {
+      new cdk.CfnOutput(this, `ApiGatewayUrl-for-${projectName}`, {
         value: api.url+'upload',
         description: 'The url of API Gateway',
       }); 
