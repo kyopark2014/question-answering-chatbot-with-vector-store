@@ -180,12 +180,11 @@ def get_answer(query, vectorstore_faiss):
     )
     #query = "Is it possible that I get sentenced to jail due to failure in filings?"
     result = qa({"query": query})
-    print_ww(result['result'])
+    
+    source_documents = result['source_documents']
+    print(source_documents)
 
-    output = result['source_documents']
-    print(output)
-
-    return output['result']
+    return result['result']
         
 def lambda_handler(event, context):
     print(event)
