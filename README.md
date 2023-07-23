@@ -14,6 +14,108 @@ faiss.write_index(), faiss.read_index()을 이용해서 local에서 index를 저
 [Faiss-LangChain](https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/faiss)와 같이 save_local(), load_local()을 사용할 수 있고, merge_from()으로 2개의 vector store를 저장할 수 있습니다.
 
 
+## 주요 구성
+
+### 문서 업로드후 요약하기
+
+문서를 업로드하면 FAISS를 이용하여 vector store에 저장합니다. 파일을 여러번 업로드할 경우에는 기존 vector store에 추가합니다. 
+
+```python
+docs = load_document(file_type, object)
+
+vectorstore_faiss_new = FAISS.from_documents(
+    docs,
+    bedrock_embeddings,
+)
+
+vectorstore_faiss.merge_from(vectorstore_faiss_new)
+print('vector store size: ', len(vectorstore_faiss.docstore._dict))
+
+query = "summerize the documents"
+
+msg = get_answer(query, vectorstore_faiss_new)
+print('msg2: ', msg)
+```
+
+### Embedding
+
+Embedding으로 BedrockEmbeddings을 사용합니다.
+
+```python
+from langchain.embeddings import BedrockEmbeddings
+bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+```
+
+### 파일 읽어오기
+
+pdf, txt, csv 파일을 S3에서 로딩하여 chunk size로 분리한 후에 Document를 이용하여 문서로 만듧니다.
+
+```python
+from langchain.docstore.document import Document
+
+text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap = 100)
+texts = text_splitter.split_text(new_contents)
+print('texts[0]: ', texts[0])
+
+docs = [
+    Document(
+        page_content = t
+    ) for t in texts[: 3]
+    ]
+return docs
+```
+
+## Question/Aswering
+
+### vectorstore에서 query를 이용하는 방법
+
+embedding한 query를 가지고 vectorstore에서 검색한 후에 vectorstore의 query()를 이용하여 답변을 얻습니다.
+
+```python
+wrapper_store_faiss = VectorStoreIndexWrapper(vectorstore = vectorstore_faiss)
+query_embedding = vectorstore_faiss.embedding_function(query)
+
+relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
+answer = wrapper_store_faiss.query(question = query, llm = llm)
+
+### Question/Answer Template를 이용하는 방법
+
+일반적으로 vectorstore에서 query를 이용하는 방법보다 나은 결과를 얻습니다.
+
+```python
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+
+query_embedding = vectorstore_faiss.embedding_function(query)
+relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
+
+    from langchain.chains import RetrievalQA
+    from langchain.prompts import PromptTemplate
+
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+{ context }
+
+Question: { question }
+Assistant: """
+PROMPT = PromptTemplate(
+    template = prompt_template, input_variables = ["context", "question"]
+)
+
+qa = RetrievalQA.from_chain_type(
+    llm = llm,
+    chain_type = "stuff",
+    retriever = vectorstore_faiss.as_retriever(
+        search_type = "similarity", search_kwargs = { "k": 3 }
+    ),
+    return_source_documents = True,
+    chain_type_kwargs = { "prompt": PROMPT }
+)
+result = qa({ "query": query })
+
+return result['result']
+```
+
 ## 실습하기
 
 ### CDK를 이용한 인프라 설치
