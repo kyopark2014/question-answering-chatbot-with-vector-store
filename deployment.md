@@ -27,20 +27,20 @@ chmod a+rx resize.sh && ./resize.sh 100
 4) 소스를 다운로드합니다.
 
 ```java
-git clone https://github.com/kyopark2014/simple-chatbot-using-LLM-based-on-amazon-bedrock
+git clone https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM
 ```
 
 5) cdk 폴더로 이동하여 필요한 라이브러리를 설치합니다.
 
 ```java
-cd simple-chatbot-using-LLM-based-on-amazon-bedrock/cdk-bedrock-simple-chatbot/ && npm install
+cd question-answering-chatbot-using-RAG-based-on-LLM/cdk-qa-with-rag/ && npm install
 ```
 
 6) bedrock-sdk를 설치합니다.
 
 ```java
 cd ../lambda-chat && wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
-unzip bedrock-python-sdk.zip -d bedrock-sdk && python3 -m pip install -U ./bedrock-sdk/boto3-1.26.162-py3-none-any.whl -t . && python3 -m pip install -U ./bedrock-sdk/awscli-1.27.162-py3-none-any.whl -t . && cd ../cdk-bedrock-simple-chatbot/
+unzip bedrock-python-sdk.zip -d bedrock-sdk && python3 -m pip install -U ./bedrock-sdk/boto3-1.26.162-py3-none-any.whl -t . && python3 -m pip install -U ./bedrock-sdk/awscli-1.27.162-py3-none-any.whl -t . && cd ../cdk-qa-with-rag/
 ```
 
 6) CDK 사용을 위해 Boostraping을 수행합니다.
