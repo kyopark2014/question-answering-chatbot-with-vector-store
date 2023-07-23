@@ -81,7 +81,7 @@ relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embeddi
 answer = wrapper_store_faiss.query(question = query, llm = llm)
 ```
 
-### Question/Answer Template를 이용하는 방법
+### Template를 이용하는 방법
 
 일반적으로 vectorstore에서 query를 이용하는 방법보다 나은 결과를 얻습니다.
 
