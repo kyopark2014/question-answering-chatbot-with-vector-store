@@ -19,3 +19,4 @@
 
 [Getting started - Faiss](https://github.com/facebookresearch/faiss/wiki/Getting-started)
 
+[FAISS - LangChain](https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/faiss)
