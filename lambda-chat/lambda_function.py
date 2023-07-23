@@ -22,6 +22,8 @@ from langchain.chains.question_answering import load_qa_chain
 
 from langchain.vectorstores import FAISS
 from langchain.indexes import VectorstoreIndexCreator
+from langchain.document_loaders import CSVLoader
+from langchain.embeddings import BedrockEmbeddings
 
 module_path = "."
 sys.path.append(os.path.abspath(module_path))
@@ -90,15 +92,19 @@ print('models: ', modelInfo)
 llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 
 # embedding
-from langchain.embeddings import BedrockEmbeddings
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 # define vectorstore
-#vectorstore_faiss = FAISS.from_documents(
-#    "",  # documents
-#    bedrock_embeddings,  # embeddings
-#)
-#print('vector store size: ', len(vectorstore_faiss))
+docs = [
+    Document(
+        page_content=""
+    )
+]
+vectorstore_faiss = FAISS.from_documents(
+    docs,  # documents
+    bedrock_embeddings,  # embeddings
+)
+print('vector store size: ', len(vectorstore_faiss))
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -120,7 +126,7 @@ def load_document(file_type, s3_file_name):
         body = doc.get()['Body'].read()
         reader = csv.reader(body)
 
-        from langchain.document_loaders import CSVLoader
+        
         contents = CSVLoader(reader)
     
     print('contents: ', contents)
