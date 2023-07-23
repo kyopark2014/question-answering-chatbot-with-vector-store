@@ -85,9 +85,7 @@ print('models: ', modelInfo)
 
 llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 
-def get_summary(file_type, s3_file_name):
-    summary = ''
-    
+def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")
     doc = s3r.Object(s3_bucket, s3_prefix+'/'+s3_file_name)
     
@@ -113,7 +111,7 @@ def get_summary(file_type, s3_file_name):
     new_contents = str(contents).replace("\n"," ") 
     print('length: ', len(new_contents))
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=0)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
     texts = text_splitter.split_text(new_contents) 
     print('texts[0]: ', texts[0])
         
@@ -122,25 +120,73 @@ def get_summary(file_type, s3_file_name):
             page_content=t
         ) for t in texts[:3]
     ]
+    return docs
     
-    prompt_template = """Write a concise summary of the following:
+          
+def get_answer_basic(query, vectorstore_faiss):
+    from langchain.indexes.vectorstore import VectorStoreIndexWrapper
+    #query = "Is it possible that I get sentenced to jail due to failure in filings?"
 
-    {text}
+    wrapper_store_faiss = VectorStoreIndexWrapper(vectorstore=vectorstore_faiss)
+
+    query_embedding = vectorstore_faiss.embedding_function(query)
+    #np.array(query_embedding)
+
+    relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
+    print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
+    print('----')
+    for i, rel_doc in enumerate(relevant_documents):
+        print_ww(f'## Document {i+1}: {rel_doc.page_content}.......')
+        print('---')
+    
+    answer = wrapper_store_faiss.query(question=query, llm=llm)
+    print_ww(answer)
+
+    return answer
+
+
+def get_answer(query, vectorstore_faiss):
+    query_embedding = vectorstore_faiss.embedding_function(query)
+    #np.array(query_embedding)
+
+    relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
+    print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
+    print('----')
+    for i, rel_doc in enumerate(relevant_documents):
+        print_ww(f'## Document {i+1}: {rel_doc.page_content}.......')
+        print('---')
+
+    from langchain.chains import RetrievalQA
+    from langchain.prompts import PromptTemplate
+
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    {context}
+
+    Question: {question}
+    Assistant:"""
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+
+    qa = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=vectorstore_faiss.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ),
+        return_source_documents=True,
+        chain_type_kwargs={"prompt": PROMPT}
+    )
+    query = "Is it possible that I get sentenced to jail due to failure in filings?"
+    result = qa({"query": query})
+    print_ww(result['result'])
+
+    output = result['source_documents']
+    print(output)
+
+    return output['result']
         
-    CONCISE SUMMARY """
-
-    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
-    summary = chain.run(docs)
-    print('summary: ', summary)
-
-    if summary == '':  # error notification
-        summary = 'Fail to summarize the document. Try agan...'
-        return summary
-    else:
-        # return summary[1:len(summary)-1]   
-        return summary
-    
 def lambda_handler(event, context):
     print(event)
     userId  = event['user-id']
@@ -206,7 +252,27 @@ def lambda_handler(event, context):
             file_type = object[object.rfind('.')+1:len(object)]
             print('file_type: ', file_type)
             
-            msg = get_summary(file_type, object)
+            docs = load_document(file_type, object)
+
+            from langchain.embeddings import BedrockEmbeddings
+            bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+
+            import numpy as np
+            sample_embedding = np.array(bedrock_embeddings.embed_query(docs[0].page_content))
+            print("Sample embedding of a document chunk: ", sample_embedding)
+            print("Size of the embedding: ", sample_embedding.shape)
+
+            from langchain.chains.question_answering import load_qa_chain
+            from langchain.vectorstores import FAISS
+            from langchain.indexes import VectorstoreIndexCreator
+            
+            vectorstore_faiss = FAISS.from_documents(
+                docs,
+                bedrock_embeddings,
+            )
+            #return vectorstore_faiss
+
+            msg = get_answer_basic("summerize the documents", vectorstore_faiss)
                 
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
