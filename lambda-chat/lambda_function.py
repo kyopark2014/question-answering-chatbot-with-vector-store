@@ -25,6 +25,8 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain.document_loaders import CSVLoader
 from langchain.embeddings import BedrockEmbeddings
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
 
 module_path = "."
 sys.path.append(os.path.abspath(module_path))
@@ -124,9 +126,7 @@ def load_document(file_type, s3_file_name):
         contents = doc.get()['Body'].read()
     elif file_type == 'csv':        
         body = doc.get()['Body'].read()
-        reader = csv.reader(body)
-
-        
+        reader = csv.reader(body)        
         contents = CSVLoader(reader)
     
     print('contents: ', contents)
@@ -169,9 +169,6 @@ def get_answer(query, vectorstore_faiss):
     for i, rel_doc in enumerate(relevant_documents):
         print_ww(f'## Document {i+1}: {rel_doc.page_content}.......')
         print('---')
-
-    from langchain.chains import RetrievalQA
-    from langchain.prompts import PromptTemplate
 
     prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
@@ -287,7 +284,7 @@ def lambda_handler(event, context):
             #msg = get_answer_basic(query, vectorstore_faiss)
             #print('msg1: ', msg)
 
-            msg = get_answer(query, vectorstore_faiss)
+            msg = get_answer(query, vectorstore_faiss_new)
             print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
