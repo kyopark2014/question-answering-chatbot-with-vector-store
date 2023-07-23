@@ -53,7 +53,7 @@ vectorstore_faiss_new = FAISS.from_documents(
 vectorstore_faiss.merge_from(vectorstore_faiss_new)
 ```
 
-문서 파일에 대한 요약(Summerization)을 제공하여 사용자가 업로드한 파일에 대해 이해할수 있도록 합니다.
+업로드한 문서 파일에 대한 요약(Summerization)을 제공하여 사용자의 파일에 대한 이해를 돕습니다.
 
 ```python
 query = "summerize the documents"
