@@ -15,5 +15,7 @@
 [인프라 설치](https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/blob/main/deployment.md)에 따라 CDK로 인프라 설치를 진행합니다.
 
 
+## Reference 
 
+[Getting started - Faiss](https://github.com/facebookresearch/faiss/wiki/Getting-started)
 
