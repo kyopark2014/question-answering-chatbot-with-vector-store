@@ -6,6 +6,26 @@
 
 <img src="https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/assets/52392004/69a6fe75-1108-4fcb-a64b-807501076360" width="750">
 
+## Bedrock을 LangChain으로 연결하기
+
+Bedrock 접속을 위해 필요한 region name과 endpoint url을 지정하고, LangChain을 사용할 수 있도록 연결하여 줍니다. Bedrock preview에서는 Dev/Prod 버전에 따라 endpoint를 달리하는데, Prod 버전을 사용하고자 할 경우에는 endpoint에 대한 부분을 삭제하거나 주석처리합니다.
+
+```python
+from langchain.llms.bedrock import Bedrock
+
+bedrock_region = "us-west-2" 
+bedrock_config = {
+    "region_name":bedrock_region,
+    "endpoint_url":"https://prod.us-west-2.frontend.bedrock.aws.dev"
+}
+    
+boto3_bedrock = bedrock.get_bedrock_client(
+    region=bedrock_config["region_name"],
+    url_override=bedrock_config["endpoint_url"])
+
+modelId = 'amazon.titan-tg1-large'  # anthropic.claude-v1
+llm = Bedrock(model_id=modelId, client=boto3_bedrock)    
+```
 
 ## Faiss
 
