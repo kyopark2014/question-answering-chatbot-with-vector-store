@@ -104,7 +104,7 @@ vectorstore_faiss = FAISS.from_documents(
     docs,  # documents
     bedrock_embeddings,  # embeddings
 )
-print('vector store size: ', len(vectorstore_faiss))
+print('vector store size: ', len(vectorstore_faiss.docstore._dict))
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -262,7 +262,9 @@ def lambda_handler(event, context):
 
     else:             
         if type == 'text':
-            if(len(vectorstore_faiss)==0):
+            print('vectorstore_faiss.docstore._dict: ', vectorstore_faiss.docstore._dict)
+
+            if(len(vectorstore_faiss.docstore._dict)==0):
                 text = body
                 msg = llm(text)
             else:
@@ -286,7 +288,7 @@ def lambda_handler(event, context):
 
             # merge            
             vectorstore_faiss.merge_from(vectorstore_faiss_new)
-            print('vector store size: ', len(vectorstore_faiss))
+            print('vector store size: ', len(vectorstore_faiss.docstore._dict))
 
             # summerization
             query = "summerize the documents"
