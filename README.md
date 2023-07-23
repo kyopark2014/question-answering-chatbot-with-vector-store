@@ -2,7 +2,7 @@
 
 여기서는 문서들을 업로드하면 Vector store에 저장후 이를 이용하여 Question/Answering을 제공하는 챗봇을 만드는것을 설명합니다. vector store를 사용하면 LLM의 token 사이즈를 긴문장을 활용할 수 있습니다. Faiss는 빠르게 semantic search를 할 수 있도록 도와줍니다.
 
-사용자가 파일을 로드하면 CloudFont와 API Gateway를 거쳐서 [Lambda (upload)](./lambda-upload/index.js)가 S3에 파일을 저장합니다. 저장이 완료되면 해당 Object의 bucket과 key를 이용하여 [Lambda (chat)](./lambda-chat/lambda_function.py)이 파일을 로드하여 text를 추출합니다. text는 chunk size로 분리되어서embedding을 통해 Faiss에 index로 저장됩니다. 사용자가 메시지를 전달하면 Faiss로 부터 가장 가까운 chunk를 3개 문장들을 가지고 Question/Answering을 수행합니다. 이후 관련된 call log는 DynamoDB에 저장됩니다. 여기서 LLM은 Bedrock을 LangChain 형식의 API를 통해 구현하였고, Chatbot을 제공하는 인프라는 AWS CDK를 통해 배포합니다. 
+사용자가 파일을 로드하면 CloudFont와 API Gateway를 거쳐서 [Lambda (upload)](./lambda-upload/index.js)가 S3에 파일을 저장합니다. 저장이 완료되면 해당 Object의 bucket과 key를 이용하여 [Lambda (chat)](./lambda-chat/lambda_function.py)이 파일을 로드하여 text를 추출합니다. text는 chunk size로 분리되어서embedding을 통해 Faiss에 index로 저장됩니다. 사용자가 메시지를 전달하면 Faiss로 부터 가장 가까운 chunk를 3개 문장들을 가지고 Question/Answering을 수행합니다. 이후 관련된 call log는 DynamoDB에 저장됩니다. 여기서 LLM은 Bedrock을 LangChain 형식의 API를 통해 구현하였고, Chatbot을 제공하는 인프라는 AWS CDK를 통해 배포합니다. 
 
 <img src="https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/assets/52392004/69a6fe75-1108-4fcb-a64b-807501076360" width="750">
 
