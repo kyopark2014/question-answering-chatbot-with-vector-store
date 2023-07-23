@@ -108,7 +108,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       actions: ['bedrock:*'],
     });        
     roleLambda.attachInlinePolicy( // add bedrock policy
-      new iam.Policy(this, 'bedrock-policy-lambda-chat-bedrock', {
+      new iam.Policy(this, `bedrock-policy-for-${projectName}`, {
         statements: [BedrockPolicy],
       }),
     );      
@@ -213,7 +213,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     // Lambda - Upload
     const lambdaUpload = new lambda.Function(this, `lambda-upload-for-${projectName}`, {
       runtime: lambda.Runtime.NODEJS_16_X, 
-      functionName: "lambda-upload-bedrock",
+      functionName: `lambda-upload-for-${projectName}`,
       code: lambda.Code.fromAsset("../lambda-upload"), 
       handler: "index.handler", 
       timeout: cdk.Duration.seconds(10),
