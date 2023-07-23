@@ -90,7 +90,7 @@ docs = [
 return docs
 ```
 
-## Question/Aswering
+## Question/Answering
 
 ### Vector Store에서 query를 이용하는 방법
 
