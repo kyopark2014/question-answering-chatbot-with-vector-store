@@ -64,7 +64,7 @@ print('msg2: ', msg)
 
 ### Embedding
 
-Embedding으로 BedrockEmbeddings을 사용합니다.
+BedrockEmbeddings을 이용하여 Embedding을 합니다.
 
 ```python
 from langchain.embeddings import BedrockEmbeddings
