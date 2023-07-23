@@ -69,7 +69,7 @@ return docs
 
 ## Question/Aswering
 
-### Vector Store에서 query를 이용하는 방법
+### Vector Store에서 query를 이용하는 방법
 
 embedding한 query를 가지고 vectorstore에서 검색한 후에 vectorstore의 query()를 이용하여 답변을 얻습니다.
 
