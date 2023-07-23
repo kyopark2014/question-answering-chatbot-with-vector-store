@@ -178,7 +178,7 @@ def get_answer(query, vectorstore_faiss):
         return_source_documents=True,
         chain_type_kwargs={"prompt": PROMPT}
     )
-    query = "Is it possible that I get sentenced to jail due to failure in filings?"
+    #query = "Is it possible that I get sentenced to jail due to failure in filings?"
     result = qa({"query": query})
     print_ww(result['result'])
 
@@ -272,7 +272,12 @@ def lambda_handler(event, context):
             )
             #return vectorstore_faiss
 
-            msg = get_answer_basic("summerize the documents", vectorstore_faiss)
+            query = "summerize the documents"
+            msg = get_answer_basic(query, vectorstore_faiss)
+            print('msg1: ', msg)
+
+            msg = get_answer(query, vectorstore_faiss)
+            print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
