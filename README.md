@@ -22,3 +22,5 @@
 [FAISS - LangChain](https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/faiss)
 
 [Welcome to Faiss Documentation](https://faiss.ai/)
+
+[Adding a FAISS or Elastic Search index to a Dataset](https://huggingface.co/docs/datasets/v1.6.1/faiss_and_ea.html)
