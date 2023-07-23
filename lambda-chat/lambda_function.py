@@ -263,12 +263,11 @@ def lambda_handler(event, context):
     else:             
         if type == 'text':
             print('vectorstore_faiss.docstore._dict: ', vectorstore_faiss.docstore._dict)
-
-            if(len(vectorstore_faiss.docstore._dict)==0):
-                text = body
+            text = body
+            if(len(vectorstore_faiss.docstore._dict)==1):                
                 msg = llm(text)
             else:
-                msg = get_answer_basic(query, vectorstore_faiss)
+                msg = get_answer_basic(text, vectorstore_faiss)
                 print('msg1: ', msg)
             
         elif type == 'document':
