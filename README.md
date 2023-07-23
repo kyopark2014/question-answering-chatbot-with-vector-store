@@ -18,7 +18,7 @@ faiss.write_index(), faiss.read_index()을 이용해서 local에서 index를 저
 
 ## 주요 구성
 
-### 문서 업로드후 요약하기
+### 문서 등록
 
 문서를 업로드하면 FAISS를 이용하여 vector store에 저장합니다. 파일을 여러번 업로드할 경우에는 기존 vector store에 추가합니다. 
 
