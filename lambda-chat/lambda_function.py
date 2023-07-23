@@ -94,11 +94,11 @@ from langchain.embeddings import BedrockEmbeddings
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 # define vectorstore
-vectorstore_faiss = FAISS.from_documents(
-    "",  # documents
-    bedrock_embeddings,  # embeddings
-)
-print('vector store size: ', len(vectorstore_faiss))
+#vectorstore_faiss = FAISS.from_documents(
+#    "",  # documents
+#    bedrock_embeddings,  # embeddings
+#)
+#print('vector store size: ', len(vectorstore_faiss))
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
