@@ -1,4 +1,4 @@
-# Faiss를 이용한 Question/Answering Chatbot 만들기 
+# Vector Store를 이용한 Question/Answering Chatbot 만들기 
 
 문서를 업로드하면 Vector store에 저장후 이를 이용하여 Question/Answering을 제공하는 챗봇을 만드는것을 설명합니다. vector store를 사용하면 LLM의 token 사이즈를 넘어서는 긴문장을 활용하여 Question/Answering과 같은 Task를 수행할 수 있습니다. 여기서 Faiss는 빠르게 semantic search를 할 수 있도록 도와줍니다.
 
