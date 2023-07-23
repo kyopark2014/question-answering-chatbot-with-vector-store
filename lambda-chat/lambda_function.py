@@ -18,6 +18,10 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.agents import create_csv_agent
 from langchain.agents.agent_types import AgentType
 from langchain.llms.bedrock import Bedrock
+from langchain.chains.question_answering import load_qa_chain
+
+from langchain.vectorstores import FAISS
+from langchain.indexes import VectorstoreIndexCreator
 
 module_path = "."
 sys.path.append(os.path.abspath(module_path))
@@ -85,6 +89,18 @@ print('models: ', modelInfo)
 
 llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 
+# embedding
+from langchain.embeddings import BedrockEmbeddings
+bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+
+# define vectorstore
+vectorstore_faiss = FAISS.from_documents(
+    "",  # documents
+    bedrock_embeddings,  # embeddings
+)
+print('vector store size: ', len(vectorstore_faiss))
+
+# load documents from s3
 def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")
     doc = s3r.Object(s3_bucket, s3_prefix+'/'+s3_file_name)
@@ -121,8 +137,7 @@ def load_document(file_type, s3_file_name):
         ) for t in texts[:3]
     ]
     return docs
-    
-          
+              
 def get_answer_basic(query, vectorstore_faiss):
     from langchain.indexes.vectorstore import VectorStoreIndexWrapper
     #query = "Is it possible that I get sentenced to jail due to failure in filings?"
@@ -143,7 +158,6 @@ def get_answer_basic(query, vectorstore_faiss):
     print_ww(answer)
 
     return answer
-
 
 def get_answer(query, vectorstore_faiss):
     query_embedding = vectorstore_faiss.embedding_function(query)
@@ -242,8 +256,12 @@ def lambda_handler(event, context):
 
     else:             
         if type == 'text':
-            text = body
-            msg = llm(text)
+            if(len(vectorstore_faiss)==0):
+                text = body
+                msg = llm(text)
+            else:
+                msg = get_answer_basic(query, vectorstore_faiss)
+                print('msg1: ', msg)
             
         elif type == 'document':
             object = body
@@ -251,29 +269,24 @@ def lambda_handler(event, context):
             file_type = object[object.rfind('.')+1:len(object)]
             print('file_type: ', file_type)
             
+            # load documents where text, pdf, csv are supported
             docs = load_document(file_type, object)
-
-            from langchain.embeddings import BedrockEmbeddings
-            bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
-
-            import numpy as np
-            sample_embedding = np.array(bedrock_embeddings.embed_query(docs[0].page_content))
-            print("Sample embedding of a document chunk: ", sample_embedding)
-            print("Size of the embedding: ", sample_embedding.shape)
-
-            from langchain.chains.question_answering import load_qa_chain
-            from langchain.vectorstores import FAISS
-            from langchain.indexes import VectorstoreIndexCreator
             
-            vectorstore_faiss = FAISS.from_documents(
-                docs,
-                bedrock_embeddings,
+            # create new vectorstore from a document
+            vectorstore_faiss_new = FAISS.from_documents(
+                docs,  # documents
+                bedrock_embeddings,  # embeddings
             )
-            #return vectorstore_faiss
 
+            # merge
+            global vectorstore_faiss
+            vectorstore_faiss.merge_from(vectorstore_faiss_new)
+            print('vector store size: ', len(vectorstore_faiss))
+
+            # summerization
             query = "summerize the documents"
-            msg = get_answer_basic(query, vectorstore_faiss)
-            print('msg1: ', msg)
+            #msg = get_answer_basic(query, vectorstore_faiss)
+            #print('msg1: ', msg)
 
             msg = get_answer(query, vectorstore_faiss)
             print('msg2: ', msg)
