@@ -24,6 +24,7 @@ from langchain.vectorstores import FAISS
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.document_loaders import CSVLoader
 from langchain.embeddings import BedrockEmbeddings
+from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 
 module_path = "."
 sys.path.append(os.path.abspath(module_path))
@@ -67,7 +68,6 @@ def load_configuration(userId):
 
         return resp['Item']['model-id']['S']
     except: 
-        # raise Exception ("Not able to load from dynamodb")                
         print('No record of configuration!')
         modelId = os.environ.get('model_id')
         save_configuration(userId, modelId)
@@ -145,13 +145,8 @@ def load_document(file_type, s3_file_name):
     return docs
               
 def get_answer_basic(query, vectorstore_faiss):
-    from langchain.indexes.vectorstore import VectorStoreIndexWrapper
-    #query = "Is it possible that I get sentenced to jail due to failure in filings?"
-
     wrapper_store_faiss = VectorStoreIndexWrapper(vectorstore=vectorstore_faiss)
-
     query_embedding = vectorstore_faiss.embedding_function(query)
-    #np.array(query_embedding)
 
     relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
@@ -167,7 +162,6 @@ def get_answer_basic(query, vectorstore_faiss):
 
 def get_answer(query, vectorstore_faiss):
     query_embedding = vectorstore_faiss.embedding_function(query)
-    #np.array(query_embedding)
 
     relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
@@ -198,7 +192,6 @@ def get_answer(query, vectorstore_faiss):
         return_source_documents=True,
         chain_type_kwargs={"prompt": PROMPT}
     )
-    #query = "Is it possible that I get sentenced to jail due to failure in filings?"
     result = qa({"query": query})
     
     source_documents = result['source_documents']
