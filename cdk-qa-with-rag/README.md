@@ -16,7 +16,8 @@ const s3Bucket = new s3.Bucket(this, `storage-${projectName}`, {
     autoDeleteObjects: true,
     publicReadAccess: false,
     versioned: false,
-});```
+});
+```
 
 
 Call log를 저장하기 위하여 DynamoDB Table을 생성합니다. Table은 User ID(user-id)를 파티션키로 Request ID(request-id)를 Sort Key로 지정하엿습니다. On-Demend로 과금되게 하였고 프로젝트 종료시 다른 인프라와 같이 삭제되도록 설정하였습니다. 검색의 편의를 위하여 GSI로 메시지 type을 지정하였습니다. 메시지 type은 text와 object 두가지를 제공합니다.
