@@ -90,7 +90,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
     const OpenSearchPolicy = new iam.PolicyStatement({  
-      resources: [resourceArn],
+      resources: [ `"${resourceArn}"`],
       actions: ['es:*'],
     });  
 
@@ -123,6 +123,10 @@ export class CdkQaWithRagStack extends cdk.Stack {
       encryptionAtRest: {
         enabled: true,
       },
+      zoneAwareness: {
+        enabled: true,
+        availabilityZoneCount: 3
+      }
     });
     new cdk.CfnOutput(this, `Domain-of-OpenSearch-for-${projectName}`, {
       value: domain.domainArn,
