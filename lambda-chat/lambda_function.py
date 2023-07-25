@@ -271,7 +271,7 @@ def lambda_handler(event, context):
                 #msg = get_answer_basic(query, vectorstore_faiss)
                 #print('msg1: ', msg)
 
-                msg = get_answer(query, vectorstore_faiss_new)
+                msg = get_answer(query, vectorstore_faiss)
                 print('msg2: ', msg)
 
                 enableRAG = True
