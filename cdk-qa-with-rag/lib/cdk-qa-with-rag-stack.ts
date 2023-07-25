@@ -96,14 +96,15 @@ export class CdkQaWithRagStack extends cdk.Stack {
     }); 
 
     const OpenSearchPolicy = new iam.PolicyStatement({  
-      //resources: [ `"${resourceArn}"`],      
-      resources: ['*'],
+      resources: [resourceArn],      
+      // resources: ['*'],
       actions: ['es:*'],
     });  
 
     // OpenSearch
     const domain = new opensearch.Domain(this, 'Domain', {
       version: opensearch.EngineVersion.OPENSEARCH_2_3,
+      
       domainName: domainName,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       enforceHttps: true,
@@ -115,12 +116,14 @@ export class CdkQaWithRagStack extends cdk.Stack {
       capacity: {
         masterNodes: 3,
         masterNodeInstanceType: 'm6g.large.search',
+        // multiAzWithStandbyEnabled: false,
         dataNodes: 3,
         dataNodeInstanceType: 'r6g.large.search',        
         // warmNodes: 2,
         // warmInstanceType: 'ultrawarm1.medium.search',
       },
       accessPolicies: [OpenSearchPolicy],
+      
       ebs: {
         volumeSize: 100,
         volumeType: ec2.EbsDeviceVolumeType.GENERAL_PURPOSE_SSD,
@@ -131,7 +134,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       },
       zoneAwareness: {
         enabled: true,
-        availabilityZoneCount: 3
+        availabilityZoneCount: 3,        
       }
     });
     new cdk.CfnOutput(this, `Domain-of-OpenSearch-for-${projectName}`, {
