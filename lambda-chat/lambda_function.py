@@ -39,9 +39,12 @@ s3_prefix = os.environ.get('s3_prefix')
 callLogTableName = os.environ.get('callLogTableName')
 configTableName = os.environ.get('configTableName')
 endpoint_url = os.environ.get('endpoint_url')
+opensearch_url = os.environ.get('opensearch_url')
 bedrock_region = os.environ.get('bedrock_region')
-modelId = os.environ.get('model_id')
 rag_type = os.environ.get('rag_type')
+opensearch_account = os.environ.get('opensearch_account')
+opensearch_passwd = os.environ.get('opensearch_passwd')
+modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
 
 def save_configuration(userId, modelId):
@@ -284,12 +287,11 @@ def lambda_handler(event, context):
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':         
-                endpoint_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com"                    
                 vectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
                     bedrock_embeddings, 
-                    opensearch_url=endpoint_url,
-                    http_auth=("admin", "Wifi1234!"),
+                    opensearch_url=opensearch_url,
+                    http_auth=(opensearch_account, opensearch_passwd),
                 )
                 if enableRAG==False: 
                     enableRAG = True
