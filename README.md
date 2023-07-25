@@ -29,6 +29,16 @@ modelId = 'amazon.titan-tg1-large'  # anthropic.claude-v1
 llm = Bedrock(model_id=modelId, client=boto3_bedrock)    
 ```
 
+
+### Embedding
+
+BedrockEmbeddings을 이용하여 Embedding을 합니다.
+
+```python
+from langchain.embeddings import BedrockEmbeddings
+bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+```
+
 ### Faiss
 
 [Faiss](https://github.com/facebookresearch/faiss)는 Facebook에서 오픈소스로 제공하는 In-memory vector store로서 embedding과 document들을 저장할 수 있으며, LangChain을 지원합니다. 비슷한 역할을 하는 persistent store로는 Amazon OpenSearch, RDS Postgres with pgVector, ChromaDB, Pinecone과 Weaviate가 있습니다. 
@@ -37,9 +47,32 @@ faiss.write_index(), faiss.read_index()을 이용해서 local에서 index를 저
 
 [Faiss-LangChain](https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/faiss)와 같이 save_local(), load_local()을 사용할 수 있고, merge_from()으로 2개의 vector store를 저장할 수 있습니다.
 
+Faiss에서는 HFSS()를 이용하여 아래와 같이 vector store를 정의합니다. 
+
+```python
+from langchain.vectorstores import FAISS
+
+vectorstore = FAISS.from_documents( # create vectorstore from a document
+    docs, 
+    bedrock_embeddings  
+)
+```
+
+
 ### OpenSearch
 
+OpenSearchVectorSearch()으로 vector store를 정의합니다. 
 
+```python
+from langchain.vectorstores import OpenSearchVectorSearch
+
+vectorstore = OpenSearchVectorSearch.from_documents(
+    docs,
+    bedrock_embeddings,
+    opensearch_url = endpoint_url,
+    http_auth = ("admin", "password"),
+)
+```
 
 ### 문서 등록
 
@@ -65,14 +98,6 @@ msg = get_answer(query, vectorstore_new)
 print('msg2: ', msg)
 ```
 
-### Embedding
-
-BedrockEmbeddings을 이용하여 Embedding을 합니다.
-
-```python
-from langchain.embeddings import BedrockEmbeddings
-bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
-```
 
 ### 파일 읽어오기
 
