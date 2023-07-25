@@ -89,11 +89,12 @@ export class CdkQaWithRagStack extends cdk.Stack {
     const region = process.env.CDK_DEFAULT_REGION;
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
-    //const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}`
-    new cdk.CfnOutput(this, `resource-arn-for-${projectName}`, {
-      value: resourceArn,
-      description: 'The arn of resource',
-    }); 
+    if(debug) {
+      new cdk.CfnOutput(this, `resource-arn-for-${projectName}`, {
+        value: resourceArn,
+        description: 'The arn of resource',
+      }); 
+    }
 
     const OpenSearchPolicy = new iam.PolicyStatement({  
       resources: [resourceArn],      
@@ -287,10 +288,12 @@ export class CdkQaWithRagStack extends cdk.Stack {
       description: 'The web url of request for chat',
     });
 
-    new cdk.CfnOutput(this, `UpdateCommend-for-${projectName}`, {
-      value: 'aws s3 cp ../html/chat.js '+'s3://'+s3Bucket.bucketName,
-      description: 'The url of web file upload',
-    });
+    if(debug) {
+      new cdk.CfnOutput(this, `UpdateCommend-for-${projectName}`, {
+        value: 'aws s3 cp ../html/chat.js '+'s3://'+s3Bucket.bucketName,
+        description: 'The url of web file upload',
+      });
+    }
 
     // Lambda - Upload
     const lambdaUpload = new lambda.Function(this, `lambda-upload-for-${projectName}`, {
