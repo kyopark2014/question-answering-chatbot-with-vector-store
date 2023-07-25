@@ -27,13 +27,13 @@ chmod a+rx resize.sh && ./resize.sh 100
 4) 소스를 다운로드합니다.
 
 ```java
-git clone https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM
+git clone https://github.com/kyopark2014/question-answering-chatbot-with-vector-store
 ```
 
 5) cdk 폴더로 이동하여 필요한 라이브러리를 설치합니다.
 
 ```java
-cd question-answering-chatbot-using-RAG-based-on-LLM/cdk-qa-with-rag/ && npm install
+cd question-answering-chatbot-with-vector-store/cdk-qa-with-rag/ && npm install
 ```
 
 6) bedrock-sdk를 설치합니다.
