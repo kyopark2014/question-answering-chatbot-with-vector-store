@@ -197,7 +197,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore_faiss
+    global modelId, llm, vectorstore_faiss, enableRAG
     
     modelId = load_configuration(userId)
     if(modelId==""): 
