@@ -51,7 +51,7 @@ faiss.write_index(), faiss.read_index()을 이용해서 local에서 index를 저
 
 [Faiss-LangChain](https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/faiss)와 같이 save_local(), load_local()을 사용할 수 있고, merge_from()으로 2개의 vector store를 저장할 수 있습니다.
 
-Faiss에서는 HFSS()를 이용하여 아래와 같이 vector store를 정의합니다. 
+Faiss에서는 FAISS()를 이용하여 아래와 같이 vector store를 정의합니다. 
 
 ```python
 from langchain.vectorstores import FAISS
@@ -82,6 +82,24 @@ OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합�
             "Resource": "arn:aws:es:ap-northeast-2:[account-id]:domain/[domain-name]/*"
         }
     ]
+}
+```
+
+또한, OpenSearch의 access policy는 아래와 같습니다.
+
+```java
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "es:*",
+      "Resource": "arn:aws:es:ap-northeast-2:[account-id]:domain/[domain-name]/*"
+    }
+  ]
 }
 ```
 
