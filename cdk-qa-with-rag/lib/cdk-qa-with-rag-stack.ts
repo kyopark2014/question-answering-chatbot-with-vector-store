@@ -83,6 +83,15 @@ export class CdkQaWithRagStack extends cdk.Stack {
       sources: [s3Deploy.Source.asset("../html")],
       destinationBucket: s3Bucket,
     });
+    
+    // Permission for OpenSearch
+    const region = process.env.CDK_DEFAULT_REGION;
+    const accountId = process.env.CDK_DEFAULT_ACCOUNT;
+    const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+    const OpenSearchPolicy = new iam.PolicyStatement({  
+      resources: [resourceArn],
+      actions: ['es:*'],
+    });  
 
     // OpenSearch
     const domainName = `os-${projectName}`
@@ -92,19 +101,20 @@ export class CdkQaWithRagStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       enforceHttps: true,
       fineGrainedAccessControl: {
-        masterUserName: 'admin',
+        masterUserName: opensearch_account,
         // masterUserPassword: cdk.SecretValue.secretsManager('dkim-private-key'),
-        masterUserPassword:cdk.SecretValue.unsafePlainText('Wifi1234!')
+        masterUserPassword:cdk.SecretValue.unsafePlainText(opensearch_passwd)
       },
       capacity: {
         masterNodes: 3,
         masterNodeInstanceType: 'm6g.large.search',
         dataNodes: 3,
-        dataNodeInstanceType: 'r6g.large.search',
+        dataNodeInstanceType: 'r6g.large.search',        
         //multiAzWithStandbyEnabled: true,
         // warmNodes: 2,
         // warmInstanceType: 'ultrawarm1.medium.search',
       },
+      accessPolicies: [OpenSearchPolicy],
       ebs: {
         volumeSize: 100,
         volumeType: ec2.EbsDeviceVolumeType.GENERAL_PURPOSE_SSD,
@@ -158,15 +168,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
         statements: [BedrockPolicy],
       }),
     );
-
-    // grant opensearch permission
-    const region = process.env.CDK_DEFAULT_REGION;
-    const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-    const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
-    const OpenSearchPolicy = new iam.PolicyStatement({  
-      resources: [resourceArn],
-      actions: ['es:*'],
-    });        
+         
     roleLambda.attachInlinePolicy( // add bedrock policy
       new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
         statements: [OpenSearchPolicy],
