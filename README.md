@@ -58,6 +58,11 @@ vectorstore = FAISS.from_documents( # create vectorstore from a document
 )
 ```
 
+vectorstore를 이용하여 관계된 문서를 조회합니다. 이때 Faiss는 embedding된 query를 이용하여 similarity_search_by_vector()로 조회합니다.
+
+```python
+relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+```
 
 ### OpenSearch
 
@@ -72,6 +77,12 @@ vectorstore = OpenSearchVectorSearch.from_documents(
     opensearch_url = endpoint_url,
     http_auth = ("admin", "password"),
 )
+```
+
+vectorstore를 이용하여 관계된 문서를 조회합니다. 이때 OpenSearch는 query를 이용하여 similarity_search()로 조회합니다.
+
+```python
+relevant_documents = vectorstore.similarity_search(query)
 ```
 
 ### 문서 등록
