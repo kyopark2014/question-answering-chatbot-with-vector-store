@@ -52,6 +52,63 @@ const configDataTable = new dynamodb.Table(this, `dynamodb-configuration-for-${p
 });
 ```
 
+OpenSearch를 위한 Policy와 Access Policy를 아래와 같이 정의합니다.
+
+```java
+const domainName = `os-${projectName}`
+const region = process.env.CDK_DEFAULT_REGION;
+const accountId = process.env.CDK_DEFAULT_ACCOUNT;
+const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+
+
+const OpenSearchPolicy = new iam.PolicyStatement({
+    resources: [resourceArn],
+    actions: ['es:*'],
+});
+const OpenSearchAccessPolicy = new iam.PolicyStatement({
+    resources: [resourceArn],
+    actions: ['es:*'],
+    effect: iam.Effect.ALLOW,
+    principals: [new iam.AnyPrincipal()],
+});  
+```
+
+OpenSearch에 대해 아래와 같이 정의합니다.
+
+```java
+const domain = new opensearch.Domain(this, 'Domain', {
+    version: opensearch.EngineVersion.OPENSEARCH_2_3,
+
+    domainName: domainName,
+    removalPolicy: cdk.RemovalPolicy.DESTROY,
+    enforceHttps: true,
+    fineGrainedAccessControl: {
+        masterUserName: opensearch_account,
+        masterUserPassword: cdk.SecretValue.unsafePlainText(opensearch_passwd)
+    },
+    capacity: {
+        masterNodes: 3,
+        masterNodeInstanceType: 'm6g.large.search',
+        dataNodes: 3,
+        dataNodeInstanceType: 'r6g.large.search',
+    },
+    accessPolicies: [OpenSearchAccessPolicy],
+    ebs: {
+        volumeSize: 100,
+        volumeType: ec2.EbsDeviceVolumeType.GENERAL_PURPOSE_SSD,
+    },
+    nodeToNodeEncryption: true,
+    encryptionAtRest: {
+        enabled: true,
+    },
+    zoneAwareness: {
+        enabled: true,
+        availabilityZoneCount: 3,
+    }
+});
+```
+
+
 Bedrock 사용에 필요한 IAM Role을 생성합니다. Principal로 "bedrock.amazonaws.com"을 추가하였고, Policy로 action에 "bedrock:*"을 허용하였습니다.
 
 ```java
