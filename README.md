@@ -50,12 +50,12 @@ faiss.write_index(), faiss.read_index()을 이용해서 local에서 index를 저
 ```python
 docs = load_document(file_type, object)
 
-vectorstore_faiss_new = FAISS.from_documents(
+vectorstore_new = FAISS.from_documents(
     docs,
     bedrock_embeddings,
 )
 
-vectorstore_faiss.merge_from(vectorstore_faiss_new)
+vectorstore.merge_from(vectorstore_new)
 ```
 
 업로드한 문서 파일에 대한 요약(Summerization)을 제공하여 사용자의 파일에 대한 이해를 돕습니다.
@@ -63,7 +63,7 @@ vectorstore_faiss.merge_from(vectorstore_faiss_new)
 ```python
 query = "summerize the documents"
 
-msg = get_answer(query, vectorstore_faiss_new)
+msg = get_answer(query, vectorstore_new)
 print('msg2: ', msg)
 ```
 
@@ -102,10 +102,10 @@ return docs
 embedding한 query를 가지고 vectorstore에서 검색한 후에 vectorstore의 query()를 이용하여 답변을 얻습니다.
 
 ```python
-wrapper_store_faiss = VectorStoreIndexWrapper(vectorstore = vectorstore_faiss)
-query_embedding = vectorstore_faiss.embedding_function(query)
+wrapper_store_faiss = VectorStoreIndexWrapper(vectorstore = vectorstore)
+query_embedding = vectorstore.embedding_function(query)
 
-relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
+relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 answer = wrapper_store_faiss.query(question = query, llm = llm)
 ```
 
@@ -117,8 +117,8 @@ answer = wrapper_store_faiss.query(question = query, llm = llm)
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
-query_embedding = vectorstore_faiss.embedding_function(query)
-relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
+query_embedding = vectorstore.embedding_function(query)
+relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 
     from langchain.chains import RetrievalQA
     from langchain.prompts import PromptTemplate
@@ -136,7 +136,7 @@ PROMPT = PromptTemplate(
 qa = RetrievalQA.from_chain_type(
     llm = llm,
     chain_type = "stuff",
-    retriever = vectorstore_faiss.as_retriever(
+    retriever = vectorstore.as_retriever(
         search_type = "similarity", search_kwargs = { "k": 3 }
     ),
     return_source_documents = True,
