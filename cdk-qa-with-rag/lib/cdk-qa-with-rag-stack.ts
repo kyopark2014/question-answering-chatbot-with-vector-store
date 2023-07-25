@@ -97,7 +97,6 @@ export class CdkQaWithRagStack extends cdk.Stack {
 
     const OpenSearchPolicy = new iam.PolicyStatement({  
       resources: [resourceArn],      
-      // resources: ['*'],
       actions: ['es:*'],
     });  
 
@@ -122,7 +121,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
         // warmNodes: 2,
         // warmInstanceType: 'ultrawarm1.medium.search',
       },
-    //  accessPolicies: [OpenSearchPolicy],      
+      accessPolicies: [OpenSearchPolicy],      
       ebs: {
         volumeSize: 100,
         volumeType: ec2.EbsDeviceVolumeType.GENERAL_PURPOSE_SSD,
