@@ -267,59 +267,38 @@ def lambda_handler(event, context):
             
             # load documents where text, pdf, csv are supported
             docs = load_document(file_type, object)
-            
-            if enableRAG==False: 
-                if rag_type == 'faiss':
-                    # create new vectorstore from a document
-                    vectorstore = FAISS.from_documents(
+                        
+            if rag_type == 'faiss':
+                if enableRAG == False:                    
+                    vectorstore = FAISS.from_documents( # create vectorstore from a document
                         docs,  # documents
                         bedrock_embeddings  # embeddings
                     )
-                
-                elif rag_type == 'opensearch':                    
-                    endpoint_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com"
-                    vectorstore = OpenSearchVectorSearch.from_documents(
-                        docs, 
-                        bedrock_embeddings, 
-                        opensearch_url=endpoint_url,
-                        http_auth=("admin", "Wifi1234!"),
-                    )
-
-                enableRAG = True
-            else: 
-                if rag_type == 'faiss':
-                # create new vectorstore from a document
-                    vectorstore_new = FAISS.from_documents(
+                else:                             
+                    vectorstore_new = FAISS.from_documents( # create new vectorstore from a document
                         docs,  # documents
                         bedrock_embeddings,  # embeddings
-                    )
-
-                    # merge            
-                    vectorstore.merge_from(vectorstore_new)
+                    )                               
+                    vectorstore.merge_from(vectorstore_new) # merge 
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
-                    # summerization
-                    query = "summerize the documents"
-                    #msg = get_answer_basic(query, vectorstore, rag_type)
-                    #print('msg1: ', msg)
-
-                    msg = get_answer(query, vectorstore_new, rag_type)
-                    print('msg2: ', msg)
-                elif rag_type == 'opensearch':
-                    endpoint_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com"                    
-                    vectorstore = OpenSearchVectorSearch.from_documents(
-                        docs, 
-                        bedrock_embeddings, 
-                        opensearch_url=endpoint_url,
-                        http_auth=("admin", "Wifi1234!"),
-                    )
+            elif rag_type == 'opensearch':         
+                endpoint_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com"                    
+                vectorstore = OpenSearchVectorSearch.from_documents(
+                    docs, 
+                    bedrock_embeddings, 
+                    opensearch_url=endpoint_url,
+                    http_auth=("admin", "Wifi1234!"),
+                )
+                if enableRAG==False: 
+                    enableRAG = True
                     
             # summerization
             query = "summerize the documents"
             #msg = get_answer_basic(query, vectorstore, rag_type)
             #print('msg1: ', msg)
 
-            msg = get_answer(query, vectorstore_new, rag_type)
+            msg = get_answer(query, vectorstore, rag_type)
             print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
