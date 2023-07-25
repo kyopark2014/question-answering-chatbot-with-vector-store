@@ -41,6 +41,7 @@ configTableName = os.environ.get('configTableName')
 endpoint_url = os.environ.get('endpoint_url')
 bedrock_region = os.environ.get('bedrock_region')
 modelId = os.environ.get('model_id')
+rag_type = os.environ.get('rag_type')
 print('model_id: ', modelId)
 
 def save_configuration(userId, modelId):
@@ -98,7 +99,6 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 enableRAG = False
-rag_type = 'opensearch'  # faiss
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -274,6 +274,7 @@ def lambda_handler(event, context):
                         docs,  # documents
                         bedrock_embeddings  # embeddings
                     )
+                    enableRAG = True                    
                 else:                             
                     vectorstore_new = FAISS.from_documents( # create new vectorstore from a document
                         docs,  # documents
