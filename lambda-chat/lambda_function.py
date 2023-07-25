@@ -136,8 +136,8 @@ def load_document(file_type, s3_file_name):
     ]
     return docs
               
-def get_answer_basic(query, vectorstore, rag_type):
-    wrapper_store_faiss = VectorStoreIndexWrapper(vectorstore=vectorstore)
+def get_answer_using_query(query, vectorstore, rag_type):
+    wrapper_store = VectorStoreIndexWrapper(vectorstore=vectorstore)
     
     if rag_type == 'faiss':
         query_embedding = vectorstore.embedding_function(query)
@@ -151,12 +151,12 @@ def get_answer_basic(query, vectorstore, rag_type):
         print_ww(f'## Document {i+1}: {rel_doc.page_content}.......')
         print('---')
     
-    answer = wrapper_store_faiss.query(question=query, llm=llm)
+    answer = wrapper_store.query(question=query, llm=llm)
     print_ww(answer)
 
     return answer
 
-def get_answer(query, vectorstore, rag_type):
+def get_answer_using_template(query, vectorstore, rag_type):
     if rag_type == 'faiss':
         query_embedding = vectorstore.embedding_function(query)
         relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
@@ -256,7 +256,7 @@ def lambda_handler(event, context):
             if enableRAG==False:                
                 msg = llm(text)
             else:
-                msg = get_answer_basic(text, vectorstore, rag_type)
+                msg = get_answer_using_query(text, vectorstore, rag_type)
                 print('msg1: ', msg)
             
         elif type == 'document':
@@ -296,10 +296,10 @@ def lambda_handler(event, context):
                     
             # summerization
             query = "summerize the documents"
-            #msg = get_answer_basic(query, vectorstore, rag_type)
+            #msg = get_answer_using_query(query, vectorstore, rag_type)
             #print('msg1: ', msg)
 
-            msg = get_answer(query, vectorstore, rag_type)
+            msg = get_answer_using_template(query, vectorstore, rag_type)
             print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
