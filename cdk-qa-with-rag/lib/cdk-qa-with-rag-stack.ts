@@ -89,8 +89,15 @@ export class CdkQaWithRagStack extends cdk.Stack {
     const region = process.env.CDK_DEFAULT_REGION;
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+
+    new cdk.CfnOutput(this, `resource-arn-for-${projectName}`, {
+      value: resourceArn,
+      description: 'The arn of resource',
+    }); 
+
     const OpenSearchPolicy = new iam.PolicyStatement({  
-      resources: [ `"${resourceArn}"`],
+      //resources: [ `"${resourceArn}"`],
+      resources: ['*'],
       actions: ['es:*'],
     });  
 
