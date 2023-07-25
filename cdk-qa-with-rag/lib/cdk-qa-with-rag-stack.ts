@@ -85,9 +85,10 @@ export class CdkQaWithRagStack extends cdk.Stack {
     });
 
     // OpenSearch
+    const domainName = `os-${projectName}`
     const domain = new opensearch.Domain(this, 'Domain', {
       version: opensearch.EngineVersion.OPENSEARCH_2_3,
-      domainName: `os-${projectName}`,
+      domainName: domainName,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       enforceHttps: true,
       fineGrainedAccessControl: {
@@ -148,13 +149,27 @@ export class CdkQaWithRagStack extends cdk.Stack {
     roleLambda.addManagedPolicy({
       managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
     });
-    const BedrockPolicy = new iam.PolicyStatement({  // policy statement for sagemaker
+    const BedrockPolicy = new iam.PolicyStatement({ 
       resources: ['*'],
       actions: ['bedrock:*'],
     });        
     roleLambda.attachInlinePolicy( // add bedrock policy
       new iam.Policy(this, `bedrock-policy-for-${projectName}`, {
         statements: [BedrockPolicy],
+      }),
+    );
+
+    // grant opensearch permission
+    const region = process.env.CDK_DEFAULT_REGION;
+    const accountId = process.env.CDK_DEFAULT_ACCOUNT;
+    const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+    const OpenSearchPolicy = new iam.PolicyStatement({  
+      resources: [resourceArn],
+      actions: ['es:*'],
+    });        
+    roleLambda.attachInlinePolicy( // add bedrock policy
+      new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
+        statements: [OpenSearchPolicy],
       }),
     );      
 
