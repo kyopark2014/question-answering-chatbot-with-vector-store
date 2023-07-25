@@ -85,18 +85,18 @@ export class CdkQaWithRagStack extends cdk.Stack {
     });
     
     // Permission for OpenSearch
-    const domainName = `os-${projectName}`
+  /*  const domainName = `os-${projectName}`
     const region = process.env.CDK_DEFAULT_REGION;
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-    const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
-
+    //const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+    const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}`
     new cdk.CfnOutput(this, `resource-arn-for-${projectName}`, {
       value: resourceArn,
       description: 'The arn of resource',
     }); 
 
     const OpenSearchPolicy = new iam.PolicyStatement({  
-      //resources: [ `"${resourceArn}"`],
+      //resources: [ `"${resourceArn}"`],      
       resources: ['*'],
       actions: ['es:*'],
     });  
@@ -109,7 +109,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       enforceHttps: true,
       fineGrainedAccessControl: {
         masterUserName: opensearch_account,
-        // masterUserPassword: cdk.SecretValue.secretsManager('dkim-private-key'),
+        // masterUserPassword: cdk.SecretValue.secretsManager('opensearch-private-key'),
         masterUserPassword:cdk.SecretValue.unsafePlainText(opensearch_passwd)
       },
       capacity: {
@@ -117,7 +117,6 @@ export class CdkQaWithRagStack extends cdk.Stack {
         masterNodeInstanceType: 'm6g.large.search',
         dataNodes: 3,
         dataNodeInstanceType: 'r6g.large.search',        
-        //multiAzWithStandbyEnabled: true,
         // warmNodes: 2,
         // warmInstanceType: 'ultrawarm1.medium.search',
       },
@@ -142,8 +141,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     new cdk.CfnOutput(this, `Endpoint-of-OpenSearch-for-${projectName}`, {
       value: 'https://'+domain.domainEndpoint,
       description: 'The endpoint of OpenSearch Domain',
-    }); 
-
+    }); */
 
     // cloudfront
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
@@ -180,11 +178,11 @@ export class CdkQaWithRagStack extends cdk.Stack {
       }),
     );
          
-    roleLambda.attachInlinePolicy( // add bedrock policy
+  /*  roleLambda.attachInlinePolicy( // add bedrock policy
       new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
         statements: [OpenSearchPolicy],
       }),
-    );      
+    );      */
 
     // Lambda for chat using langchain (container)
     const lambdaChatApi = new lambda.DockerImageFunction(this, `lambda-chat-for-${projectName}`, {
