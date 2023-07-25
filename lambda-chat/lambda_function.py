@@ -27,6 +27,7 @@ from langchain.embeddings import BedrockEmbeddings
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
+from langchain.vectorstores import OpenSearchVectorSearch
 
 module_path = "."
 sys.path.append(os.path.abspath(module_path))
@@ -97,6 +98,7 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 enableRAG = False
+rag_type = 'faiss'  # opensearch
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -134,11 +136,15 @@ def load_document(file_type, s3_file_name):
     ]
     return docs
               
-def get_answer_basic(query, vectorstore_faiss):
-    wrapper_store_faiss = VectorStoreIndexWrapper(vectorstore=vectorstore_faiss)
-    query_embedding = vectorstore_faiss.embedding_function(query)
-
-    relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
+def get_answer_basic(query, vectorstore, rag_type):
+    wrapper_store_faiss = VectorStoreIndexWrapper(vectorstore=vectorstore)
+    
+    if rag_type == 'faiss':
+        query_embedding = vectorstore.embedding_function(query)
+        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+    elif rag_type == 'opensearch':
+        relevant_documents = vectorstore.similarity_search(query)
+    
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
     for i, rel_doc in enumerate(relevant_documents):
@@ -150,10 +156,13 @@ def get_answer_basic(query, vectorstore_faiss):
 
     return answer
 
-def get_answer(query, vectorstore_faiss):
-    query_embedding = vectorstore_faiss.embedding_function(query)
+def get_answer(query, vectorstore):
+    if rag_type == 'faiss':
+        query_embedding = vectorstore.embedding_function(query)
+        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+    elif rag_type == 'opensearch':
+        relevant_documents = vectorstore.similarity_search(query)
 
-    relevant_documents = vectorstore_faiss.similarity_search_by_vector(query_embedding)
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
     for i, rel_doc in enumerate(relevant_documents):
@@ -173,7 +182,7 @@ def get_answer(query, vectorstore_faiss):
     qa = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
-        retriever=vectorstore_faiss.as_retriever(
+        retriever=vectorstore.as_retriever(
             search_type="similarity", search_kwargs={"k": 3}
         ),
         return_source_documents=True,
@@ -197,7 +206,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore_faiss, enableRAG
+    global modelId, llm, vectorstore, enableRAG, rag_type
     
     modelId = load_configuration(userId)
     if(modelId==""): 
@@ -232,7 +241,7 @@ def lambda_handler(event, context):
                     modelId = new_model
                     llm = Bedrock(model_id=modelId, client=boto3_bedrock)
                     isChanged = True
-                    save_configuration(userId, modelId)
+                    save_configuration(userId, modelId)            
 
             if isChanged:
                 msg = f"The model is changed to {modelId}"
@@ -247,7 +256,7 @@ def lambda_handler(event, context):
             if enableRAG==False:                
                 msg = llm(text)
             else:
-                msg = get_answer_basic(text, vectorstore_faiss)
+                msg = get_answer_basic(text, vectorstore, reg_type)
                 print('msg1: ', msg)
             
         elif type == 'document':
@@ -260,39 +269,66 @@ def lambda_handler(event, context):
             docs = load_document(file_type, object)
             
             if enableRAG==False: 
-                # create new vectorstore from a document
-                vectorstore_faiss = FAISS.from_documents(
-                    docs,  # documents
-                    bedrock_embeddings,  # embeddings
-                )
+                if rag_type == 'faiss':
+                    # create new vectorstore from a document
+                    vectorstore = FAISS.from_documents(
+                        docs,  # documents
+                        bedrock_embeddings  # embeddings
+                    )
+                
+                elif rag_type == 'opensearch':                    
+                    endpoint_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com"
+                    vectorstore = OpenSearchVectorSearch.from_documents(
+                        docs, 
+                        bedrock_embeddings, 
+                        opensearch_url=endpoint_url,
+                        http_auth=("admin", "Wifi1234!"),
+                    )
 
                 # summerization
                 query = "summerize the documents"
-                #msg = get_answer_basic(query, vectorstore_faiss)
+                #msg = get_answer_basic(query, vectorstore)
                 #print('msg1: ', msg)
 
-                msg = get_answer(query, vectorstore_faiss)
+                msg = get_answer(query, vectorstore, rag_type)
                 print('msg2: ', msg)
 
                 enableRAG = True
             else: 
+                if rag_type == 'faiss':
                 # create new vectorstore from a document
-                vectorstore_faiss_new = FAISS.from_documents(
-                    docs,  # documents
-                    bedrock_embeddings,  # embeddings
-                )
+                    vectorstore_new = FAISS.from_documents(
+                        docs,  # documents
+                        bedrock_embeddings,  # embeddings
+                    )
 
-                # merge            
-                vectorstore_faiss.merge_from(vectorstore_faiss_new)
-                print('vector store size: ', len(vectorstore_faiss.docstore._dict))
+                    # merge            
+                    vectorstore.merge_from(vectorstore_new)
+                    print('vector store size: ', len(vectorstore.docstore._dict))
 
-                # summerization
-                query = "summerize the documents"
-                #msg = get_answer_basic(query, vectorstore_faiss)
-                #print('msg1: ', msg)
+                    # summerization
+                    query = "summerize the documents"
+                    #msg = get_answer_basic(query, vectorstore, rag_type)
+                    #print('msg1: ', msg)
 
-                msg = get_answer(query, vectorstore_faiss_new)
-                print('msg2: ', msg)
+                    msg = get_answer(query, vectorstore_new, rag_type)
+                    print('msg2: ', msg)
+                elif rag_type == 'opensearch':
+                    endpoint_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com"                    
+                    vectorstore = OpenSearchVectorSearch.from_documents(
+                        docs, 
+                        bedrock_embeddings, 
+                        opensearch_url=endpoint_url,
+                        http_auth=("admin", "Wifi1234!"),
+                    )
+                    
+                    # summerization
+                    query = "summerize the documents"
+                    #msg = get_answer_basic(query, vectorstore, rag_type)
+                    #print('msg1: ', msg)
+
+                    msg = get_answer(query, vectorstore_new, rag_type)
+                    print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
