@@ -244,7 +244,7 @@ def lambda_handler(event, context):
         if type == 'text':
             print('enableRAG: ', enableRAG)
             text = body
-            if(enableRAG):                
+            if enableRAG==False:                
                 msg = llm(text)
             else:
                 msg = get_answer_basic(text, vectorstore_faiss)
