@@ -37,6 +37,9 @@ faiss.write_index(), faiss.read_index()을 이용해서 local에서 index를 저
 
 [Faiss-LangChain](https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/faiss)와 같이 save_local(), load_local()을 사용할 수 있고, merge_from()으로 2개의 vector store를 저장할 수 있습니다.
 
+## OpenSearch
+
+
 
 ## 주요 구성
 
