@@ -1,4 +1,4 @@
-# Vector Store(Faiss)를 이용한 Question/Answering Chatbot 만들기 
+# Vector Store를 이용한 Question/Answering Chatbot 만들기 
 
 여기서는 Amazon Bedrock의 LLM 모델을 이용하여 Question/Answering을 수행하는 Chatbot을 만듧니다. Question/Answering의 정확도를 높이기 위하여 문서를 로딩하여 사용할 수 있습니다. 여기서는 대표적인 In-memory vector store인 Faiss를 이용하여 문서의 내용을 분석하고 sementic search 기능을 활용합니다. 이를 통해, LLM이 Question/Answering 수행시 Faiss에 있는 index db를 통해 가장 유사한 문서를 추출하여 사용할 수 있습니다. 이렇게 vector store를 사용하면 LLM의 token 사이즈를 넘어서는 긴문장을 활용하여 Question/Answering과 같은 Task를 수행할 수 있습니다. 
 
