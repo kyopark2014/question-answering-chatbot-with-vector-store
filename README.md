@@ -103,7 +103,7 @@ OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합�
 }
 ```
 
-OpenSearchVectorSearch()으로 vector store를 정의합니다. 
+이제, 아래와 같이 OpenSearchVectorSearch()으로 vector store를 정의합니다. 
 
 ```python
 from langchain.vectorstores import OpenSearchVectorSearch
@@ -116,7 +116,7 @@ vectorstore = OpenSearchVectorSearch.from_documents(
 )
 ```
 
-vectorstore를 이용하여 관계된 문서를 조회합니다. 이때 OpenSearch는 query를 이용하여 similarity_search()로 조회합니다.
+아래와 같이 vectorstore로 부터 관련된 문서를 조회할 수 있습니다. 이때 OpenSearch는 query를 이용하여 similarity_search()로 조회합니다.
 
 ```python
 relevant_documents = vectorstore.similarity_search(query)
