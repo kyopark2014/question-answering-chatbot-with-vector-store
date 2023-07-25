@@ -85,6 +85,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     });
     
     // Permission for OpenSearch
+    const domainName = `os-${projectName}`
     const region = process.env.CDK_DEFAULT_REGION;
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
@@ -94,7 +95,6 @@ export class CdkQaWithRagStack extends cdk.Stack {
     });  
 
     // OpenSearch
-    const domainName = `os-${projectName}`
     const domain = new opensearch.Domain(this, 'Domain', {
       version: opensearch.EngineVersion.OPENSEARCH_2_3,
       domainName: domainName,
