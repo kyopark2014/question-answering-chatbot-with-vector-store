@@ -187,3 +187,11 @@ Chatbot API를 테스트하기 위해 제공하는 Web client는 일반적인 �
 
 [Python faiss.write_index() Examples](https://www.programcreek.com/python/example/112290/faiss.write_index)
 
+[OpenSearch - Langchain](https://python.langchain.com/docs/integrations/vectorstores/opensearch)
+
+[OpenSearch - Domain](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_opensearchservice.Domain.html)
+
+[Domain - CDK](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_opensearchservice.Domain.html)
+
+[interface CapacityConfig - CDK](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_opensearchservice.CapacityConfig.html)
+
