@@ -99,6 +99,12 @@ export class CdkQaWithRagStack extends cdk.Stack {
       resources: [resourceArn],      
       actions: ['es:*'],
     });  
+    const OpenSearchAccessPolicy = new iam.PolicyStatement({        
+      resources: [resourceArn],      
+      actions: ['es:*'],
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.AnyPrincipal()],      
+    });  
 
     // OpenSearch
     const domain = new opensearch.Domain(this, 'Domain', {
@@ -121,7 +127,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
         // warmNodes: 2,
         // warmInstanceType: 'ultrawarm1.medium.search',
       },
-      accessPolicies: [OpenSearchPolicy],      
+      accessPolicies: [OpenSearchAccessPolicy],      
       ebs: {
         volumeSize: 100,
         volumeType: ec2.EbsDeviceVolumeType.GENERAL_PURPOSE_SSD,
