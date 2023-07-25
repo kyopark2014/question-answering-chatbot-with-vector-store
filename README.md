@@ -39,7 +39,11 @@ from langchain.embeddings import BedrockEmbeddings
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 ```
 
-### Faiss
+### Vector Store 
+
+Faiss와 OpenSearch 방식의 선택은 [cdk-qa-with-rag-stack.ts](./cdk-qa-with-rag/lib/cdk-qa-with-rag-stack.ts)에서 rag_type을 "faiss" 또는 "opensearch"로 변경할 수 있습니다. 기본값은 "opensearch"입니다.
+
+#### Faiss
 
 [Faiss](https://github.com/facebookresearch/faiss)는 Facebook에서 오픈소스로 제공하는 In-memory vector store로서 embedding과 document들을 저장할 수 있으며, LangChain을 지원합니다. 비슷한 역할을 하는 persistent store로는 Amazon OpenSearch, RDS Postgres with pgVector, ChromaDB, Pinecone과 Weaviate가 있습니다. 
 
@@ -64,7 +68,7 @@ vectorstore를 이용하여 관계된 문서를 조회합니다. 이때 Faiss는
 relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 ```
 
-### OpenSearch
+#### OpenSearch
 
 OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합니다.
 
