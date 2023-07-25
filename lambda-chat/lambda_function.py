@@ -96,17 +96,7 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 # embedding
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
-# define vectorstore
-docs = [
-    Document(
-        page_content=""
-    )
-]
-vectorstore_faiss = FAISS.from_documents(
-    docs,  # documents
-    bedrock_embeddings,  # embeddings
-)
-print('vector store size: ', len(vectorstore_faiss.docstore._dict))
+enableRAG = False
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -252,9 +242,9 @@ def lambda_handler(event, context):
 
     else:             
         if type == 'text':
-            print('vectorstore_faiss.docstore._dict: ', vectorstore_faiss.docstore._dict)
+            print('enableRAG: ', enableRAG)
             text = body
-            if(len(vectorstore_faiss.docstore._dict)==1):                
+            if(enableRAG):                
                 msg = llm(text)
             else:
                 msg = get_answer_basic(text, vectorstore_faiss)
@@ -269,23 +259,40 @@ def lambda_handler(event, context):
             # load documents where text, pdf, csv are supported
             docs = load_document(file_type, object)
             
-            # create new vectorstore from a document
-            vectorstore_faiss_new = FAISS.from_documents(
-                docs,  # documents
-                bedrock_embeddings,  # embeddings
-            )
+            if enableRAG==False: 
+                # create new vectorstore from a document
+                vectorstore_faiss = FAISS.from_documents(
+                    docs,  # documents
+                    bedrock_embeddings,  # embeddings
+                )
 
-            # merge            
-            vectorstore_faiss.merge_from(vectorstore_faiss_new)
-            print('vector store size: ', len(vectorstore_faiss.docstore._dict))
+                # summerization
+                query = "summerize the documents"
+                #msg = get_answer_basic(query, vectorstore_faiss)
+                #print('msg1: ', msg)
 
-            # summerization
-            query = "summerize the documents"
-            #msg = get_answer_basic(query, vectorstore_faiss)
-            #print('msg1: ', msg)
+                msg = get_answer(query, vectorstore_faiss_new)
+                print('msg2: ', msg)
 
-            msg = get_answer(query, vectorstore_faiss_new)
-            print('msg2: ', msg)
+                enableRAG = True
+            else: 
+                # create new vectorstore from a document
+                vectorstore_faiss_new = FAISS.from_documents(
+                    docs,  # documents
+                    bedrock_embeddings,  # embeddings
+                )
+
+                # merge            
+                vectorstore_faiss.merge_from(vectorstore_faiss_new)
+                print('vector store size: ', len(vectorstore_faiss.docstore._dict))
+
+                # summerization
+                query = "summerize the documents"
+                #msg = get_answer_basic(query, vectorstore_faiss)
+                #print('msg1: ', msg)
+
+                msg = get_answer(query, vectorstore_faiss_new)
+                print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
