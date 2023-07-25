@@ -85,7 +85,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     });
     
     // Permission for OpenSearch
-  /*  const domainName = `os-${projectName}`
+    const domainName = `os-${projectName}`
     const region = process.env.CDK_DEFAULT_REGION;
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     //const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
@@ -141,7 +141,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     new cdk.CfnOutput(this, `Endpoint-of-OpenSearch-for-${projectName}`, {
       value: 'https://'+domain.domainEndpoint,
       description: 'The endpoint of OpenSearch Domain',
-    }); */
+    }); 
 
     // cloudfront
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
@@ -178,11 +178,11 @@ export class CdkQaWithRagStack extends cdk.Stack {
       }),
     );
          
-  /*  roleLambda.attachInlinePolicy( // add bedrock policy
+    roleLambda.attachInlinePolicy( // add bedrock policy
       new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
         statements: [OpenSearchPolicy],
       }),
-    );      */
+    );      
 
     // Lambda for chat using langchain (container)
     const lambdaChatApi = new lambda.DockerImageFunction(this, `lambda-chat-for-${projectName}`, {
