@@ -10,6 +10,8 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as apiGateway from 'aws-cdk-lib/aws-apigateway';
 import * as s3Deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as opensearch from 'aws-cdk-lib/aws-opensearchservice';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
 const debug = false;
 const stage = 'dev';
@@ -81,6 +83,45 @@ export class CdkQaWithRagStack extends cdk.Stack {
       sources: [s3Deploy.Source.asset("../html")],
       destinationBucket: s3Bucket,
     });
+
+    // OpenSearch
+    const domain = new opensearch.Domain(this, 'Domain', {
+      version: opensearch.EngineVersion.OPENSEARCH_2_3,
+      domainName: `os-${projectName}`,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      enforceHttps: true,
+      fineGrainedAccessControl: {
+        masterUserName: 'admin',
+        // masterUserPassword: cdk.SecretValue.secretsManager('dkim-private-key'),
+        masterUserPassword:cdk.SecretValue.unsafePlainText('Wifi1234!')
+      },
+      capacity: {
+        masterNodes: 3,
+        masterNodeInstanceType: 'm6g.large.search',
+        dataNodes: 3,
+        dataNodeInstanceType: 'r6g.large.search',
+        //multiAzWithStandbyEnabled: true,
+        // warmNodes: 2,
+        // warmInstanceType: 'ultrawarm1.medium.search',
+      },
+      ebs: {
+        volumeSize: 100,
+        volumeType: ec2.EbsDeviceVolumeType.GENERAL_PURPOSE_SSD,
+      },
+      nodeToNodeEncryption: true,
+      encryptionAtRest: {
+        enabled: true,
+      },
+    });
+    new cdk.CfnOutput(this, `Domain-of-OpenSearch-for-${projectName}`, {
+      value: domain.domainArn,
+      description: 'The arm of OpenSearch Domain',
+    });
+    new cdk.CfnOutput(this, `Endpoint-of-OpenSearch-for-${projectName}`, {
+      value: 'https://'+domain.domainEndpoint,
+      description: 'The endpoint of OpenSearch Domain',
+    }); 
+
 
     // cloudfront
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
