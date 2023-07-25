@@ -180,11 +180,11 @@ export class CdkQaWithRagStack extends cdk.Stack {
       }),
     );
          
-  /*  roleLambda.attachInlinePolicy( // add bedrock policy
+    roleLambda.attachInlinePolicy( // add bedrock policy
       new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
         statements: [OpenSearchPolicy],
       }),
-    ); */      
+    );       
 
     // Lambda for chat using langchain (container)
     const lambdaChatApi = new lambda.DockerImageFunction(this, `lambda-chat-for-${projectName}`, {
