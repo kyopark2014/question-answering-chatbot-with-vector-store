@@ -18,7 +18,7 @@ const stage = 'dev';
 const s3_prefix = 'docs';
 const bedrock_region = "us-west-2";
 const endpoint_url = "https://prod.us-west-2.frontend.bedrock.aws.dev";
-const opensearch_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com";
+//const opensearch_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com";
 const model_id = "amazon.titan-tg1-large"; // amazon.titan-e1t-medium, anthropic.claude-v1
 const projectName = "qa-chatbot-with-rag";
 const bucketName = `storage-for-${projectName}`;
@@ -183,8 +183,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       new iam.Policy(this, `bedrock-policy-for-${projectName}`, {
         statements: [BedrockPolicy],
       }),
-    );
-         
+    );         
     roleLambda.attachInlinePolicy( // add bedrock policy
       new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
         statements: [OpenSearchPolicy],
@@ -202,7 +201,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       environment: {
         bedrock_region: bedrock_region,
         endpoint_url: endpoint_url,
-        opensearch_url: opensearch_url,
+        opensearch_url: 'https://'+domain.domainEndpoint,
         model_id: model_id,
         s3_bucket: s3Bucket.bucketName,
         s3_prefix: s3_prefix,
