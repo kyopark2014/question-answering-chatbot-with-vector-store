@@ -156,7 +156,7 @@ def get_answer_basic(query, vectorstore, rag_type):
 
     return answer
 
-def get_answer(query, vectorstore):
+def get_answer(query, vectorstore, rag_type):
     if rag_type == 'faiss':
         query_embedding = vectorstore.embedding_function(query)
         relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
@@ -287,7 +287,7 @@ def lambda_handler(event, context):
 
                 # summerization
                 query = "summerize the documents"
-                #msg = get_answer_basic(query, vectorstore)
+                #msg = get_answer_basic(query, vectorstore, rag_type)
                 #print('msg1: ', msg)
 
                 msg = get_answer(query, vectorstore, rag_type)
