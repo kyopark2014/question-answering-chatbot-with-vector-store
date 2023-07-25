@@ -256,7 +256,7 @@ def lambda_handler(event, context):
             if enableRAG==False:                
                 msg = llm(text)
             else:
-                msg = get_answer_basic(text, vectorstore, reg_type)
+                msg = get_answer_basic(text, vectorstore, rag_type)
                 print('msg1: ', msg)
             
         elif type == 'document':
@@ -284,14 +284,6 @@ def lambda_handler(event, context):
                         opensearch_url=endpoint_url,
                         http_auth=("admin", "Wifi1234!"),
                     )
-
-                # summerization
-                query = "summerize the documents"
-                #msg = get_answer_basic(query, vectorstore, rag_type)
-                #print('msg1: ', msg)
-
-                msg = get_answer(query, vectorstore, rag_type)
-                print('msg2: ', msg)
 
                 enableRAG = True
             else: 
@@ -322,13 +314,13 @@ def lambda_handler(event, context):
                         http_auth=("admin", "Wifi1234!"),
                     )
                     
-                    # summerization
-                    query = "summerize the documents"
-                    #msg = get_answer_basic(query, vectorstore, rag_type)
-                    #print('msg1: ', msg)
+            # summerization
+            query = "summerize the documents"
+            #msg = get_answer_basic(query, vectorstore, rag_type)
+            #print('msg1: ', msg)
 
-                    msg = get_answer(query, vectorstore_new, rag_type)
-                    print('msg2: ', msg)
+            msg = get_answer(query, vectorstore_new, rag_type)
+            print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
