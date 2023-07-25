@@ -98,7 +98,7 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 enableRAG = False
-rag_type = 'faiss'  # opensearch
+rag_type = 'opensearch'  # faiss
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
