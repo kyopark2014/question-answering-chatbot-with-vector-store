@@ -66,6 +66,21 @@ relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 
 ### OpenSearch
 
+OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합니다.
+
+```java
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "es:*",
+            "Resource": "arn:aws:es:ap-northeast-2:[account-id]:domain/[domain-name]/*"
+        }
+    ]
+}
+```
+
 OpenSearchVectorSearch()으로 vector store를 정의합니다. 
 
 ```python
