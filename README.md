@@ -1,6 +1,10 @@
 # Vector Store를 이용한 Question/Answering Chatbot 
 
-여기서는 Amazon Bedrock의 LLM 모델을 이용하여 Question/Answering을 수행하는 Chatbot을 만듧니다. Question/Answering의 정확도를 높이기 위하여 문서를 업로드하여 Vector Store에 저장하여 사용할 수 있습니다. 여기서는 대표적인 In-memory vector store인 Faiss와 대용량 병렬처리가 가능한 Amazon OpenSearch를 이용하여 문서의 내용을 분석하고 sementic search 기능을 활용합니다. 이를 통해, LLM으로 질문(Question)을 보내면, vector store에서 가장 유사한 문서를 찾아여 답변(Answering)에 사용할 수 있습니다. 이렇게 vector store를 사용하면 LLM의 token 사이즈를 넘어서는 긴문장을 활용하여 Question/Answering과 같은 Task를 수행할 수 있으며 환각(hallucination) 영향을 줄일 수 있습니다.
+여기서는 Amazon Bedrock의 LLM 모델을 이용하여 Question/Answering을 수행하는 Chatbot을 만듧니다. Question/Answering의 정확도를 높이기 위하여 Vector Store를 이용합니다. 
+
+Vector Store는 이미지, 문서(text document), 오디오와 같지 구조화되지 않은 컨텐츠(unstructured content)를 표현하는데 용이합니다. 특히 대규모 언어 모델(LLM)의 경우에 Embedding을 이용하여 텍스트들의 연관성(Sementic meaning)을 벡터(Vector)로 표현할 수 있습니다. 따라서, Generative AI는 Vector store와 같은 외부 지식(External Knowledge Base)를 이용하여 Hallucination을 방지할 수 있습니다. 사용자가 업로드한 문서는 Amazon S3에 저장된 후에, Embedding을 통해 vectore store에 저장됩니다. 
+
+여기서는 대표적인 In-memory vector store인 Faiss와 대용량 병렬처리가 가능한 Amazon OpenSearch를 이용하여 문서의 내용을 분석하고 sementic search 기능을 활용합니다. 이를 통해, LLM으로 질문(Question)을 보내면, vector store에서 가장 유사한 문서를 찾아여 답변(Answering)에 사용할 수 있습니다. 이렇게 vector store를 사용하면 LLM의 token 사이즈를 넘어서는 긴문장을 활용하여 Question/Answering과 같은 Task를 수행할 수 있으며 환각(hallucination) 영향을 줄일 수 있습니다.
 
 전체적인 Architecture는 아래와 같습니다. 사용자가 파일을 로드하면 CloudFont와 API Gateway를 거쳐서 [Lambda (upload)](./lambda-upload/index.js)가 S3에 파일을 저장합니다. 저장이 완료되면 해당 Object의 bucket과 key를 이용하여 [Lambda (chat)](./lambda-chat/lambda_function.py)이 파일을 로드하여 text를 추출합니다. text는 chunk size로 분리되어서 embedding을 통해 vector store에 index로 저장됩니다. 사용자가 메시지를 전달하면 vector store로 부터 가장 가까운 chunk들을 이용하여 Question/Answering을 수행합니다. 이후 관련된 call log는 DynamoDB에 저장됩니다. 여기서 LLM은 Bedrock을 LangChain 형식의 API를 통해 구현하였고, Chatbot을 제공하는 인프라는 AWS CDK를 통해 배포합니다. 
 
