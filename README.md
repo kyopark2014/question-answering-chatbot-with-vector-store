@@ -1,6 +1,8 @@
 # Vector Store를 이용한 Question/Answering Chatbot 
 
-여기서는 Amazon Bedrock의 LLM 모델을 이용하여 Question/Answering을 수행하는 Chatbot을 만듧니다. Question/Answering의 정확도를 높이기 위하여 Vector Store를 이용합니다. 
+여기서는 Amazon Bedrock의 Titan LLM(Large Language Models)를 이용하여 Question/Answering을 수행하는 Chatbot을 만듧니다. 또한, Question/Answering의 정확도를 높이기 위하여 Vector Store를 이용하여 를 적용합니다.
+
+대용량 데이터로 사전학습(Pretrained)된 LLM은 맥락(Context)에 맞춘 답변을 할 수 있는데, 외부 지식에 직접 접속하거나 외부지식을 통합하면 더 정확한 답변을 생성할 수 있습니다. 이러한 기능을 수행하는 RAG(Retrieval-Augmented Generation)는 모델의 파라미터인 Weight를 바꾸지 않고 knowledge DB에서 Prompt에 맞는 검색 결과를 추가하여 성능을 향상시키는 방법으로 양질의 데이터베이스 구축이 중요합니다. 
 
 Vector Store는 이미지, 문서(text document), 오디오와 같지 구조화되지 않은 컨텐츠(unstructured content)를 표현하는데 용이합니다. 특히 대규모 언어 모델(LLM)의 경우에 Embedding을 이용하여 텍스트들의 연관성(Sementic meaning)을 벡터(Vector)로 표현할 수 있습니다. 따라서, Generative AI는 Vector store와 같은 외부 지식(External Knowledge Base)를 이용하여 Hallucination을 방지할 수 있습니다. 사용자가 업로드한 문서는 Amazon S3에 저장된 후에, Embedding을 통해 vectore store에 저장됩니다. 
 
