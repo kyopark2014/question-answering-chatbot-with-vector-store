@@ -128,15 +128,10 @@ def load_document(file_type, s3_file_name):
     texts = text_splitter.split_text(new_contents) 
     print('texts[0]: ', texts[0])
         
-    if len(texts)>3: 
-        n = 3
-    else: 
-        n = len(texts)
-                
     docs = [
         Document(
             page_content=t
-        ) for t in texts[:n]
+        ) for t in texts[:3]
     ]
     return docs
               
@@ -271,6 +266,9 @@ def lambda_handler(event, context):
             
             # load documents where text, pdf, csv are supported
             docs = load_document(file_type, object)
+
+            print('lenght of docs: ', len(docs))
+            print('contents of docs: ', docs)
                         
             if rag_type == 'faiss':
                 if enableRAG == False:                    
