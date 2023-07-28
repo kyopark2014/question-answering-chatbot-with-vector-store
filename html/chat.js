@@ -173,84 +173,77 @@ attachFile.addEventListener('click', function(){
             var input = this;
             var url_file = $(this).val();
             var ext = url_file.substring(url_file.lastIndexOf('.') + 1).toLowerCase();
+            var filename = url_file.substring(url_file.lastIndexOf('\\') + 1).toLowerCase();
 
             console.log('url: ' + url_file);
+            console.log('filename: ' + filename);
             console.log('ext: ' + ext);
 
-            const url = 'upload';
-            let formData = new FormData();
-            formData.append("attachFile" , input.files[0]);
-            console.log('uploading file info: ', formData.get("attachFile"));
-                
             if(ext == 'pdf') {
-                contentType = 'application/pdf'                                                                
-
-                var xmlHttp = new XMLHttpRequest();
-                xmlHttp.open("POST", url, true);                 
-                
-                xmlHttp.setRequestHeader('Content-Type', contentType);
-                //xmlHttp.setRequestHeader('Content-Disposition', 'form-data; name="'+name+'"; filename="'+filename+'"');
-
-                addSentMessageForSummary("uploading the selected file in order to summerize...");
-                chatPanel.scrollTop = chatPanel.scrollHeight;  // scroll needs to move bottom
-                
-                xmlHttp.onreadystatechange = function() {
-                    if (xmlHttp.readyState == XMLHttpRequest.DONE && xmlHttp.status == 200 ) {
-                        console.log(xmlHttp.responseText);
-
-                        response = JSON.parse(xmlHttp.responseText);
-                        console.log('upload file nmae: ' + response.Key);
-
-                        sendRequestForSummary(response.Key);
-                    }
-                    else if(xmlHttp.status != 200) {
-                        console.log('status' + xmlHttp.status);
-                        alert("Try again! The request was failed. Note the size of file should be less than 5MB");
-                    }
-                };
-                
-                xmlHttp.send(formData); 
-                console.log(xmlHttp.responseText);
+                contentType = 'application/pdf'           
             }
-            else if(ext == 'txt' || ext == 'csv') {                
-                if(ext == 'txt')
-                    contentType = 'text/plain'
-                else if(ext == 'csv')
-                    contentType = 'text/csv'
-               
-                const reader = new FileReader();
-                reader.readAsText(formData.get("attachFile"));
-                reader.onload = function() {
-                    console.log('loaded text: ', reader.result); 
+            else if(ext == 'txt') {
+                contentType = 'text/plain'
+            }
+            else if(ext == 'csv') {
+                contentType = 'text/csv'
+            }
+
+            const uri = "getUploadUrl";
+            const xhr = new XMLHttpRequest();
+        
+            xhr.open("POST", uri, true);
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    response = JSON.parse(xhr.responseText);
+                    console.log("response: " + JSON.stringify(response));
+                    
+                    // addReceivedMessage(response.UploadURL)
+
+                    // upload the file
+                    const body = JSON.parse(response.body);
+                    console.log('body: ', body);
+
+                    const uploadURL = body.UploadURL;                    
+                    console.log("UploadURL: ", uploadURL);
+
+                    const key = body.Key;   
+                    console.log("key: ", key);
 
                     var xmlHttp = new XMLHttpRequest();
-                    xmlHttp.open("POST", url, true);                 
-                    
-                    xmlHttp.setRequestHeader('Content-Type', contentType);
-                    //xmlHttp.setRequestHeader('Content-Disposition', 'form-data; name="'+name+'"; filename="'+filename+'"');
+                    xmlHttp.open("PUT", uploadURL, true);       
 
-                    addSentMessageForSummary("uploading the selected file in order to summerize...");
-                    chatPanel.scrollTop = chatPanel.scrollHeight;  // scroll needs to move bottom
-                    
+                    let formData = new FormData();
+                    formData.append("attachFile" , input.files[0]);
+                    console.log('uploading file info: ', formData.get("attachFile"));
+
                     xmlHttp.onreadystatechange = function() {
                         if (xmlHttp.readyState == XMLHttpRequest.DONE && xmlHttp.status == 200 ) {
                             console.log(xmlHttp.responseText);
-
-                            response = JSON.parse(xmlHttp.responseText);
-                            console.log('upload file nmae: ' + response.Key);
-
-                            sendRequestForSummary(response.Key);
+                                           
+                            // summary for the upload file
+                            sendRequestForSummary(key);
                         }
                         else if(xmlHttp.status != 200) {
                             console.log('status' + xmlHttp.status);
                             alert("Try again! The request was failed. Note the size of file should be less than 5MB");
                         }
                     };
-                    
-                    xmlHttp.send(reader.result);                     
-                    console.log(xmlHttp.responseText);  
-                };                
-            }                       
+        
+                    xmlHttp.send(formData); 
+                    console.log(xmlHttp.responseText);
+                }
+            };
+        
+            var requestObj = {
+                "filename": filename,
+                "ext": contentType,
+            }
+            console.log("request: " + JSON.stringify(requestObj));
+        
+            var blob = new Blob([JSON.stringify(requestObj)], {type: 'application/json'});
+        
+            xhr.send(blob);       
         });
     });
        
@@ -310,3 +303,4 @@ function sendRequestForSummary(object) {
 
     xhr.send(blob);            
 }
+

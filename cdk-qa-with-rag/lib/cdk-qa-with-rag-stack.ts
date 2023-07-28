@@ -38,6 +38,16 @@ export class CdkQaWithRagStack extends cdk.Stack {
       autoDeleteObjects: true,
       publicReadAccess: false,
       versioned: false,
+      cors: [
+        {
+          allowedHeaders: ['*'],
+          allowedMethods: [
+            s3.HttpMethods.POST,
+            s3.HttpMethods.PUT,
+          ],
+          allowedOrigins: ['*'],
+        },
+      ],
     });
     if(debug) {
       new cdk.CfnOutput(this, 'bucketName', {
@@ -288,12 +298,10 @@ export class CdkQaWithRagStack extends cdk.Stack {
       description: 'The web url of request for chat',
     });
 
-    if(debug) {
-      new cdk.CfnOutput(this, `UpdateCommend-for-${projectName}`, {
-        value: 'aws s3 cp ../html/chat.js '+'s3://'+s3Bucket.bucketName,
-        description: 'The url of web file upload',
-      });
-    }
+    new cdk.CfnOutput(this, `UpdateCommend-for-${projectName}`, {
+      value: 'aws s3 cp ../html/chat.js '+'s3://'+s3Bucket.bucketName,
+      description: 'The url of web file upload',
+    });
 
     // Lambda - Upload
     const lambdaUpload = new lambda.Function(this, `lambda-upload-for-${projectName}`, {
@@ -319,7 +327,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       integrationResponses: [{
         statusCode: '200',
       }], 
-      proxy:true, 
+      proxy:false, 
     }), {
       methodResponses: [  
         {
