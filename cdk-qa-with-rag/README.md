@@ -16,6 +16,14 @@ const s3Bucket = new s3.Bucket(this, `storage-${projectName}`, {
     autoDeleteObjects: true,
     publicReadAccess: false,
     versioned: false,
+    cors: [{
+        allowedHeaders: ['*'],
+        allowedMethods: [
+            s3.HttpMethods.POST,
+            s3.HttpMethods.PUT,
+        ],
+        allowedOrigins: ['*'],
+    }],
 });
 ```
 
