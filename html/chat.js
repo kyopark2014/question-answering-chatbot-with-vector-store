@@ -207,9 +207,6 @@ attachFile.addEventListener('click', function(){
                     const uploadURL = body.UploadURL;                    
                     console.log("UploadURL: ", uploadURL);
 
-                    const key = body.Key;   
-                    console.log("key: ", key);
-
                     var xmlHttp = new XMLHttpRequest();
                     xmlHttp.open("PUT", uploadURL, true);       
 
@@ -222,7 +219,7 @@ attachFile.addEventListener('click', function(){
                             console.log(xmlHttp.responseText);
                                            
                             // summary for the upload file
-                            sendRequestForSummary(key);
+                            sendRequestForSummary(filename);
                         }
                         else if(xmlHttp.status != 200) {
                             console.log('status' + xmlHttp.status);
