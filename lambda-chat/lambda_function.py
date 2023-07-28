@@ -135,7 +135,7 @@ def load_document(file_type, s3_file_name):
     docs = [
         Document(
             page_content=t
-        ) for t in texts[:10]
+        ) for t in texts[:3]
     ]
     return docs
               
