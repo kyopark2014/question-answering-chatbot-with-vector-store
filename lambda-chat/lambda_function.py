@@ -286,7 +286,8 @@ def lambda_handler(event, context):
                     vectorstore.merge_from(vectorstore_new) # merge 
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
-            elif rag_type == 'opensearch':         
+            elif rag_type == 'opensearch':    
+                """     
                 vectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
                     bedrock_embeddings, 
@@ -295,6 +296,7 @@ def lambda_handler(event, context):
                 )
                 if enableRAG==False: 
                     enableRAG = True
+                """
 
             # summerization to show the document
             prompt_template = """Write a concise summary of the following:
