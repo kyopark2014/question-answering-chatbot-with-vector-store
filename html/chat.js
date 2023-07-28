@@ -234,7 +234,7 @@ attachFile.addEventListener('click', function(){
         
             var requestObj = {
                 "filename": filename,
-                "ext": contentType,
+                "contentType": contentType,
             }
             console.log("request: " + JSON.stringify(requestObj));
         
