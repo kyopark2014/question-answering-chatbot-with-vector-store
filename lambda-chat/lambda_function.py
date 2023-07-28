@@ -131,7 +131,7 @@ def load_document(file_type, s3_file_name):
     if len(texts)>3: 
         n = 3
     else: 
-        n = len(texts
+        n = len(texts)
                 
     docs = [
         Document(
