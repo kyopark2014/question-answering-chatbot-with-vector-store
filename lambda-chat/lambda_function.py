@@ -296,13 +296,26 @@ def lambda_handler(event, context):
                 if enableRAG==False: 
                     enableRAG = True
                     
-            # summerization
-            query = "summerize the documents"
+            # summerization to show the document
+            prompt_template = """Write a concise summary of the following:
+
+            {text}
+                
+            CONCISE SUMMARY """
+
+            PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+            chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+            summary = chain.run(docs)
+            print('summary: ', summary)
+
+            msg = summary
+
+            #query = "summerize the documents"
             #msg = get_answer_using_query(query, vectorstore, rag_type)
             #print('msg1: ', msg)
 
-            msg = get_answer_using_template(query, vectorstore, rag_type)
-            print('msg2: ', msg)
+            # msg = get_answer_using_template(query, vectorstore, rag_type)
+            #print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
