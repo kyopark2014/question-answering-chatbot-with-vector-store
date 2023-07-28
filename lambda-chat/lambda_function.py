@@ -8,6 +8,9 @@ import PyPDF2
 import csv
 import sys
 
+from langchain import PromptTemplate, SagemakerEndpoint
+from langchain.llms.sagemaker_endpoint import LLMContentHandler
+from langchain.text_splitter import CharacterTextSplitter
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
 from langchain.chains.summarize import load_summarize_chain
@@ -18,6 +21,7 @@ from langchain.llms.bedrock import Bedrock
 from langchain.chains.question_answering import load_qa_chain
 
 from langchain.vectorstores import FAISS
+from langchain.indexes import VectorstoreIndexCreator
 from langchain.document_loaders import CSVLoader
 from langchain.embeddings import BedrockEmbeddings
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
@@ -266,9 +270,6 @@ def lambda_handler(event, context):
             
             # load documents where text, pdf, csv are supported
             docs = load_document(file_type, object)
-
-            print('lenght of docs: ', len(docs))
-            print('contents of docs: ', docs)
                         
             if rag_type == 'faiss':
                 if enableRAG == False:                    
