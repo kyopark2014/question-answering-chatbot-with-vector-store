@@ -132,6 +132,8 @@ function addSentMessageForSummary(text) {
 
     msglist[index].innerHTML = 
         `<div class="chat-sender chat-sender--right"><h1>${timestr}</h1>${text}&nbsp;<h2 id="status${index}"></h2></div>`;   
+
+    chatPanel.scrollTop = chatPanel.scrollHeight;  // scroll needs to move bottom
 }  
 
 function addReceivedMessage(msg) {
@@ -189,6 +191,8 @@ attachFile.addEventListener('click', function(){
                 contentType = 'text/csv'
             }
 
+            addSentMessageForSummary("uploading the selected pdf in order to summerize...");
+
             const uri = "upload";
             const xhr = new XMLHttpRequest();
         
@@ -198,8 +202,6 @@ attachFile.addEventListener('click', function(){
                     response = JSON.parse(xhr.responseText);
                     console.log("response: " + JSON.stringify(response));
                     
-                    // addReceivedMessage(response.UploadURL)
-
                     // upload the file
                     const body = JSON.parse(response.body);
                     console.log('body: ', body);
