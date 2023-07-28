@@ -238,7 +238,7 @@ attachFile.addEventListener('click', function(){
             }
             console.log("request: " + JSON.stringify(requestObj));
         
-            var blob = new Blob([JSON.stringify(requestObj)], {type: 'application/json'});
+            var blob = new Blob([JSON.stringify(requestObj)], {type: contentType});
         
             xhr.send(blob);       
         });
