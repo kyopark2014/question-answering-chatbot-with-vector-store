@@ -259,7 +259,7 @@ upload.addMethod('POST', new apiGateway.LambdaIntegration(lambdaUpload, {
     integrationResponses: [{
         statusCode: '200',
     }],
-    proxy: true,
+    proxy: false,
 }), {
     methodResponses: [
         {
