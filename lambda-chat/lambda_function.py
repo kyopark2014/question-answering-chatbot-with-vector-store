@@ -128,10 +128,15 @@ def load_document(file_type, s3_file_name):
     texts = text_splitter.split_text(new_contents) 
     print('texts[0]: ', texts[0])
         
+    if len(texts)>3: 
+        n = 3
+    else: 
+        n = len(texts
+                
     docs = [
         Document(
             page_content=t
-        ) for t in texts[:3]
+        ) for t in texts[:n]
     ]
     return docs
               
