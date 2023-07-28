@@ -65,7 +65,7 @@ index = 0;
 
 addNotifyMessage("start chat with Amazon Bedrock");
 
-addReceivedMessage("Amazon Bedrock을 이용하여 주셔서 감사합니다. 원하는 질문을 입력하세요. 아래의 파일 버튼을 선택해 5MB이하의 TXT, PDF, CSV 문서를 올리면 좀더 향상된 대화(RAG)를 하실 수 있습니다.")
+addReceivedMessage("Amazon Bedrock을 이용하여 주셔서 감사합니다. 원하는 질문을 입력하세요. 아래의 파일 버튼을 선택해 TXT, PDF, CSV 문서를 올리면 좀더 향상된 대화(RAG)를 하실 수 있습니다.")
 
 // Listeners
 message.addEventListener('keyup', function(e){
@@ -223,7 +223,7 @@ attachFile.addEventListener('click', function(){
                         }
                         else if(xmlHttp.status != 200) {
                             console.log('status' + xmlHttp.status);
-                            alert("Try again! The request was failed. Note the size of file should be less than 5MB");
+                            alert("Try again! The request was failed.");
                         }
                     };
         
