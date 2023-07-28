@@ -287,6 +287,7 @@ def lambda_handler(event, context):
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':         
+                """
                 vectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
                     bedrock_embeddings, 
@@ -295,7 +296,8 @@ def lambda_handler(event, context):
                 )
                 if enableRAG==False: 
                     enableRAG = True
-                    
+                """
+                
             # summerization to show the document
             #prompt_template = """Write a concise summary of the following:
 
@@ -311,8 +313,8 @@ def lambda_handler(event, context):
             #msg = summary
             # summerization
             query = "summerize the documents"
-            #msg = get_answer_using_query(query, vectorstore, rag_type)
-            #print('msg1: ', msg)
+            msg = get_answer_using_query(query, vectorstore, rag_type)
+            print('msg1: ', msg)
 
             msg = get_answer_using_template(query, vectorstore, rag_type)
             print('msg2: ', msg)
