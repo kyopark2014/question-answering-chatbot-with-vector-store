@@ -212,10 +212,8 @@ attachFile.addEventListener('click', function(){
                     var xmlHttp = new XMLHttpRequest();
                     xmlHttp.open("PUT", uploadURL, true);       
 
-                    let formData = new FormData();
-                    formData.append("attachFile" , input.files[0]);
-                    console.log('uploading file info: ', formData.get("attachFile"));
-
+                    const blob = new Blob([input.files[0]], { type: contentType });
+                    
                     xmlHttp.onreadystatechange = function() {
                         if (xmlHttp.readyState == XMLHttpRequest.DONE && xmlHttp.status == 200 ) {
                             console.log(xmlHttp.responseText);
@@ -229,7 +227,7 @@ attachFile.addEventListener('click', function(){
                         }
                     };
         
-                    xmlHttp.send(formData); 
+                    xmlHttp.send(blob); 
                     console.log(xmlHttp.responseText);
                 }
             };
@@ -302,4 +300,3 @@ function sendRequestForSummary(object) {
 
     xhr.send(blob);            
 }
-
