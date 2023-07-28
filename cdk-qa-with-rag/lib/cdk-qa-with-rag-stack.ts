@@ -18,7 +18,6 @@ const stage = 'dev';
 const s3_prefix = 'docs';
 const bedrock_region = "us-west-2";
 const endpoint_url = "https://prod.us-west-2.frontend.bedrock.aws.dev";
-//const opensearch_url = "https://search-os-rag-ndnwd5kdjwyo6ohcdyc22nufmi.ap-northeast-2.es.amazonaws.com";
 const model_id = "amazon.titan-tg1-large"; // amazon.titan-e1t-medium, anthropic.claude-v1
 const projectName = "qa-chatbot-with-rag";
 const bucketName = `storage-for-${projectName}`;
