@@ -189,7 +189,7 @@ attachFile.addEventListener('click', function(){
                 contentType = 'text/csv'
             }
 
-            const uri = "getUploadUrl";
+            const uri = "upload";
             const xhr = new XMLHttpRequest();
         
             xhr.open("POST", uri, true);
