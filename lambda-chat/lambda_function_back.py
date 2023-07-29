@@ -81,28 +81,6 @@ def load_configuration(userId):
 
         return modelId
 
-# Bedrock Contiguration
-bedrock_region = bedrock_region
-bedrock_config = {
-    "region_name":bedrock_region,
-    "endpoint_url":endpoint_url
-}
-    
-# supported llm list from bedrock
-boto3_bedrock = bedrock.get_bedrock_client(
-    region=bedrock_config["region_name"],
-    url_override=bedrock_config["endpoint_url"])
-    
-modelInfo = boto3_bedrock.list_foundation_models()    
-print('models: ', modelInfo)
-
-llm = Bedrock(model_id=modelId, client=boto3_bedrock)
-
-# embedding
-bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
-
-enableRAG = False
-
 # load documents from s3
 def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")
@@ -137,6 +115,7 @@ def load_document(file_type, s3_file_name):
             page_content=t
         ) for t in texts[:3]
     ]
+
     return docs
               
 def get_answer_using_query(query, vectorstore, rag_type):
@@ -197,7 +176,45 @@ def get_answer_using_template(query, vectorstore, rag_type):
     print(source_documents)
 
     return result['result']
-        
+
+
+# Bedrock Contiguration
+bedrock_region = bedrock_region
+bedrock_config = {
+    "region_name":bedrock_region,
+    "endpoint_url":endpoint_url
+}
+    
+# supported llm list from bedrock
+boto3_bedrock = bedrock.get_bedrock_client(
+    region=bedrock_config["region_name"],
+    url_override=bedrock_config["endpoint_url"])
+    
+modelInfo = boto3_bedrock.list_foundation_models()    
+print('models: ', modelInfo)
+
+llm = Bedrock(model_id=modelId, client=boto3_bedrock)
+
+# embedding
+bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+
+enableRAG = False
+
+"""
+docs = [
+    Document(
+        page_content=""
+    ) 
+]
+
+vectorstore = OpenSearchVectorSearch.from_documents(
+    docs, 
+    bedrock_embeddings, 
+    opensearch_url=opensearch_url,
+    http_auth=(opensearch_account, opensearch_passwd),
+)
+"""
+
 def lambda_handler(event, context):
     print(event)
     userId  = event['user-id']
@@ -269,7 +286,7 @@ def lambda_handler(event, context):
             print('file_type: ', file_type)
             
             # load documents where text, pdf, csv are supported
-            docs = load_document(file_type, object)
+            #docs = load_document(file_type, object)
                         
             if rag_type == 'faiss':
                 if enableRAG == False:                    
@@ -286,23 +303,69 @@ def lambda_handler(event, context):
                     vectorstore.merge_from(vectorstore_new) # merge 
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
-            elif rag_type == 'opensearch':         
-                vectorstore = OpenSearchVectorSearch.from_documents(
+            elif rag_type == 'opensearch':    
+                
+                
+                s3_file_name = '2016-3series.pdf'
+                s3r = boto3.resource("s3")
+                doc = s3r.Object(s3_bucket, s3_prefix+'/'+s3_file_name)
+                    
+                contents = doc.get()['Body'].read()
+                reader = PyPDF2.PdfReader(BytesIO(contents))
+                        
+                raw_text = []
+                for page in reader.pages:
+                    raw_text.append(page.extract_text())
+                contents = '\n'.join(raw_text)  
+                new_contents = str(contents).replace("\n"," ") 
+
+                from langchain.text_splitter import CharacterTextSplitter
+                from langchain.text_splitter import RecursiveCharacterTextSplitter
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
+                texts = text_splitter.split_text(new_contents) 
+                from langchain.docstore.document import Document
+                docs = [
+                    Document(
+                        page_content=t
+                    ) for t in texts[:3]
+                ]
+                print('doc length: ', len(docs))
+                print('doc contents: ', docs)
+                from langchain.embeddings import BedrockEmbeddings
+                bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+                from langchain.vectorstores import OpenSearchVectorSearch
+                opensearch_url = "https://search-os-qa-chatbot-with-rag-7tgssoso5edxyvxdrpmzw2aw7e.ap-northeast-2.es.amazonaws.com"
+                nvectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
                     bedrock_embeddings, 
                     opensearch_url=opensearch_url,
-                    http_auth=(opensearch_account, opensearch_passwd),
+                    http_auth=("admin", "Wifi1234!"),
                 )
+
                 if enableRAG==False: 
                     enableRAG = True
-                    
+
+            # summerization to show the document
+            prompt_template = """Write a concise summary of the following:
+
+            {text}
+                
+            CONCISE SUMMARY """
+
+            print('template: ', prompt_template)
+            PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+            chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+            summary = chain.run(docs)
+            print('summary: ', summary)
+
+            msg = summary
             # summerization
-            query = "summerize the documents"
+            #query = "summerize the documents"
             #msg = get_answer_using_query(query, vectorstore, rag_type)
             #print('msg1: ', msg)
 
-            msg = get_answer_using_template(query, vectorstore, rag_type)
-            print('msg2: ', msg)
+            #msg = get_answer_using_template(query, vectorstore, rag_type)
+            #print('msg2: ', msg)
                 
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
