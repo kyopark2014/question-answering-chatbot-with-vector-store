@@ -81,28 +81,6 @@ def load_configuration(userId):
 
         return modelId
 
-# Bedrock Contiguration
-bedrock_region = bedrock_region
-bedrock_config = {
-    "region_name":bedrock_region,
-    "endpoint_url":endpoint_url
-}
-    
-# supported llm list from bedrock
-boto3_bedrock = bedrock.get_bedrock_client(
-    region=bedrock_config["region_name"],
-    url_override=bedrock_config["endpoint_url"])
-    
-modelInfo = boto3_bedrock.list_foundation_models()    
-print('models: ', modelInfo)
-
-llm = Bedrock(model_id=modelId, client=boto3_bedrock)
-
-# embedding
-bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
-
-enableRAG = False
-
 # load documents from s3
 def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")
@@ -198,6 +176,28 @@ def get_answer_using_template(query, vectorstore, rag_type):
 
     return result['result']
 
+
+# Bedrock Contiguration
+bedrock_region = bedrock_region
+bedrock_config = {
+    "region_name":bedrock_region,
+    "endpoint_url":endpoint_url
+}
+    
+# supported llm list from bedrock
+boto3_bedrock = bedrock.get_bedrock_client(
+    region=bedrock_config["region_name"],
+    url_override=bedrock_config["endpoint_url"])
+    
+modelInfo = boto3_bedrock.list_foundation_models()    
+print('models: ', modelInfo)
+
+llm = Bedrock(model_id=modelId, client=boto3_bedrock)
+
+# embedding
+bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+
+enableRAG = False
 
 """
 docs = [
@@ -305,12 +305,15 @@ def lambda_handler(event, context):
             elif rag_type == 'opensearch':    
                 print('doc length: ', len(docs))
                 print('doc contents: ', docs)
+                
+                opensearch_url = "https://search-os-qa-chatbot-with-rag-7tgssoso5edxyvxdrpmzw2aw7e.ap-northeast-2.es.amazonaws.com"
                 vectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
                     bedrock_embeddings, 
                     opensearch_url=opensearch_url,
-                    http_auth=(opensearch_account, opensearch_passwd),
+                    http_auth=("admin", "Wifi1234!"),
                 )
+
                 if enableRAG==False: 
                     enableRAG = True
 
@@ -321,6 +324,7 @@ def lambda_handler(event, context):
                 
             CONCISE SUMMARY """
 
+            print('template: ', prompt_template)
             PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
             chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
             summary = chain.run(docs)
