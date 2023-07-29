@@ -199,6 +199,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     return result['result']
 
 
+"""
 docs = [
     Document(
         page_content=""
@@ -211,6 +212,7 @@ vectorstore = OpenSearchVectorSearch.from_documents(
     opensearch_url=opensearch_url,
     http_auth=(opensearch_account, opensearch_passwd),
 )
+"""
 
 def lambda_handler(event, context):
     print(event)
