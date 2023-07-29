@@ -197,7 +197,21 @@ def get_answer_using_template(query, vectorstore, rag_type):
     print(source_documents)
 
     return result['result']
-        
+
+
+docs = [
+    Document(
+        page_content=""
+    ) 
+]
+
+vectorstore = OpenSearchVectorSearch.from_documents(
+    docs, 
+    bedrock_embeddings, 
+    opensearch_url=opensearch_url,
+    http_auth=(opensearch_account, opensearch_passwd),
+)
+
 def lambda_handler(event, context):
     print(event)
     userId  = event['user-id']
@@ -287,7 +301,6 @@ def lambda_handler(event, context):
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':    
-                """     
                 vectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
                     bedrock_embeddings, 
@@ -296,7 +309,6 @@ def lambda_handler(event, context):
                 )
                 if enableRAG==False: 
                     enableRAG = True
-                """
 
             # summerization to show the document
             prompt_template = """Write a concise summary of the following:
