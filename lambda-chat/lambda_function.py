@@ -115,6 +115,7 @@ def load_document(file_type, s3_file_name):
             page_content=t
         ) for t in texts[:3]
     ]
+
     return docs
               
 def get_answer_using_query(query, vectorstore, rag_type):
@@ -303,8 +304,7 @@ def lambda_handler(event, context):
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':    
-                print('doc length: ', len(docs))
-                print('doc contents: ', docs)
+                
                 
                 s3_file_name = '2016-3series.pdf'
                 s3r = boto3.resource("s3")
@@ -329,6 +329,8 @@ def lambda_handler(event, context):
                         page_content=t
                     ) for t in texts[:3]
                 ]
+                print('doc length: ', len(docs))
+                print('doc contents: ', docs)
                 from langchain.embeddings import BedrockEmbeddings
                 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
                 from langchain.vectorstores import OpenSearchVectorSearch
