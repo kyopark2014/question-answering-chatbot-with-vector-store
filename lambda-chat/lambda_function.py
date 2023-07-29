@@ -285,7 +285,7 @@ def lambda_handler(event, context):
             print('file_type: ', file_type)
             
             # load documents where text, pdf, csv are supported
-            docs = load_document(file_type, object)
+            #docs = load_document(file_type, object)
                         
             if rag_type == 'faiss':
                 if enableRAG == False:                    
