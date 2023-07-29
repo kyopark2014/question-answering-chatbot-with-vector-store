@@ -319,6 +319,8 @@ def lambda_handler(event, context):
                 contents = '\n'.join(raw_text)  
                 new_contents = str(contents).replace("\n"," ") 
 
+                from langchain.text_splitter import CharacterTextSplitter
+                from langchain.text_splitter import RecursiveCharacterTextSplitter
                 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
                 texts = text_splitter.split_text(new_contents) 
                 from langchain.docstore.document import Document
@@ -327,6 +329,9 @@ def lambda_handler(event, context):
                         page_content=t
                     ) for t in texts[:3]
                 ]
+                from langchain.embeddings import BedrockEmbeddings
+                bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+                from langchain.vectorstores import OpenSearchVectorSearch
                 opensearch_url = "https://search-os-qa-chatbot-with-rag-7tgssoso5edxyvxdrpmzw2aw7e.ap-northeast-2.es.amazonaws.com"
                 vectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
