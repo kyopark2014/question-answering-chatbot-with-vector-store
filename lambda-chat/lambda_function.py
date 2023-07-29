@@ -306,6 +306,27 @@ def lambda_handler(event, context):
                 print('doc length: ', len(docs))
                 print('doc contents: ', docs)
                 
+                s3_file_name = '2016-3series.pdf'
+                s3r = boto3.resource("s3")
+                doc = s3r.Object(s3_bucket, s3_prefix+'/'+s3_file_name)
+                    
+                contents = doc.get()['Body'].read()
+                reader = PyPDF2.PdfReader(BytesIO(contents))
+                        
+                raw_text = []
+                for page in reader.pages:
+                    raw_text.append(page.extract_text())
+                contents = '\n'.join(raw_text)  
+                new_contents = str(contents).replace("\n"," ") 
+
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
+                texts = text_splitter.split_text(new_contents) 
+                from langchain.docstore.document import Document
+                docs = [
+                    Document(
+                        page_content=t
+                    ) for t in texts[:3]
+                ]
                 opensearch_url = "https://search-os-qa-chatbot-with-rag-7tgssoso5edxyvxdrpmzw2aw7e.ap-northeast-2.es.amazonaws.com"
                 vectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
