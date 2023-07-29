@@ -335,7 +335,7 @@ def lambda_handler(event, context):
                 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
                 from langchain.vectorstores import OpenSearchVectorSearch
                 opensearch_url = "https://search-os-qa-chatbot-with-rag-7tgssoso5edxyvxdrpmzw2aw7e.ap-northeast-2.es.amazonaws.com"
-                vectorstore = OpenSearchVectorSearch.from_documents(
+                nvectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
                     bedrock_embeddings, 
                     opensearch_url=opensearch_url,
