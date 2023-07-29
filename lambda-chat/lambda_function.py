@@ -303,6 +303,8 @@ def lambda_handler(event, context):
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':    
+                print('doc length: ', len(docs))
+                print('doc contents: ', docs)
                 vectorstore = OpenSearchVectorSearch.from_documents(
                     docs, 
                     bedrock_embeddings, 
