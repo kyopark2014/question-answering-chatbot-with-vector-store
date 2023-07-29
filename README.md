@@ -6,7 +6,8 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 
 전체적인 Architecture는 아래와 같습니다. 사용자가 업로드한 문서는 Amazon S3에 저장된 후에, embedding을 통해 vectore store에 저장됩니다. 이후 사용자가 질문을 하면 vector store를 통해 질문에 가장 가까운 문장들을 받아오고 이를 기반으로 prompt를 생성하여 LLM에 질문을 요청하게 됩니다. 만약 vector store에서 질문에 가까운 문장이 없다면 LLM으로 질문을 전달합니다. 대용량 파일을 S3에 업로드 할 수 있도록 presigned url을 이용하였고, 질문과 답변을 수행한 call log는 DynamoDB에 저장되어 이후 데이터 수집 및 분석에 사용됩니다. 여기서 LLM은 Bedrock을 이용하여 LangChain 형식의 API를 통해 구현하였고, chatbot을 제공하는 인프라는 AWS CDK를 통해 배포합니다. 
 
-<img src="https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/021c7e0d-d342-4856-98f6-1baf3d36df95" width="800">
+<img src="https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/1c1ea130-43de-497e-9823-c5cf7c875f98" width="800">
+
 
 문서파일을 업로드하여 vector store에 저장하는 과정은 아래와 같습니다.
 
