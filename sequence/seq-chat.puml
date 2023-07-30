@@ -33,45 +33,29 @@ participant "<color:#D86613><$Lambda></color>\nAmazon Lambda\n(chat)" as lambdaC
 participant "<color:#D86613><$Database></color>\nVector Store" as vectorstore
 participant "<color:#green><$SageMaker></color>\nLLM" as llm
 
-user -> cdn: POST /upload
 
-cdn -> api: POST /upload
 
-api -> lambdaUpload ++ : Invokes lambda
 
-lambdaUpload -> api --: 200OK (unsigned url)
+user -> cdn: POST /chat (type='text')
 
-api -> cdn: 200OK (unsigned url)
+cdn -> api: POST /chat (type='text')
 
-cdn -> user: 200OK (unsigned url)
+api -> lambdaChat ++ : Invokes lambda
 
-user -> s3 ++: PUT document
-s3 --> user --: 200OK
+lambdaChat -> lambdaUpload: Embedding
 
-user -> cdn: POST /chat \n(type: document)
+lambdaChat -> vectorstore ++: similarity search
 
-cdn -> api: type: document 
+vectorstore -> lambdaChat --: related docs
 
-api -> lambdaChat: type: document
+lambdaChat -> llm ++: question with related docs
 
-lambdaChat -> s3 ++: get document
+llm -> lambdaChat --: 200OK (answer)
 
-s3 -> lambdaChat --: 200OK
+lambdaChat -> api --: 200OK (answer)
 
-lambdaChat -> lambdaChat: Extract text
+api -> cdn: 200OK (answer)
 
-lambdaChat -> lambdaChat: Embedding
-
-lambdaChat -> vectorstore ++: store document
-
-vectorstore -> lambdaChat --: 200OK
-
-lambdaChat -> lambdaChat: Summerization
-
-lambdaChat -> api: 200OK \n(summerized text)
-
-api -> cdn: 200OK \n(summerized text)
-
-cdn -> user: 200OK \n(summerized text)
+cdn -> user: 200OK (answer)
 
 @enduml
