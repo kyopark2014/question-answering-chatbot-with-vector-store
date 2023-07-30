@@ -30,6 +30,8 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 3) lambda(chat)은 질문을 Embedding후에 vector store에 관련된 문장이 있는지 확인합니다.
 4) Vector store가 관련된 문장을 전달하면 prompt template를 이용하여 LLM에 질문을 전달합니다. 이후 답변을 받으면 사용자에게 결과를 전달합니다.
 
+<img src="./sequence/seq-chat.png" width="600">
+
 
 ## 주요 구성
 
