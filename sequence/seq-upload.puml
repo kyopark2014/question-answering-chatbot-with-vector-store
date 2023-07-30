@@ -39,11 +39,11 @@ cdn -> api: POST /upload
 
 api -> lambdaUpload ++ : Invokes lambda
 
-lambdaUpload -> api --: 200OK (unsigned url)
+lambdaUpload -> api --: 200OK (presigned url)
 
-api -> cdn: 200OK (unsigned url)
+api -> cdn: 200OK (presigned url)
 
-cdn -> user: 200OK (unsigned url)
+cdn -> user: 200OK (presigned url)
 
 user -> s3 ++: PUT document
 s3 --> user --: 200OK
