@@ -171,7 +171,7 @@ relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 
 [Amazon OpenSearch persistent store로는 vector store](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 구성할 수 있습니다. 비슷한 역할을 하는 persistent store로는 [Amazon RDS Postgres with pgVector](https://aws.amazon.com/about-aws/whats-new/2023/05/amazon-rds-postgresql-pgvector-ml-model-integration/), ChromaDB, Pinecone과 Weaviate가 있습니다. 
 
-OpenSearch를 사용을 위해서는 IAM Role에서 아래의 퍼미션을 추가합니다.
+[Lambda-chat](./lambda-chat/lambda_function.py)에서 OpenSearch를 사용을 위해서는 Lambda의 Role에 아래의 퍼미션을 추가합니다.
 
 ```java
 {
@@ -186,7 +186,23 @@ OpenSearch를 사용을 위해서는 IAM Role에서 아래의 퍼미션을 추�
 }
 ```
 
-또한, 이때의 OpenSearch에 대한 access policy는 아래와 같습니다.
+이것은 [cdk-qa-with-rag-stack.ts](./cdk-qa-with-rag/lib/cdk-qa-with-rag-stack.ts)은 아래와 같이 구현할 수 있습니다.
+
+```typescript
+const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+const OpenSearchPolicy = new iam.PolicyStatement({
+    resources: [resourceArn],
+    actions: ['es:*'],
+});
+
+roleLambda.attachInlinePolicy( 
+    new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
+        statements: [OpenSearchPolicy],
+    }),
+); 
+```
+
+OpenSearch에 대한 access policy는 아래와 같습니다.
 
 ```java
 {
@@ -204,7 +220,19 @@ OpenSearch를 사용을 위해서는 IAM Role에서 아래의 퍼미션을 추�
 }
 ```
 
-이제, 아래와 같이 [OpenSearchVectorSearch()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)으로 vector store를 정의합니다. 
+[cdk-qa-with-rag-stack.ts](./cdk-qa-with-rag/lib/cdk-qa-with-rag-stack.ts)에서 아래와 같이 정의하여 OpenSearch 생성시 활용합니다.
+
+```typescript
+const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+const OpenSearchAccessPolicy = new iam.PolicyStatement({
+    resources: [resourceArn],
+    actions: ['es:*'],
+    effect: iam.Effect.ALLOW,
+    principals: [new iam.AnyPrincipal()],
+});
+```
+  
+[OpenSearchVectorSearch()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)로 아래와 같이 vector store를 정의합니다. 
 
 ```python
 from langchain.vectorstores import OpenSearchVectorSearch
@@ -217,7 +245,7 @@ vectorstore = OpenSearchVectorSearch.from_documents(
 )
 ```
 
-아래와 같이 vectorstore로 부터 관련된 문서를 조회할 수 있습니다. 이때 OpenSearch는 query를 이용하여 similarity_search()로 조회합니다.
+아래와 같이 OpenSearch는 [vector store로 부터 similarity_search()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 이용하여 관련된 문서를 조회할 수 있습니다.
 
 ```python
 relevant_documents = vectorstore.similarity_search(query)
