@@ -186,7 +186,7 @@ relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 }
 ```
 
-이것은 [cdk-qa-with-rag-stack.ts](./cdk-qa-with-rag/lib/cdk-qa-with-rag-stack.ts)은 아래와 같이 구현할 수 있습니다.
+이것은 [cdk-qa-with-rag-stack.ts](./cdk-qa-with-rag/lib/cdk-qa-with-rag-stack.ts)에서 아래와 같이 구현할 수 있습니다.
 
 ```typescript
 const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
