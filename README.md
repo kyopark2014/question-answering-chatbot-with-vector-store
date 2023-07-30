@@ -59,7 +59,7 @@ bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 ### 문서 읽어오기
 
-[client](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/html/chat.js)에선 Upload API로 아래와 같이 업로드할 파일명과 Content-Type을 전달합니다.
+[Client](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/html/chat.js)에선 Upload API로 아래와 같이 업로드할 파일명과 Content-Type을 전달합니다.
 
 ```java
 {
@@ -68,7 +68,7 @@ bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 }
 ```
 
-[Lambda-upload](./lambda-upload/index.js)에서는 용량이 큰 문서 파일도 S3에 업로드할 수 있도록 presigned url을 생성합니다. 아래와 같이 s3Params를 지정하고 [getSignedUrlPromise](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrlPromise-property)을 이용하여 url 정보를 client로 전달합니다.
+[Lambda-upload](./lambda-upload/index.js)에서는 용량이 큰 문서 파일도 S3에 업로드할 수 있도록 presigned url을 생성합니다. 아래와 같이 s3Params를 지정하고 [getSignedUrlPromise](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrlPromise-property)을 이용하여 url 정보를 Client로 전달합니다.
 
 ```java
 const URL_EXPIRATION_SECONDS = 300;
@@ -82,7 +82,7 @@ const s3Params = {
 const uploadURL = await s3.getSignedUrlPromise('putObject', s3Params);
 ```
 
-client에서 아래와 같은 응답을 얻으면 "UploadURL"을 추출하여 문서 파일을 업로드합니다.
+Client에서 아래와 같은 응답을 얻으면 "UploadURL"을 추출하여 문서 파일을 업로드합니다.
 
 ```java
 {
@@ -277,13 +277,21 @@ result = qa({ "query": query })
 return result['result']
 ```
 
-## 실습하기
+
+## 직접 실습 해보기
+
+### 사전 준비 사항
+
+이 솔루션을 사용하기 위해서는 사전에 아래와 같은 준비가 되어야 합니다.
+
+- [AWS Account 생성](https://repost.aws/ko/knowledge-center/create-and-activate-aws-account)
+
 
 ### CDK를 이용한 인프라 설치
 [인프라 설치](https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/blob/main/deployment.md)에 따라 CDK로 인프라 설치를 진행합니다. [CDK 구현 코드](./cdk-qa-with-rag/README.md)에서는 Typescript로 인프라를 정의하는 방법에 대해 상세히 설명하고 있습니다.
 
 
-## 실행결과
+### 실행결과
 
 파일을 올리면 파일의 텍스트를 기반으로 요약(Summeraztion)을 수행합니다.
 
@@ -297,9 +305,25 @@ return result['result']
 
 ![image](https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/assets/52392004/4be7f868-b830-4e2f-af1d-445f905f280b)
 
-### Chatbot 동작 시험시 주의할점
+#### Chatbot 동작 시험시 주의할점
 
 일반적인 chatbot들은 지속적인 세션을 유지 관리하기 위해서는 websocket 등을 사용하지만, 여기서 사용한 Chatbot은 API를 테스트하기 위하여 RESTful API를 사용하고 있습니다. 따라서, LLM에서 응답이 일정시간(30초)이상 지연되는 경우에 브라우저에서 답변을 볼 수 없습니다. 따라서 긴 응답시간이 필요한 경우에 CloudWatch에서 [lambda-chat](./lambda-chat/lambda_function.py)의 로그를 확인하거나, DynamoDB에 저장된 call log를 확인합니다.
+
+
+### 리소스 정리하기
+
+더이상 인프라를 사용하지 않는 경우에 아래처럼 모든 리소스를 삭제할 수 있습니다. [Cloud9 console](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/)에 접속하여 아래와 같이 삭제를 합니다.
+
+```java
+cdk destroy
+```
+
+
+## 결론
+
+AWS 서울 리전에서 Amazon Bedrock과 vector store를 이용하여 질문과 답변(Question/Answering)을 수행하는 chatbot을 생성하여 RAG 동작을 구현하였습니다.
+
+Falcon FM 기반의 Chatbot을 생성하여 텍스트에 대한 요청 및 PDF 파일의 요약(Summary)를 수행하였습니다. Falcon FM은 HuggingFace의 [Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)에서 1등 (2023년 7월 기준)을 할 만큼 우수한 성능을 가지고 있고, 상용을 포함한 라이선스에도 자유롭습니다. 또한, Falcon FM은 SageMaker JumpStart에서 편리하게 설치하고 활용할 수 있으며, 이제 AWS 서울 리전에서 EC2 G5와 같은 우수한 인프라를 통해 쉽고 빠르게 개발 및 상용이 가능합니다. LLM (Large Language Models) 기반의 Chatbot은 기존 Rule-based의 Chatbot에 비하여 훨씬 우수한 대화능력을 보여주며, 또한 AWS Lambda, CloudFront, API Gateway, S3와 같은 AWS 인프라를 이용하여 쉽게 구현할 수 있습니다. 근래에 다양하고 성능 좋은 LLM들이 많이 나오고 한글도 일부 지원되고 있어서 향후 다양한 용도로 많은 활용이 기대됩니다.
 
 
 ## Reference 
