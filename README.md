@@ -57,6 +57,92 @@ from langchain.embeddings import BedrockEmbeddings
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 ```
 
+### 문서 읽어오기
+
+client에선 Upload API로 아래와 같이 업로드할 파일명과 Content-Type을 전달합니다.
+
+```java
+{
+    "filename":"gen-ai-wiki.pdf",
+    "contentType":"application/pdf"
+}
+```
+
+[Lambda-upload](./lambda-upload/index.js)에서는 용량이 큰 문서 파일도 S3에 업로드할 수 있도록 presigned url을 생성합니다. 아래와 같이 s3Params를 지정하고 [getSignedUrlPromise](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrlPromise-property)을 이용하여 url 정보를 client로 전달합니다.
+
+```java
+const URL_EXPIRATION_SECONDS = 300;
+const s3Params = {
+    Bucket: bucketName,
+    Key: s3_prefix+'/'+filename,
+    Expires: URL_EXPIRATION_SECONDS,
+    ContentType: contentType,
+};
+
+const uploadURL = await s3.getSignedUrlPromise('putObject', s3Params);
+```
+
+client에서 아래와 같은 응답을 얻으면 "UploadURL"을 추출하여 문서 파일을 업로드합니다.
+
+```java
+{
+   "statusCode":200,
+   "body":"{\"Bucket\":\"storage-for-qa-chatbot-with-rag\",\"Key\":\"docs/gen-ai-wiki.pdf\",\"Expires\":300,\"ContentType\":\"application/pdf\",\"UploadURL\":\"https://storage-for-qa-chatbot-with-rag.s3.ap-northeast-2.amazonaws.com/docs/gen-ai-wiki.pdf?Content-Type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAZ3KIXN5TBIBMQXTK%2F20230730%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Date=20230730T055129Z&X-Amz-Expires=300&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaDmFwLW5vcnRoZWFzdC0yIkcwRQIhAP8or6Pr1lDHQpTIO7cTWPsB7kpkdkOdsrd2NbllPpsuAiBlV...(중량)..78d1b62f1285e8def&X-Amz-SignedHeaders=host\"}"
+}
+```
+
+파일 업로드가 끝나면, [Client](./html/chat.js)는 Chat API로 문서를 vector store에 등록하도록 아래와 같이 요청합니다. 
+
+```java
+{
+   "user-id":"f642fd39-8ef7-4a77-9911-1c50608c2831",
+   "request-id":"d9ab57ad-6950-412e-a492-1381eb1f2642",
+   "type":"document",
+   "body":"gen-ai-wiki.pdf"
+}
+```
+
+[Lambda-chat](./lambda-chat/lambda_function.py)에서는 type이 "document" 이라면, S3에서 아래와 같이 파일을 로드하여 text를 분리합니다.
+
+```python
+s3r = boto3.resource("s3")
+doc = s3r.Object(s3_bucket, s3_prefix + '/' + s3_file_name)
+
+if file_type == 'pdf':
+    contents = doc.get()['Body'].read()
+    reader = PyPDF2.PdfReader(BytesIO(contents))
+
+    raw_text = []
+    for page in reader.pages:
+        raw_text.append(page.extract_text())
+    contents = '\n'.join(raw_text)    
+        
+elif file_type == 'txt':
+    contents = doc.get()['Body'].read()
+elif file_type == 'csv':
+    body = doc.get()['Body'].read()
+    reader = csv.reader(body)
+    contents = CSVLoader(reader)
+```
+
+이후 chunk size로 분리한 후에 Document를 이용하여 문서로 만듧니다.
+
+```python
+from langchain.docstore.document import Document
+
+text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap = 100)
+texts = text_splitter.split_text(new_contents)
+print('texts[0]: ', texts[0])
+
+docs = [
+    Document(
+        page_content = t
+    ) for t in texts[: 3]
+    ]
+return docs
+```
+
+
 ### Vector Store 
 
 Faiss와 OpenSearch 방식의 선택은 [cdk-qa-with-rag-stack.ts](./cdk-qa-with-rag/lib/cdk-qa-with-rag-stack.ts)에서 rag_type을 "faiss" 또는 "opensearch"로 변경할 수 있습니다. 기본값은 "opensearch"입니다.
@@ -74,17 +160,18 @@ vectorstore = FAISS.from_documents( # create vectorstore from a document
 )
 ```
 
-vectorstore를 이용하여 관계된 문서를 조회합니다. 이때 Faiss는 embedding된 query를 이용하여 similarity_search_by_vector()로 조회합니다.
+이후, vectorstore를 이용하여 관계된 문서를 조회합니다. 이때 Faiss는 embedding된 query를 이용하여 [similarity_search_by_vector()](https://python.langchain.com/docs/modules/data_connection/vectorstores/)로 조회합니다.
 
 ```python
 relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 ```
 
+
 #### OpenSearch
 
 [Amazon OpenSearch persistent store로는 vector store](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 구성할 수 있습니다. 비슷한 역할을 하는 persistent store로는 RDS Postgres with pgVector, ChromaDB, Pinecone과 Weaviate가 있습니다. 
-OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합니다.
 
+OpenSearch를 사용을 위해서는 IAM Role에서 아래의 퍼미션을 추가합니다.
 
 ```java
 {
@@ -99,7 +186,7 @@ OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합�
 }
 ```
 
-또한, OpenSearch의 access policy는 아래와 같습니다.
+또한, 이때의 OpenSearch에 대한 access policy는 아래와 같습니다.
 
 ```java
 {
@@ -117,7 +204,7 @@ OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합�
 }
 ```
 
-이제, 아래와 같이 OpenSearchVectorSearch()으로 vector store를 정의합니다. 
+이제, 아래와 같이 [OpenSearchVectorSearch()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)으로 vector store를 정의합니다. 
 
 ```python
 from langchain.vectorstores import OpenSearchVectorSearch
@@ -134,25 +221,6 @@ vectorstore = OpenSearchVectorSearch.from_documents(
 
 ```python
 relevant_documents = vectorstore.similarity_search(query)
-```
-
-### 파일 읽어오기
-
-pdf, txt, csv 파일을 S3에서 로딩하여 chunk size로 분리한 후에 Document를 이용하여 문서로 만듧니다.
-
-```python
-from langchain.docstore.document import Document
-
-text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap = 100)
-texts = text_splitter.split_text(new_contents)
-print('texts[0]: ', texts[0])
-
-docs = [
-    Document(
-        page_content = t
-    ) for t in texts[: 3]
-    ]
-return docs
 ```
 
 ### Question/Answering
