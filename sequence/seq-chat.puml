@@ -42,13 +42,13 @@ cdn -> api: POST /chat (type='text')
 
 api -> lambdaChat ++ : Invokes lambda
 
-lambdaChat -> lambdaUpload: Embedding
+lambdaChat -> lambdaChat: Embedding
 
 lambdaChat -> vectorstore ++: similarity search
 
 vectorstore -> lambdaChat --: related docs
 
-lambdaChat -> llm ++: question with related docs
+lambdaChat -> llm ++: question \nwith related docs
 
 llm -> lambdaChat --: 200OK (answer)
 

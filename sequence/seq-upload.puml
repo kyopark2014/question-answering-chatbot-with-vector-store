@@ -45,14 +45,14 @@ api -> cdn: 200OK (presigned url)
 
 cdn -> user: 200OK (presigned url)
 
-user -> s3 ++: PUT document
+user -> s3 ++: PUT document \nusing presigned url
 s3 --> user --: 200OK
 
 user -> cdn: POST /chat \n(type: document)
 
-cdn -> api: type: document 
+cdn -> api: POST /chat \n(type: document)
 
-api -> lambdaChat: type: document
+api -> lambdaChat ++: POST /chat \n(type: document)
 
 lambdaChat -> s3 ++: get document
 
@@ -68,7 +68,7 @@ vectorstore -> lambdaChat --: 200OK
 
 lambdaChat -> lambdaChat: Summerization
 
-lambdaChat -> api: 200OK \n(summerized text)
+lambdaChat -> api --: 200OK \n(summerized text)
 
 api -> cdn: 200OK \n(summerized text)
 
