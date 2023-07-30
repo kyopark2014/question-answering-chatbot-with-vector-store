@@ -148,7 +148,7 @@ docs = [
     Document(
         page_content = t
     ) for t in texts[: 3]
-    ]
+]
 return docs
 ```
 
