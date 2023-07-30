@@ -22,8 +22,6 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 
 <img src="./sequence/seq-upload.png" width="600">
 
-
-
 채팅 창에서 텍스트 입력(Prompt)를 통해 RAG를 활용하는 과정은 아래와 같습니다.
 1) 사용자가 채팅창에서 질문(Question)을 입력합니다.
 2) 이것은 Chat API를 이용하여 [lambda (chat)](./lambda-chat/lambda_function.py)에 전달됩니다.
@@ -31,7 +29,6 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 4) Vector store가 관련된 문장을 전달하면 prompt template를 이용하여 LLM에 질문을 전달합니다. 이후 답변을 받으면 사용자에게 결과를 전달합니다.
 
 <img src="./sequence/seq-chat.png" width="600">
-
 
 ## 주요 구성
 
