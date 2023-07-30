@@ -69,7 +69,7 @@ bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 ### 문서 읽어오기
 
-[Client](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/html/chat.js)에선 Upload API로 아래와 같이 업로드할 파일명과 Content-Type을 전달합니다.
+[Client](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/html/chat.js)에서 Upload API로 아래와 같이 업로드할 파일명과 Content-Type을 전달합니다.
 
 ```java
 {
