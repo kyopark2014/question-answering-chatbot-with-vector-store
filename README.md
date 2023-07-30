@@ -91,7 +91,7 @@ client에서 아래와 같은 응답을 얻으면 "UploadURL"을 추출하여 �
 }
 ```
 
-파일 업로드가 끝나면, [Client](./html/chat.js)는 Chat API로 문서를 vector store에 등록하도록 아래와 같이 요청합니다. 
+파일 업로드가 끝나면, [Client](./html/chat.js)는 Chat API로 문서를 vector store에 등록하도록 아래와 같이 요청합니다. 
 
 ```java
 {
