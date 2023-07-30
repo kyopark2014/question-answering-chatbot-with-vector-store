@@ -321,17 +321,21 @@ return result['result']
 
 ### 실행결과
 
-파일을 올리면 파일의 텍스트를 기반으로 요약(Summeraztion)을 수행합니다.
+채팅창에 "Tell me how to use ChatGPT in AWS."라고 입력합니다.
 
-![image](https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/assets/52392004/93a8d391-905b-487b-a45e-a7c67f03528b)
+![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/a769d1e5-7d7d-467d-825f-77786ef806fa)
 
-이후 텍스트로 질문을 하면 아래와 같이 업로드한 문서파일을 기반으로 답변을 수행합니다.
 
-![image](https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/assets/52392004/4050847f-8f05-4136-a290-9818f108d1cb)
+gen-ai-aws.pdf를 업로드합니다.
 
-잘못된 질문을 하여도 아래와 같이 업로드한 문서에 맞추어서 답변을 할 수 있습니다.
+![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/aceae3f4-d406-4736-b468-c0e960b49aa9)
 
-![image](https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/assets/52392004/4be7f868-b830-4e2f-af1d-445f905f280b)
+
+동일한 질문을 하면 아래와 같이 답변을 합니다.
+
+![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/bfd0d183-580b-49be-83de-f57d019a1fec)
+
+
 
 #### Chatbot 동작 시험시 주의할점
 
