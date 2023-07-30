@@ -63,13 +63,7 @@ Faiss와 OpenSearch 방식의 선택은 [cdk-qa-with-rag-stack.ts](./cdk-qa-with
 
 #### Faiss
 
-[Faiss](https://github.com/facebookresearch/faiss)는 Facebook에서 오픈소스로 제공하는 In-memory vector store로서 embedding과 document들을 저장할 수 있으며, LangChain을 지원합니다. 비슷한 역할을 하는 persistent store로는 Amazon OpenSearch, RDS Postgres with pgVector, ChromaDB, Pinecone과 Weaviate가 있습니다. 
-
-faiss.write_index(), faiss.read_index()을 이용해서 local에서 index를 저장하고 읽어올수 있습니다. 그러나 S3에서 직접 로드는 현재 제공하고 있지 않습니다. EFS에서 저장후 S3에 업로드 하는 방식은 레퍼런스가 있습니다.
-
-[Faiss-LangChain](https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/faiss)와 같이 save_local(), load_local()을 사용할 수 있고, merge_from()으로 2개의 vector store를 저장할 수 있습니다.
-
-Faiss에서는 FAISS()를 이용하여 아래와 같이 vector store를 정의합니다. 
+[Faiss](https://github.com/facebookresearch/faiss)는 Facebook에서 오픈소스로 제공하는 In-memory vector store로서 embedding과 document들을 저장할 수 있으며, LangChain을 지원합니다. Faiss에서는 FAISS()를 이용하여 아래와 같이 vector store를 정의합니다. 
 
 ```python
 from langchain.vectorstores import FAISS
@@ -88,7 +82,9 @@ relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 
 #### OpenSearch
 
+Amazon OpenSearch persistent store로는 vector store를 구성할 수 있습니다. 비슷한 역할을 하는 persistent store로는 RDS Postgres with pgVector, ChromaDB, Pinecone과 Weaviate가 있습니다. 
 OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합니다.
+
 
 ```java
 {
@@ -97,7 +93,7 @@ OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합�
         {
             "Effect": "Allow",
             "Action": "es:*",
-            "Resource": "arn:aws:es:ap-northeast-2:[account-id]:domain/[domain-name]/*"
+            "Resource": "arn:aws:es:[region]:[account-id]:domain/[domain-name]/*"
         }
     ]
 }
@@ -115,7 +111,7 @@ OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합�
         "AWS": "*"
       },
       "Action": "es:*",
-      "Resource": "arn:aws:es:ap-northeast-2:[account-id]:domain/[domain-name]/*"
+      "Resource": "arn:aws:es:[region]:[account-id]:domain/[domain-name]/*"
     }
   ]
 }
@@ -140,31 +136,6 @@ vectorstore = OpenSearchVectorSearch.from_documents(
 relevant_documents = vectorstore.similarity_search(query)
 ```
 
-### 문서 등록
-
-문서를 업로드하면 FAISS를 이용하여 vector store에 저장합니다. 파일을 여러번 업로드할 경우에는 기존 vector store에 추가합니다. 
-
-```python
-docs = load_document(file_type, object)
-
-vectorstore_new = FAISS.from_documents(
-    docs,
-    bedrock_embeddings,
-)
-
-vectorstore.merge_from(vectorstore_new)
-```
-
-업로드한 문서 파일에 대한 요약(Summerization)을 제공하여 사용자의 파일에 대한 이해를 돕습니다.
-
-```python
-query = "summerize the documents"
-
-msg = get_answer(query, vectorstore_new)
-print('msg2: ', msg)
-```
-
-
 ### 파일 읽어오기
 
 pdf, txt, csv 파일을 S3에서 로딩하여 chunk size로 분리한 후에 Document를 이용하여 문서로 만듧니다.
@@ -186,7 +157,7 @@ return docs
 
 ### Question/Answering
 
-아래와 같이 vector store에 직접 Query 하는 방식과, Template를 이용하는 2가지 방법으로 Question/Answering을 수행합니다.
+아래와 같이 vector store에 직접 Query 하는 방식과, Template를 이용하는 2가지 방법으로 Question/Answering 구현하는 것을 설명합니다.
 
 #### Vector Store에서 query를 이용하는 방법
 
