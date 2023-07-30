@@ -16,6 +16,11 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 3) Chat API에서 request type을 'document'로 지정하면 [lambda (chat)](./lambda-chat/lambda_function.py)은 S3에서 object를 로드하여 텍스트를 추출합니다.
 4) Embeding을 통해 단어들을 vector화 합니다.
 5) Vector store에 문서를 저장합니다. 이때 RAG의 type이 "faiss"이면 in-memory store인 Faiss로 저장하고, "opensearch"이면 Amazon OpenSearch로 저장합니다.
+6) 채팅창에 업로드한 문서의 요약(Summerization)을 보여지기 위해 summerization을 수행하고 그 결과를 사용자에게 전달합니다.
+
+<img src="./sequence/seq-upload.png" width="600">
+
+
 
 채팅 창에서 텍스트 입력(Prompt)를 통해 RAG를 활용하는 과정은 아래와 같습니다.
 1) 사용자가 채팅창에서 질문(Question)을 입력합니다.
