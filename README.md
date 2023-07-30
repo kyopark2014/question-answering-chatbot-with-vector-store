@@ -13,9 +13,9 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 
 문서파일을 업로드하여 vector store에 저장하는 과정은 아래와 같습니다.
 
-1) 사용자가 파일 업로드를 요청합니다. 이때 사용하는 Upload API는 [lambda (upload)](./lambda-upload/index.js)는 S3 presigned url을 생성하여 전달합니다.
-2) 이후 presigned url로 문서를 업로드 하면 S3에 Object로 저장됩니다.
-3) Chat API에서 request type을 'document'로 지정하면 [lambda (chat)](./lambda-chat/lambda_function.py)은 S3에서 object를 로드하여 텍스트를 추출합니다.
+1) 사용자가 파일 업로드를 요청합니다. 이때 사용하는 Upload API는 [lambda (upload)](./lambda-upload/index.js)에 전달되어 S3 presigned url을 생성하게 됩니다.
+2) 사용자가 presigned url로 문서를 업로드 하면 S3에 object로 저장됩니다.
+3) Chat API에서 request type을 "document"로 지정하면 [lambda (chat)](./lambda-chat/lambda_function.py)는 S3에서 object를 로드하여 텍스트를 추출합니다.
 4) Embeding을 통해 단어들을 vector화 합니다.
 5) Vector store에 문서를 저장합니다. 이때 RAG의 type이 "faiss"이면 in-memory store인 Faiss로 저장하고, "opensearch"이면 Amazon OpenSearch로 저장합니다.
 6) 채팅창에 업로드한 문서의 요약(Summerization)을 보여지기 위해 summerization을 수행하고 그 결과를 사용자에게 전달합니다.
@@ -36,9 +36,9 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 
 ## 주요 구성
 
-### Bedrock을 LangChain으로 연결하기
+### Bedrock을 LangChain으로 연결
 
-현재(2023년 7월) Bedrock은 Preview 상태이므로, Bedrock 사용을 위해서는 AWS를 통해 사용권한을 획득하여야 합니다. 사용 권한 받으면 특정 region의 endpoint를 사용할 수 있도록 허용하는데, 아래와 같이 bedrock client에서 관련 정보를 설정할 수 있습니다. 이후 [Bedrock](https://python.langchain.com/docs/integrations/providers/bedrock)을 import하여 LangChain으로 application을 개발할 수 있습니다. 
+현재(2023년 7월) Bedrock은 Preview 상태이므로, Bedrock 사용을 위해서는 AWS를 통해 사용권한을 획득하여야 합니다. 사용 권한 받으면 특정 region의 endpoint를 사용할 수 있도록 허용하는데, 아래와 같이 bedrock client에서 관련 정보를 설정할 수 있습니다. 이후 [Bedrock](https://python.langchain.com/docs/integrations/providers/bedrock)을 import하여 LangChain로 application을 개발할 수 있습니다. 
 
 ```python
 from langchain.llms.bedrock import Bedrock
@@ -279,7 +279,7 @@ answer = wrapper_store.query(question = query, llm = llm)
 
 #### Template를 이용하는 방법
 
-일반적으로 vectorstore에서 query를 이용하는 방법보다 나은 결과를 얻습니다.
+Template를 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용하여, 일반적으로 vectorstore에서 query를 이용하는 방법보다 나은 결과를 얻습니다.
 
 ```python
 from langchain.chains import RetrievalQA
