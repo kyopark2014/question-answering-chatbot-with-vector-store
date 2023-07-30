@@ -321,17 +321,15 @@ return result['result']
 
 ### 실행결과
 
-채팅창에 "Tell me how to use ChatGPT in AWS."라고 입력합니다.
+채팅창에 "Tell me how to use ChatGPT in AWS."라고 입력합니다. 대규모 언어 모델은 가장 근사한 답을 찾아서 전달하므로 전형적인 환각(hallucination) 응답을 얻었습니다.
 
 ![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/a769d1e5-7d7d-467d-825f-77786ef806fa)
 
-
-gen-ai-aws.pdf를 업로드합니다.
+[gen-ai-aws.pdf](./gen-ai-aws.pdf)을 다운로드 한 후에 채팅창 아래의 파일 아이콘을 선택하여 업로드합니다. 업로드가 끝나면 아래와 같이 "gen-ai-aws.pdf"을 요약하여 보여줍니다.
 
 ![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/aceae3f4-d406-4736-b468-c0e960b49aa9)
 
-
-동일한 질문을 하면 아래와 같이 답변을 합니다.
+"gen-ai-aws.pdf"는 AWS의 Generative AI에 대한 정보를 가지고 있으므로, 동일한 질문을 했을때에 아래와 같이 이전과 다른 정확한 답변을 얻을 수 있습니다.
 
 ![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/bfd0d183-580b-49be-83de-f57d019a1fec)
 
