@@ -1,8 +1,8 @@
 # Vector Store를 이용한 Question/Answering Chatbot 
 
-여기서는 Amazon Bedrock의 대규모 언어 모델(Large Language Models)을 이용하여 질문/답변(Question/Answering)을 수행하는 chatbot을 vector store를 이용하여 구현합니다. 대량의 데이터로 사전학습(pretrained)한 대규모 언어 모델(LLM)은 학습되지 않은 질문에 대해서도 가장 가까운 답변을 맥락(context)에 맞게 찾아 답변할 수 있습니다. 이는 기존의 Role 방식보다 훨씬 정답에 가까운 답변을 제공하지만, 때로는 매우 그럴듯한 잘못된 답변(hallucination)을 할 수 있습니다. 이런 경우에 파인 튜닝(fine tuning)을 통해 정확도를 높일 수 있으나, 계속적으로 추가되는 데이터를 매번 파인 튜닝으로 처리할 수 없습니다. 따라서, RAG(Retrieval-Augmented Generation)와 같이 기본 모델의 파라미터(weight)을 바꾸지 않고, 지식 데이터베이스(knowledge Database)에서 얻어진 외부 지식을 이용하여 정확도를 개선하는 방법을 활용할 수 있습니다. RAG는 prompt engineering 기술 중의 하나로서 vector store를 지식 데이터베이스로 이용하고 있습니다. 
+여기서는 Amazon Bedrock의 대규모 언어 모델(Large Language Models)을 이용하여 질문/답변(Question/Answering)을 수행하는 chatbot을 vector store를 이용하여 구현합니다. 대량의 데이터로 사전학습(pretrained)한 대규모 언어 모델(LLM)은 학습되지 않은 질문에 대해서도 가장 가까운 답변을 맥락(context)에 맞게 찾아 답변할 수 있습니다. 이는 기존의 Role 방식보다 훨씬 정답에 가까운 답변을 제공하지만, 때로는 매우 그럴듯한 잘못된 답변(hallucination)을 할 수 있습니다. 이런 경우에 파인 튜닝(fine tuning)을 통해 정확도를 높일 수 있으나, 계속적으로 추가되는 데이터를 매번 파인 튜닝으로 처리할 수 없습니다. 따라서, [RAG(Retrieval-Augmented Generation)](https://sagemaker-examples.readthedocs.io/en/latest/introduction_to_amazon_algorithms/jumpstart-foundation-models/question_answering_retrieval_augmented_generation/question_answering_jumpstart_knn.html)와 같이 기본 모델의 파라미터(weight)을 바꾸지 않고, 지식 데이터베이스(knowledge Database)에서 얻어진 외부 지식을 이용하여 정확도를 개선하는 방법을 활용할 수 있습니다. RAG는 prompt engineering 기술 중의 하나로서 vector store를 지식 데이터베이스로 이용하고 있습니다. 
 
-Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 되지 않은 컨텐츠(unstructured content)를 저장하고 검색할 수 있습니다. 특히 대규모 언어 모델(LLM)의 경우에 embedding을 이용하여 텍스트들의 연관성(sementic meaning)을 벡터(vector)로 표현할 수 있으므로, 연관성 검색(sementic search)을 통해 질문에 가장 가까운 답변을 찾을 수 있습니다. 여기서는 대표적인 In-memory vector store인 Faiss와 persistent store이면서 대용량 병렬처리가 가능한 Amazon OpenSearch를 이용하여 문서의 내용을 분석하고 연관성 검색(sementic search) 기능을 활용합니다. 이를 통해, 대규모 언어 모델로 질문(question)을 보내면, vector store에서 가장 유사한 문서를 찾아여 답변(answering)에 활용할 수 있습니다. 이와같이 vector store를 사용하면 대규모 언어 모델의 token 사이즈를 넘어서는 긴 문장을 활용하여 질문/답변(Question/Answering)과 같은 Task를 수행할 수 있으며 환각(hallucination) 영향을 줄일 수 있습니다.
+Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 되지 않은 컨텐츠(unstructured content)를 저장하고 검색할 수 있습니다. 특히 대규모 언어 모델(LLM)의 경우에 embedding을 이용하여 텍스트들의 연관성(sementic meaning)을 벡터(vector)로 표현할 수 있으므로, 연관성 검색(sementic search)을 통해 질문에 가장 가까운 답변을 찾을 수 있습니다. 여기서는 대표적인 In-memory vector store인 [Faiss](https://github.com/facebookresearch/faiss/wiki/Getting-started)와 persistent store이면서 대용량 병렬처리가 가능한 [Amazon OpenSearch](https://medium.com/@pandey.vikesh/rag-ing-success-guide-to-choose-the-right-components-for-your-rag-solution-on-aws-223b9d4c7280)를 이용하여 문서의 내용을 분석하고 연관성 검색(sementic search) 기능을 활용합니다. 이를 통해, 대규모 언어 모델로 질문(question)을 보내면, vector store에서 가장 유사한 문서를 찾아여 답변(answering)에 활용할 수 있습니다. 이와같이 vector store를 사용하면 대규모 언어 모델의 token 사이즈를 넘어서는 긴 문장을 활용하여 질문/답변(Question/Answering)과 같은 Task를 수행할 수 있으며 환각(hallucination) 영향을 줄일 수 있습니다.
 
 전체적인 Architecture는 아래와 같습니다. 사용자가 업로드한 문서는 Amazon S3에 저장된 후에, embedding을 통해 vectore store에 저장됩니다. 이후 사용자가 질문을 하면 vector store를 통해 질문에 가장 가까운 문장들을 받아오고 이를 기반으로 prompt를 생성하여 대규모 언어 모델(LLM)에 질문을 요청하게 됩니다. 만약 vector store에서 질문에 가까운 문장이 없다면 대규모 언어 모델(LLM)으로 질문을 전달합니다. 대용량 파일을 S3에 업로드 할 수 있도록 presigned url을 이용하였고, 질문과 답변을 수행한 call log는 DynamoDB에 저장되어 이후 데이터 수집 및 분석에 사용됩니다. 여기서 LLM은 Bedrock을 이용하여 LangChain 형식의 API를 통해 구현하였고, chatbot을 제공하는 인프라는 AWS CDK를 통해 배포합니다. 
 
@@ -28,7 +28,7 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 
 ### Bedrock을 LangChain으로 연결하기
 
-Bedrock 접속을 위해 필요한 region name과 endpoint url을 지정하고, LangChain을 사용할 수 있도록 연결하여 줍니다. Bedrock preview에서는 Dev/Prod 버전에 따라 endpoint를 달리하는데, Prod 버전을 사용하고자 할 경우에는 endpoint에 대한 부분을 삭제하거나 주석처리합니다.
+현재(2023년 7월) Bedrock은 Preview 상태이므로, Bedrock 사용을 위해서는 AWS를 통해 사용권한을 획득하여야 합니다. 사용 권한 받으면 특정 region의 endpoint를 사용할 수 있도록 허용하는데, 아래와 같이 bedrock client에서 관련 정보를 설정할 수 있습니다. 이후 [Bedrock](https://python.langchain.com/docs/integrations/providers/bedrock)을 import하여 LangChain으로 application을 개발할 수 있습니다. 
 
 ```python
 from langchain.llms.bedrock import Bedrock
@@ -63,7 +63,7 @@ Faiss와 OpenSearch 방식의 선택은 [cdk-qa-with-rag-stack.ts](./cdk-qa-with
 
 #### Faiss
 
-[Faiss](https://github.com/facebookresearch/faiss)는 Facebook에서 오픈소스로 제공하는 In-memory vector store로서 embedding과 document들을 저장할 수 있으며, LangChain을 지원합니다. Faiss에서는 FAISS()를 이용하여 아래와 같이 vector store를 정의합니다. 
+[Faiss](https://github.com/facebookresearch/faiss)는 Facebook에서 오픈소스로 제공하는 In-memory vector store로서 embedding과 document들을 저장할 수 있으며, [LangChain을 지원](https://python.langchain.com/docs/integrations/vectorstores/faiss)합니다. Faiss에서는 FAISS()를 이용하여 아래와 같이 vector store를 정의합니다. 
 
 ```python
 from langchain.vectorstores import FAISS
@@ -82,7 +82,7 @@ relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 
 #### OpenSearch
 
-Amazon OpenSearch persistent store로는 vector store를 구성할 수 있습니다. 비슷한 역할을 하는 persistent store로는 RDS Postgres with pgVector, ChromaDB, Pinecone과 Weaviate가 있습니다. 
+[Amazon OpenSearch persistent store로는 vector store](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 구성할 수 있습니다. 비슷한 역할을 하는 persistent store로는 RDS Postgres with pgVector, ChromaDB, Pinecone과 Weaviate가 있습니다. 
 OpenSearch를 사용을 위해 IAM Role에서 아래의 퍼미션을 추가합니다.
 
 
