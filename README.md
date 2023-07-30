@@ -321,9 +321,8 @@ cdk destroy
 
 ## 결론
 
-AWS 서울 리전에서 Amazon Bedrock과 vector store를 이용하여 질문과 답변(Question/Answering)을 수행하는 chatbot을 생성하여 RAG 동작을 구현하였습니다.
+AWS 서울 리전에서 Amazon Bedrock과 vector store를 이용하여 질문과 답변(Question/Answering)을 수행하는 chatbot을 구현하였습니다. Amazon Bedrock은 여러개의 대용량 언어 모델을 선택하여 사용할 수 있습니다. 여기서는 Amazon Titan을 활용하여 RAG 동작을 구현하였고, 대용량 언어 모델의 환각(hallucination)을 해결할 수 있었습니다. 또한 Chatbot 어플리케이션 개발을 위해 LangChain을 활용하였고, IaC(Infrastructure as Code)로 AWS CDK를 이용하였습니다. 대용량 언어 모델은 향후 다양한 어플리케이션에서 효과적으로 활용될것으로 기대됩니다. Amazon Bedrock을 이용하여 대용량 언어 모델을 개발하면 기존 AWS 인프라와 손쉽게 연동하고 다양한 어플리케이션을 효과적으로 개발할 수 있습니다.
 
-Falcon FM 기반의 Chatbot을 생성하여 텍스트에 대한 요청 및 PDF 파일의 요약(Summary)를 수행하였습니다. Falcon FM은 HuggingFace의 [Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)에서 1등 (2023년 7월 기준)을 할 만큼 우수한 성능을 가지고 있고, 상용을 포함한 라이선스에도 자유롭습니다. 또한, Falcon FM은 SageMaker JumpStart에서 편리하게 설치하고 활용할 수 있으며, 이제 AWS 서울 리전에서 EC2 G5와 같은 우수한 인프라를 통해 쉽고 빠르게 개발 및 상용이 가능합니다. LLM (Large Language Models) 기반의 Chatbot은 기존 Rule-based의 Chatbot에 비하여 훨씬 우수한 대화능력을 보여주며, 또한 AWS Lambda, CloudFront, API Gateway, S3와 같은 AWS 인프라를 이용하여 쉽게 구현할 수 있습니다. 근래에 다양하고 성능 좋은 LLM들이 많이 나오고 한글도 일부 지원되고 있어서 향후 다양한 용도로 많은 활용이 기대됩니다.
 
 
 ## Reference 
