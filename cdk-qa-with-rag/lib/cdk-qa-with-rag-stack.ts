@@ -194,7 +194,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
         statements: [BedrockPolicy],
       }),
     );         
-    roleLambda.attachInlinePolicy( // add bedrock policy
+    roleLambda.attachInlinePolicy( // add opensearch policy
       new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
         statements: [OpenSearchPolicy],
       }),
