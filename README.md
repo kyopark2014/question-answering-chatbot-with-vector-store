@@ -305,6 +305,9 @@ result = qa({ "query": query })
 return result['result']
 ```
 
+### AWS CDK로 인프라 구현하기
+
+[CDK 구현 코드](./cdk-qa-with-rag/README.md)에서는 Typescript로 인프라를 정의하는 방법에 대해 상세히 설명하고 있습니다.
 
 ## 직접 실습 해보기
 
@@ -316,7 +319,7 @@ return result['result']
 
 
 ### CDK를 이용한 인프라 설치
-[인프라 설치](https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/blob/main/deployment.md)에 따라 CDK로 인프라 설치를 진행합니다. [CDK 구현 코드](./cdk-qa-with-rag/README.md)에서는 Typescript로 인프라를 정의하는 방법에 대해 상세히 설명하고 있습니다.
+[인프라 설치](https://github.com/kyopark2014/question-answering-chatbot-using-RAG-based-on-LLM/blob/main/deployment.md)에 따라 CDK로 인프라 설치를 진행합니다. 
 
 
 ### 실행결과
