@@ -4,18 +4,18 @@
 
 Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 되지 않은 컨텐츠(unstructured content)를 저장하고 검색할 수 있습니다. 특히 대규모 언어 모델(LLM)의 경우에 embedding을 이용하여 텍스트들의 연관성(sementic meaning)을 벡터(vector)로 표현할 수 있으므로, 연관성 검색(sementic search)을 통해 질문에 가장 가까운 답변을 찾을 수 있습니다. 여기서는 대표적인 In-memory vector store인 [Faiss](https://github.com/facebookresearch/faiss/wiki/Getting-started)와 persistent store이면서 대용량 병렬처리가 가능한 [Amazon OpenSearch](https://medium.com/@pandey.vikesh/rag-ing-success-guide-to-choose-the-right-components-for-your-rag-solution-on-aws-223b9d4c7280)를 이용하여 문서의 내용을 분석하고 연관성 검색(sementic search) 기능을 활용합니다. 이를 통해, 대규모 언어 모델로 질문(question)을 보내면, vector store에서 가장 유사한 문서를 찾아여 답변(answering)에 활용할 수 있습니다. 이와같이 vector store를 사용하면 대규모 언어 모델의 token 사이즈를 넘어서는 긴 문장을 활용하여 질문/답변(Question/Answering)과 같은 Task를 수행할 수 있으며 환각(hallucination) 영향을 줄일 수 있습니다.
 
-전체적인 Architecture는 아래와 같습니다. 사용자가 업로드한 문서는 [Amazon S3](https://aws.amazon.com/ko/s3/)에 저장된 후에, embedding을 통해 vectore store에 저장됩니다. 이후 사용자가 질문을 하면 vector store를 통해 질문에 가장 가까운 문장들을 받아오고 이를 기반으로 prompt를 생성하여 대규모 언어 모델(LLM)에 질문을 요청하게 됩니다. 만약 vector store에서 질문에 가까운 문장이 없다면 대규모 언어 모델(LLM)으로 질문을 전달합니다. 대용량 파일을 S3에 업로드 할 수 있도록 presigned url을 이용하였고, 질문과 답변을 수행한 call log는 [Amazon DynamoDB](https://aws.amazon.com/ko/dynamodb/)에 저장되어 이후 데이터 수집 및 분석에 사용됩니다. 여기서 대용량 언어 모델로 [Bedrock Titan](https://aws.amazon.com/ko/bedrock/titan/)을 이용합니다. Titan 모델은 Amazon에 의해서 대용량 데이터셋으로 사전훈련되었고 강력하고 범용적인 목적을 위해 사용될 수 있습니다. 또한 LangChain을 활용하여 Application을 개발하였고, chatbot을 제공하는 인프라는 AWS CDK를 통해 배포합니다. 
+전체적인 Architecture는 아래와 같습니다. 사용자가 업로드한 문서는 [Amazon S3](https://aws.amazon.com/ko/s3/)에 저장된 후에, embedding을 통해 vectore store에 저장됩니다. 이후 사용자가 질문을 하면 vector store를 통해 질문에 가장 가까운 문장들을 받아오고 이를 기반으로 prompt를 생성하여 대규모 언어 모델(LLM)에 질문을 요청하게 됩니다. 만약 vector store에서 질문에 가까운 문장이 없다면 대규모 언어 모델(LLM)으로 질문을 전달합니다. 대용량 파일을 S3에 업로드 할 수 있도록 [presigned url](https://docs.aws.amazon.com/ko_kr/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)을 이용하였고, 질문과 답변을 수행한 call log는 [Amazon DynamoDB](https://aws.amazon.com/ko/dynamodb/)에 저장되어 이후 데이터 수집 및 분석에 사용됩니다. 여기서 대용량 언어 모델로 [Bedrock Titan](https://aws.amazon.com/ko/bedrock/titan/)을 이용합니다. Titan 모델은 Amazon에 의해서 대용량 데이터셋으로 사전훈련 되었고 강력하고 범용적인 목적을 위해 사용될 수 있습니다. 또한 LangChain을 활용하여 Application을 개발하였고, chatbot을 제공하는 인프라는 AWS CDK를 통해 배포합니다. 
 
 <img src="https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/1c1ea130-43de-497e-9823-c5cf7c875f98" width="800">
 
 
 문서파일을 업로드하여 vector store에 저장하는 과정은 아래와 같습니다.
 
-1) 사용자가 파일 업로드를 요청합니다. 이때 사용하는 '/upload' API는 [lambda (upload)](.lambda-upload/index.js)는 S3 signed url을 생성하여 전달합니다.
-2) 이후 signed url로 문서를 업로드 하면 S3에 Object로 저장됩니다.
-3) '/chat' API에서 request type을 'document'로 지정하면 [lambda (chat)](.lambda-chat/index.js)은 S3에서 object를 로드하여 텍스트를 추출합니다.
+1) 사용자가 파일 업로드를 요청합니다. 이때 사용하는 Upload API는 [lambda (upload)](.lambda-upload/index.js)는 S3 presigned url을 생성하여 전달합니다.
+2) 이후 presigned url로 문서를 업로드 하면 S3에 Object로 저장됩니다.
+3) Chat API에서 request type을 'document'로 지정하면 [lambda (chat)](.lambda-chat/index.js)은 S3에서 object를 로드하여 텍스트를 추출합니다.
 4) Embeding을 통해 단어들을 vector화 합니다.
-5) Vector store에 저장합니다. 이때 RAG의 type이 "faiss"이면 in-memory로 저장하고, "opensearch"이면 Amazon OpenSearch에 저장합니다.
+5) Vector store에 저장합니다. 이때 RAG의 type이 "faiss"이면 in-memory store인 Faiss로 저장하고, "opensearch"이면 Amazon OpenSearch로 저장합니다.
 
 채팅 창에서 텍스트 입력(Prompt)를 통해 RAG를 활용하는 과정은 아래와 같습니다.
 1) 사용자가 채팅창에서 질문(Question)을 입력합니다.
