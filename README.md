@@ -20,6 +20,8 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 5) Vector store에 문서를 저장합니다. 이때 RAG의 type이 "faiss"이면 in-memory store인 Faiss로 저장하고, "opensearch"이면 Amazon OpenSearch로 저장합니다.
 6) 채팅창에 업로드한 문서의 요약(Summerization)을 보여지기 위해 summerization을 수행하고 그 결과를 사용자에게 전달합니다.
 
+아래는 문서 업로드시의 sequence diagram입니다. 
+
 <img src="./sequence/seq-upload.png" width="600">
 
 채팅 창에서 텍스트 입력(Prompt)를 통해 RAG를 활용하는 과정은 아래와 같습니다.
@@ -27,6 +29,8 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 2) 이것은 Chat API를 이용하여 [lambda (chat)](./lambda-chat/lambda_function.py)에 전달됩니다.
 3) lambda(chat)은 질문을 Embedding후에 vector store에 관련된 문장이 있는지 확인합니다.
 4) Vector store가 관련된 문장을 전달하면 prompt template를 이용하여 LLM에 질문을 전달합니다. 이후 답변을 받으면 사용자에게 결과를 전달합니다.
+
+아래는 vectore store를 이용한 메시지 동작을 설명하는 sequence diagram입니다. 
 
 <img src="./sequence/seq-chat.png" width="600">
 
