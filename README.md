@@ -50,7 +50,7 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 
 ### Embedding
 
-BedrockEmbeddings을 이용하여 Embedding을 합니다.
+[BedrockEmbeddings](https://python.langchain.com/docs/integrations/text_embedding/bedrock)을 이용하여 Embedding을 합니다.
 
 ```python
 from langchain.embeddings import BedrockEmbeddings
