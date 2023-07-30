@@ -169,7 +169,7 @@ relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 
 #### OpenSearch
 
-[Amazon OpenSearch persistent store로는 vector store](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 구성할 수 있습니다. 비슷한 역할을 하는 persistent store로는 RDS Postgres with pgVector, ChromaDB, Pinecone과 Weaviate가 있습니다. 
+[Amazon OpenSearch persistent store로는 vector store](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 구성할 수 있습니다. 비슷한 역할을 하는 persistent store로는 [RDS Postgres with pgVector](https://aws.amazon.com/about-aws/whats-new/2023/05/amazon-rds-postgresql-pgvector-ml-model-integration/), ChromaDB, Pinecone과 Weaviate가 있습니다. 
 
 OpenSearch를 사용을 위해서는 IAM Role에서 아래의 퍼미션을 추가합니다.
 
