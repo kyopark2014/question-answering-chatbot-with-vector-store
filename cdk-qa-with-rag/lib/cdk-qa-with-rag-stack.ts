@@ -140,7 +140,8 @@ export class CdkQaWithRagStack extends cdk.Stack {
       accessPolicies: [OpenSearchAccessPolicy],      
       ebs: {
         volumeSize: 100,
-        volumeType: ec2.EbsDeviceVolumeType.GENERAL_PURPOSE_SSD,
+        // volumeType: ec2.EbsDeviceVolumeType.GENERAL_PURPOSE_SSD,
+        volumeType: ec2.EbsDeviceVolumeType.IO2
       },
       nodeToNodeEncryption: true,
       encryptionAtRest: {
