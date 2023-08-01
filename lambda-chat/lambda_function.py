@@ -177,40 +177,38 @@ def get_answer_using_template(query, vectorstore, rag_type):
         print('---')
     
     print('length of relevant_documents: ', len(relevant_documents))
-    if(len(relevant_documents)==0):
-        return llm(query)
-    else:
-        prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
-        {context}
+    {context}
 
-        Question: {question}
-        Assistant:"""
-        PROMPT = PromptTemplate(
-            template=prompt_template, input_variables=["context", "question"]
-        )
+    Question: {question}
+    Assistant:"""
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
 
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=vectorstore.as_retriever(
-                search_type="similarity", search_kwargs={"k": 3}
-            ),
-            return_source_documents=True,
-            chain_type_kwargs={"prompt": PROMPT}
-        )
-        result = qa({"query": query})
+    qa = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ),
+        return_source_documents=True,
+        chain_type_kwargs={"prompt": PROMPT}
+    )
+    result = qa({"query": query})
         
-        source_documents = result['source_documents']
-        print('source_documents: ', source_documents)
+    source_documents = result['source_documents']
+    print('source_documents: ', source_documents)
 
-        reference = get_reference(source_documents)
-        print('reference: ', reference)
+    reference = get_reference(source_documents)
+    print('reference: ', reference)
 
-        return result['result']+reference
+    return result['result']+reference
 
 def get_reference(docs):
-    reference = "From\n"
+    reference = "\nFrom\n"
     for doc in docs:
         name = doc.metadata['name']
         page = doc.metadata['page']
