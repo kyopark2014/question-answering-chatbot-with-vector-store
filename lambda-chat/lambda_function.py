@@ -199,9 +199,21 @@ def get_answer_using_template(query, vectorstore, rag_type):
         result = qa({"query": query})
         
         source_documents = result['source_documents']
-        print(source_documents)
+        print('source_documents: ', source_documents)
 
-        return result['result']
+        reference = get_reference(source_documents)
+        print('reference: ', reference)
+
+        return result['result']+reference
+
+def get_reference(docs):
+    reference = "From\n"
+    for doc in docs:
+        name = doc.metadata['name']
+        page = doc.metadata['page']
+    
+        reference = reference + (str(page)+'page in '+name+'\n')
+    return reference
         
 def lambda_handler(event, context):
     print(event)
