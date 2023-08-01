@@ -220,6 +220,8 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
+    global modelId, llm, enableRAGForFaiss
+    
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
             # index_name = "rag-index-*", // all
@@ -231,8 +233,6 @@ def lambda_handler(event, context):
         )
     elif rag_type == 'faiss':
         print('enableRAGForFaiss = ', enableRAGForFaiss)
-
-    global modelId, llm, enableRAGForFaiss
     
     modelId = load_configuration(userId)
     if(modelId==""): 
