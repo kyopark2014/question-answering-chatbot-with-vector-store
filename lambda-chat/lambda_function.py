@@ -325,7 +325,7 @@ def lambda_handler(event, context):
                     is_aoss = False,
                     embedding_function = bedrock_embeddings,
                     opensearch_url = opensearch_url,
-                    http_auth = ("admin", "Wifi1234!"),
+                    http_auth=(opensearch_account, opensearch_passwd),
                 )
                 new_vectorstore.add_documents(docs)     
 
