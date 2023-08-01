@@ -220,7 +220,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, enableRAGForFaiss
+    global modelId, llm, vectorstore, enableRAGForFaiss
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
