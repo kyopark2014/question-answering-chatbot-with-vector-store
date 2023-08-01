@@ -46,6 +46,7 @@ opensearch_account = os.environ.get('opensearch_account')
 opensearch_passwd = os.environ.get('opensearch_passwd')
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
+enableRAGForFaiss = False   
 
 def save_configuration(userId, modelId):
     item = {
@@ -80,37 +81,6 @@ def load_configuration(userId):
         save_configuration(userId, modelId)
 
         return modelId
-
-# Bedrock Contiguration
-bedrock_region = bedrock_region
-bedrock_config = {
-    "region_name":bedrock_region,
-    "endpoint_url":endpoint_url
-}
-    
-# supported llm list from bedrock
-boto3_bedrock = bedrock.get_bedrock_client(
-    region=bedrock_config["region_name"],
-    url_override=bedrock_config["endpoint_url"])
-    
-modelInfo = boto3_bedrock.list_foundation_models()    
-print('models: ', modelInfo)
-
-llm = Bedrock(model_id=modelId, client=boto3_bedrock)
-
-# embedding
-bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
-
-if rag_type == 'opensearch':
-    vectorstore = OpenSearchVectorSearch(
-        index_name = "rag-index-*",
-        is_aoss = False,
-        embedding_function = bedrock_embeddings,
-        opensearch_url=opensearch_url,
-        http_auth=(opensearch_account, opensearch_passwd),
-    )
-
-enableRAGForFaiss = False    
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -215,7 +185,27 @@ def get_reference(docs):
     
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
-        
+
+# Bedrock Contiguration
+bedrock_region = bedrock_region
+bedrock_config = {
+    "region_name":bedrock_region,
+    "endpoint_url":endpoint_url
+}
+    
+# supported llm list from bedrock
+boto3_bedrock = bedrock.get_bedrock_client(
+    region=bedrock_config["region_name"],
+    url_override=bedrock_config["endpoint_url"])
+    
+modelInfo = boto3_bedrock.list_foundation_models()    
+print('models: ', modelInfo)
+
+llm = Bedrock(model_id=modelId, client=boto3_bedrock)
+
+# embedding
+bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+
 def lambda_handler(event, context):
     print(event)
     userId  = event['user-id']
@@ -227,7 +217,17 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, enableRAGForFaiss
+    if rag_type == 'opensearch':
+        vectorstore = OpenSearchVectorSearch(
+            # index_name = "rag-index-*", // all
+            index_name = 'rag-index-'+userId+'-*',
+            is_aoss = False,
+            embedding_function = bedrock_embeddings,
+            opensearch_url=opensearch_url,
+            http_auth=(opensearch_account, opensearch_passwd),
+        )
+
+    global modelId, llm, enableRAGForFaiss
     
     modelId = load_configuration(userId)
     if(modelId==""): 
@@ -312,7 +312,7 @@ def lambda_handler(event, context):
 
             elif rag_type == 'opensearch':    
                 new_vectorstore = OpenSearchVectorSearch(
-                    index_name="rag-index-"+userId,
+                    index_name="rag-index-"+userId+'-'+requestId,
                     is_aoss = False,
                     embedding_function = bedrock_embeddings,
                     opensearch_url = opensearch_url,
