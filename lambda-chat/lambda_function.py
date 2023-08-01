@@ -309,11 +309,15 @@ def lambda_handler(event, context):
             print('docs size: ', len(docs))
                         
             if rag_type == 'faiss':
-                if enableRAGForFaiss == False:                                        
+                if enableRAGForFaiss == False:   
+                    vectorstore = FAISS.from_documents( # create vectorstore from a document
+                        docs,  # documents
+                        bedrock_embeddings  # embeddings
+                    )
                     enableRAGForFaiss = True                    
-                
-                vectorstore.add_documents(docs)
-                print('vector store size: ', len(vectorstore.docstore._dict))
+                else:
+                    vectorstore.add_documents(docs)
+                    print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':    
                 new_vectorstore = OpenSearchVectorSearch(
