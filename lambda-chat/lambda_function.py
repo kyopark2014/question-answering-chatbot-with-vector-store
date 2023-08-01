@@ -109,8 +109,6 @@ vectorstore = OpenSearchVectorSearch(
     http_auth=(opensearch_account, opensearch_passwd),
 )
 
-enableRAG = False
-
 # load documents from s3
 def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")
@@ -162,7 +160,7 @@ def get_answer_using_query(query, vectorstore, rag_type):
 
     return answer
 
-def get_answer_using_template(query, vectorstore, rag_type):
+def get_answer_using_template(query, vectorstore, rag_type):    
     if rag_type == 'faiss':
         query_embedding = vectorstore.embedding_function(query)
         relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
@@ -174,32 +172,36 @@ def get_answer_using_template(query, vectorstore, rag_type):
     for i, rel_doc in enumerate(relevant_documents):
         print_ww(f'## Document {i+1}: {rel_doc.page_content}.......')
         print('---')
-
-    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-    {context}
-
-    Question: {question}
-    Assistant:"""
-    PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
-
-    qa = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 3}
-        ),
-        return_source_documents=True,
-        chain_type_kwargs={"prompt": PROMPT}
-    )
-    result = qa({"query": query})
     
-    source_documents = result['source_documents']
-    print(source_documents)
+    print('length of relevant_documents: ', len(relevant_documents))
+    if(len(relevant_documents)==0):
+        return llm(query)
+    else:
+        prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
-    return result['result']
+        {context}
+
+        Question: {question}
+        Assistant:"""
+        PROMPT = PromptTemplate(
+            template=prompt_template, input_variables=["context", "question"]
+        )
+
+        qa = RetrievalQA.from_chain_type(
+            llm=llm,
+            chain_type="stuff",
+            retriever=vectorstore.as_retriever(
+                search_type="similarity", search_kwargs={"k": 3}
+            ),
+            return_source_documents=True,
+            chain_type_kwargs={"prompt": PROMPT}
+        )
+        result = qa({"query": query})
+        
+        source_documents = result['source_documents']
+        print(source_documents)
+
+        return result['result']
         
 def lambda_handler(event, context):
     print(event)
@@ -212,7 +214,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, enableRAG, rag_type
+    global modelId, llm, vectorstore, rag_type
     
     modelId = load_configuration(userId)
     if(modelId==""): 
@@ -257,13 +259,9 @@ def lambda_handler(event, context):
 
     else:             
         if type == 'text':
-            print('enableRAG: ', enableRAG)
             text = body
-            if enableRAG==False:                
-                msg = llm(text)
-            else:
-                msg = get_answer_using_query(text, vectorstore, rag_type)
-                print('msg1: ', msg)
+            msg = get_answer_using_template(text)
+            print('msg: ', msg)
             
         elif type == 'document':
             object = body
