@@ -205,7 +205,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       description: 'lambda for chat api',
       functionName: `lambda-chat-api-for-${projectName}`,
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '../../lambda-chat')),
-      timeout: cdk.Duration.seconds(60),
+      timeout: cdk.Duration.seconds(600),
       memorySize: 4096,
       role: roleLambda,
       environment: {
@@ -308,7 +308,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       functionName: `lambda-upload-for-${projectName}`,
       code: lambda.Code.fromAsset("../lambda-upload"), 
       handler: "index.handler", 
-      timeout: cdk.Duration.seconds(10),
+      timeout: cdk.Duration.seconds(60),
       logRetention: logs.RetentionDays.ONE_DAY,
       environment: {
         bucketName: s3Bucket.bucketName,
