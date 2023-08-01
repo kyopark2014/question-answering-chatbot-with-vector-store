@@ -176,6 +176,11 @@ vectorstore = FAISS.from_documents( # create vectorstore from a document
 relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 ```
 
+문서를 추가할 경우에 아래와 같이 vector store에 추가합니다.
+
+```python
+vectorstore.add_documents(docs)
+```
 
 #### OpenSearch
 
@@ -242,23 +247,37 @@ const OpenSearchAccessPolicy = new iam.PolicyStatement({
 });
 ```
   
-[OpenSearchVectorSearch()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)로 아래와 같이 vector store를 정의합니다. 
+문서를 vector store인 OpenSearch에 저장할때에는 아래와 같이 [OpenSearchVectorSearch()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 이용하여 vector store를 지정하고 문서를 추가합니다. 이때 index_name은 OpenSearch에 저장된 vector들을 검색할때 유용합니다. 여기서는 OpenSearch에 저장할때 "rag-index-[userId]-[requestId]" 형식으로 저장합니다. 이렇게 함으로써 문서를 올린 사람의 데이터만 검색할 수 있습니다. "is_aoss"는 serverless 버번의 OpenSearch를 지정합니다. 
 
 ```python
 from langchain.vectorstores import OpenSearchVectorSearch
 
-vectorstore = OpenSearchVectorSearch.from_documents(
-    docs,
-    bedrock_embeddings,
-    opensearch_url = endpoint_url,
-    http_auth = ("admin", "password"),
+new_vectorstore = OpenSearchVectorSearch(
+    index_name = "rag-index-" + userId + '-' + requestId,
+    is_aoss = False,
+    embedding_function = bedrock_embeddings,
+    opensearch_url = opensearch_url,
+    http_auth=(opensearch_account, opensearch_passwd),
 )
+new_vectorstore.add_documents(docs) 
 ```
 
 아래와 같이 OpenSearch는 [vector store로 부터 similarity_search()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 이용하여 관련된 문서를 조회할 수 있습니다.
 
 ```python
 relevant_documents = vectorstore.similarity_search(query)
+```
+
+또한, 텍스트를 질문(Qeustion)이 들어오면 OpenSearch에서 해당 사용자가 올린 문서를 가져올 수 있도록 아래와 같이 vector store를 정의합니다.
+
+```python
+vectorstore = OpenSearchVectorSearch(
+    index_name = 'rag-index-'+userId+'-*',
+    is_aoss = False,
+    embedding_function = bedrock_embeddings,
+    opensearch_url=opensearch_url,
+    http_auth=(opensearch_account, opensearch_passwd),
+)
 ```
 
 ### Question/Answering
