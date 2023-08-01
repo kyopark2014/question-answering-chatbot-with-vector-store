@@ -101,13 +101,16 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 # embedding
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
-vectorstore = OpenSearchVectorSearch(
-    index_name = "rag-index-*",
-    is_aoss = False,
-    embedding_function = bedrock_embeddings,
-    opensearch_url=opensearch_url,
-    http_auth=(opensearch_account, opensearch_passwd),
-)
+if rag_type == 'opensearch':
+    vectorstore = OpenSearchVectorSearch(
+        index_name = "rag-index-*",
+        is_aoss = False,
+        embedding_function = bedrock_embeddings,
+        opensearch_url=opensearch_url,
+        http_auth=(opensearch_account, opensearch_passwd),
+    )
+
+enableRAGForFaiss = False    
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -226,7 +229,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore
+    global modelId, llm, vectorstore, enableRAGForFaiss
     
     modelId = load_configuration(userId)
     if(modelId==""): 
@@ -272,7 +275,11 @@ def lambda_handler(event, context):
     else:             
         if type == 'text':
             text = body
-            msg = get_answer_using_template(text, vectorstore, rag_type)
+
+            if rag_type == 'faiss' and enableRAGForFaiss == False: 
+                llm(text)
+            else: 
+                msg = get_answer_using_template(text, vectorstore, rag_type)
             print('msg: ', msg)
             
         elif type == 'document':
@@ -299,19 +306,11 @@ def lambda_handler(event, context):
             print('docs size: ', len(docs))
                         
             if rag_type == 'faiss':
-                if enableRAG == False:                    
-                    vectorstore = FAISS.from_documents( # create vectorstore from a document
-                        docs,  # documents
-                        bedrock_embeddings  # embeddings
-                    )
-                    enableRAG = True                    
-                else:                             
-                    vectorstore_new = FAISS.from_documents( # create new vectorstore from a document
-                        docs,  # documents
-                        bedrock_embeddings,  # embeddings
-                    )                               
-                    vectorstore.merge_from(vectorstore_new) # merge 
-                    print('vector store size: ', len(vectorstore.docstore._dict))
+                if enableRAGForFaiss == False:                                        
+                    enableRAGForFaiss = True                    
+                
+                vectorstore.add_documents(docs)
+                print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':    
                 new_vectorstore = OpenSearchVectorSearch(
@@ -329,9 +328,7 @@ def lambda_handler(event, context):
                 #    opensearch_url=opensearch_url,
                 #    http_auth=(opensearch_account, opensearch_passwd),
                 #)
-                if enableRAG==False: 
-                    enableRAG = True
-                    
+
             # summerization to show the document
             prompt_template = """Write a concise summary of the following:
 
