@@ -214,7 +214,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, rag_type
+    global modelId, llm, vectorstore
     
     modelId = load_configuration(userId)
     if(modelId==""): 
@@ -260,7 +260,7 @@ def lambda_handler(event, context):
     else:             
         if type == 'text':
             text = body
-            msg = get_answer_using_template(text)
+            msg = get_answer_using_template(text, vectorstore, rag_type)
             print('msg: ', msg)
             
         elif type == 'document':
