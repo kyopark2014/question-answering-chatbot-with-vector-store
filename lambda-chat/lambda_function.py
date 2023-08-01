@@ -172,13 +172,16 @@ def get_answer_using_template(query, vectorstore, rag_type):
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
-    reference = get_reference(source_documents)
-    print('reference: ', reference)
+    if len(relevant_documents)>=1:
+        reference = get_reference(source_documents)
+        print('reference: ', reference)
 
-    return result['result']+reference
+        return result['result']+reference
+    else:
+        return result['result']
 
 def get_reference(docs):
-    reference = "\nFrom\n"
+    reference = "\n\nFrom\n"
     for doc in docs:
         name = doc.metadata['name']
         page = doc.metadata['page']
@@ -226,6 +229,8 @@ def lambda_handler(event, context):
             opensearch_url=opensearch_url,
             http_auth=(opensearch_account, opensearch_passwd),
         )
+    elif rag_type == 'faiss':
+        print('enableRAGForFaiss = ', enableRAGForFaiss)
 
     global modelId, llm, enableRAGForFaiss
     
@@ -275,7 +280,7 @@ def lambda_handler(event, context):
             text = body
 
             if rag_type == 'faiss' and enableRAGForFaiss == False: 
-                llm(text)
+                msg = llm(text)
             else: 
                 msg = get_answer_using_template(text, vectorstore, rag_type)
             print('msg: ', msg)

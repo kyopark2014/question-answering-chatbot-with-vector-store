@@ -191,7 +191,7 @@ attachFile.addEventListener('click', function(){
                 contentType = 'text/csv'
             }
 
-            addSentMessageForSummary("uploading the selected pdf in order to summerize...");
+            addSentMessageForSummary("uploading the selected document in order to summerize...");
 
             const uri = "upload";
             const xhr = new XMLHttpRequest();
