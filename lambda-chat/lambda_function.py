@@ -174,7 +174,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
 
     if len(relevant_documents)>=1:
         reference = get_reference(source_documents)
-        print('reference: ', reference)
+        #print('reference: ', reference)
 
         return result['result']+reference
     else:
@@ -290,7 +290,7 @@ def lambda_handler(event, context):
                 msg = llm(text)
             else: 
                 msg = get_answer_using_template(text, vectorstore, rag_type)
-            print('msg: ', msg)
+            #print('msg: ', msg)
             
         elif type == 'document':
             object = body
@@ -321,7 +321,7 @@ def lambda_handler(event, context):
                         docs,  # documents
                         bedrock_embeddings  # embeddings
                     )
-                    enableRAGForFaiss = True                    
+                    enableRAGForFaiss = True
                 else:
                     vectorstore.add_documents(docs)
                     print('vector store size: ', len(vectorstore.docstore._dict))
@@ -350,7 +350,6 @@ def lambda_handler(event, context):
                 
             CONCISE SUMMARY """
 
-            print('template: ', prompt_template)
             PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
             chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
             summary = chain.run(docs)
