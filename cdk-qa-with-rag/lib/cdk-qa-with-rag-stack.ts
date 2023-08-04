@@ -357,7 +357,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
         tableName: callLogTableName
       }      
     });
-    s3Bucket.grantReadWrite(lambdaQueryResult);
+    callLogDataTable.grantReadWriteData(lambdaQueryResult); // permission for dynamo
     
     // POST method - query
     const query = api.root.addResource("query");
