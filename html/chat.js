@@ -236,10 +236,6 @@ attachFile.addEventListener('click', function(){
                             console.log('status' + xmlHttp.status);
                             alert("Try again! The request was failed.");                            
                         }
-                        else if(xmlHttp.readyState == XMLHttpRequest.DONE) {
-                            console.log('status' + xmlHttp.status);
-                            alert("load data again.");
-                        }
                     };
         
                     xmlHttp.send(blob); 
@@ -328,9 +324,9 @@ function sendRequestForRetry(userId, requestId) {
         if (xhr.readyState === 4 && xhr.status === 200) {
             response = JSON.parse(xhr.responseText);
             console.log("response: " + JSON.stringify(response));
-            
-            isResponsed = true;
+                        
             if(response.msg) {
+                isResponsed = true;
                 addReceivedMessage(response.msg)                
             }            
         }
