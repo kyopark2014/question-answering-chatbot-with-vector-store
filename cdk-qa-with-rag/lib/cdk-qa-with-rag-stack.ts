@@ -337,18 +337,54 @@ export class CdkQaWithRagStack extends cdk.Stack {
         }
       ]
     }); 
-    if(debug) {
-      new cdk.CfnOutput(this, `ApiGatewayUrl-for-${projectName}`, {
-        value: api.url+'upload',
-        description: 'The url of API Gateway',
-      }); 
-    }
 
     // cloudfront setting for api gateway    
     distribution.addBehavior("/upload", new origins.RestApiOrigin(api), {
       cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
       allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,  
       viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-    });    
+    });
+    
+    // Lambda - queryResult
+    const lambdaQueryResult = new lambda.Function(this, `lambda-query-for-${projectName}`, {
+      runtime: lambda.Runtime.NODEJS_16_X, 
+      functionName: `lambda-query-for-${projectName}`,
+      code: lambda.Code.fromAsset("../lambda-query"), 
+      handler: "index.handler", 
+      timeout: cdk.Duration.seconds(60),
+      logRetention: logs.RetentionDays.ONE_DAY,
+      environment: {
+        bucketName: s3Bucket.bucketName,
+        s3_prefix:  s3_prefix
+      }      
+    });
+    s3Bucket.grantReadWrite(lambdaQueryResult);
+    
+    // POST method - query
+    const query = api.root.addResource("query");
+    query.addMethod('POST', new apiGateway.LambdaIntegration(lambdaQueryResult, {
+      passthroughBehavior: apiGateway.PassthroughBehavior.WHEN_NO_TEMPLATES,
+      credentialsRole: role,
+      integrationResponses: [{
+        statusCode: '200',
+      }], 
+      proxy:false, 
+    }), {
+      methodResponses: [  
+        {
+          statusCode: '200',
+          responseModels: {
+            'application/json': apiGateway.Model.EMPTY_MODEL,
+          }, 
+        }
+      ]
+    }); 
+
+    // cloudfront setting for api gateway    
+    distribution.addBehavior("/query", new origins.RestApiOrigin(api), {
+      cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
+      allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,  
+      viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+    });
   }
 }

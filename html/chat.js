@@ -43,6 +43,8 @@ var msgHistory = new HashMap();
 var callee = "John";
 var index=0;
 var userId = uuidv4();
+var isResponsed = true;
+var requestId;
 
 for (i=0;i<maxMsgItems;i++) {
     msglist.push(document.getElementById('msgLog'+i));
@@ -54,6 +56,10 @@ for (i=0;i<maxMsgItems;i++) {
             else i = index + maxMsgItems;
 
             console.log('click! index: '+index);
+
+            console.log('isResponsed: '+isResponsed);
+            console.log('requestId: ', requestId);  
+            console.log('userId: ', userId);  
         })
     })(i);
 }
@@ -219,11 +225,18 @@ attachFile.addEventListener('click', function(){
                             console.log(xmlHttp.responseText);
                                            
                             // summary for the upload file
-                            sendRequestForSummary(filename);
+                            isResponsed = false;       
+                            console.log('requestId: ', requestId);                     
+                            sendRequestForSummary(filename);                            
                         }
                         else if(xmlHttp.readyState == XMLHttpRequest.DONE && xmlHttp.status != 200) {
                             console.log('status' + xmlHttp.status);
                             alert("Try again! The request was failed.");
+                            
+                        }
+                        else if(xmlHttp.readyState == XMLHttpRequest.DONE) {
+                            console.log('status' + xmlHttp.status);
+                            alert("load data again.");
                         }
                     };
         
@@ -260,7 +273,7 @@ function sendRequest(text) {
             addReceivedMessage(response.msg)
         }
     };
-
+    
     var requestObj = {
         "user-id": userId,
         "request-id": uuidv4(),
@@ -285,12 +298,15 @@ function sendRequestForSummary(object) {
             console.log("response: " + JSON.stringify(response));
             
             addReceivedMessage(response.msg)
+            isResponsed = true;
         }
     };
 
+    requestId = uuidv4()
+    console.log('requestId: ', requestId)
     var requestObj = {
         "user-id": userId,
-        "request-id": uuidv4(),
+        "request-id": requestId,
         "type": "document",
         "body": object
     }
