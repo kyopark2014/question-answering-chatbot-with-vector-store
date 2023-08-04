@@ -344,6 +344,11 @@ def lambda_handler(event, context):
                 #)
 
             # summerization to show the document
+            docs = [
+                Document(
+                    page_content=t
+                ) for t in texts[:3]
+            ]
             prompt_template = """Write a concise summary of the following:
 
             {text}
