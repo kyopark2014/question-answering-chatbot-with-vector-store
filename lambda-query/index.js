@@ -1,6 +1,6 @@
 const aws = require('aws-sdk');
 
-const dynamo = new aws.DynamoDB.DocumentClient();
+var dynamo = new aws.DynamoDB();
 const tableName = process.env.tableName;
 
 exports.handler = async (event, context) => {
@@ -18,8 +18,8 @@ exports.handler = async (event, context) => {
             }, 
             TableName: tableName
         };
-        var result = await dynamodb.getItem(params).promise()
-        console.log(JSON.stringify(result))
+        var result = await dynamo.getItem(params).promise();
+        console.log(JSON.stringify(result));
     } catch (error) {
         console.error(error);
     }

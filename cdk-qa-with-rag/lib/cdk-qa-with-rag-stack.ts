@@ -354,8 +354,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(60),
       logRetention: logs.RetentionDays.ONE_DAY,
       environment: {
-        bucketName: s3Bucket.bucketName,
-        s3_prefix:  s3_prefix
+        tableName: callLogTableName
       }      
     });
     s3Bucket.grantReadWrite(lambdaQueryResult);
