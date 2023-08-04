@@ -60,6 +60,10 @@ for (i=0;i<maxMsgItems;i++) {
             console.log('isResponsed: '+isResponsed);
             console.log('requestId: ', requestId);  
             console.log('userId: ', userId);  
+
+            if(!isResponsed) {
+                sendRequestForRetry(userId, requestId);
+            }
         })
     })(i);
 }
@@ -226,13 +230,11 @@ attachFile.addEventListener('click', function(){
                                            
                             // summary for the upload file
                             isResponsed = false;       
-                            console.log('requestId: ', requestId);                     
                             sendRequestForSummary(filename);                            
                         }
                         else if(xmlHttp.readyState == XMLHttpRequest.DONE && xmlHttp.status != 200) {
                             console.log('status' + xmlHttp.status);
-                            alert("Try again! The request was failed.");
-                            
+                            alert("Try again! The request was failed.");                            
                         }
                         else if(xmlHttp.readyState == XMLHttpRequest.DONE) {
                             console.log('status' + xmlHttp.status);
@@ -309,6 +311,31 @@ function sendRequestForSummary(object) {
         "request-id": requestId,
         "type": "document",
         "body": object
+    }
+    console.log("request: " + JSON.stringify(requestObj));
+
+    var blob = new Blob([JSON.stringify(requestObj)], {type: 'application/json'});
+
+    xhr.send(blob);            
+}
+
+function sendRequestForRetry(userId, requestId) {
+    const uri = "query";
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", uri, true);
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            response = JSON.parse(xhr.responseText);
+            console.log("response: " + JSON.stringify(response));
+            
+            addReceivedMessage(response.msg)
+        }
+    };
+    
+    var requestObj = {
+        "user-id": userId,
+        "request-id": requestId,
     }
     console.log("request: " + JSON.stringify(requestObj));
 
