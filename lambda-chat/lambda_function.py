@@ -103,13 +103,13 @@ def load_document(file_type, s3_file_name):
         reader = csv.reader(body)        
         contents = CSVLoader(reader)
     
-    print('contents: ', contents)
+    #print('contents: ', contents)
     new_contents = str(contents).replace("\n"," ") 
     print('length: ', len(new_contents))
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
     texts = text_splitter.split_text(new_contents) 
-    print('texts[0]: ', texts[0])
+    #print('texts[0]: ', texts[0])
             
     return texts
               
