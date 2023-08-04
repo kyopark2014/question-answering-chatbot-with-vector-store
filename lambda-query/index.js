@@ -10,23 +10,29 @@ exports.handler = async (event, context) => {
     const userId = event['user-id'];
     const requestId = event['request-id'];
 
+    let msg = "";
     try {
+        const key = {
+            "user-id": {"S": userId}, 
+            "request-id": {"S": requestId}
+        };
+        console.log("key: ", key);
+
         var params = {
-            Key: {
-                "user-id": {"S": userId}, 
-                "request-id": {"S": requestId}
-            }, 
+            Key: key, 
             TableName: tableName
         };
         var result = await dynamo.getItem(params).promise();
         console.log(JSON.stringify(result));
+
+        msg = result['Item']['msg']['S'];
     } catch (error) {
         console.error(error);
     }
 
     const response = {
         statusCode: 200,
-        msg: "message"
+        msg: msg
     };
     return response;
 };

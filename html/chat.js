@@ -329,7 +329,10 @@ function sendRequestForRetry(userId, requestId) {
             response = JSON.parse(xhr.responseText);
             console.log("response: " + JSON.stringify(response));
             
-            addReceivedMessage(response.msg)
+            isResponsed = true;
+            if(response.msg) {
+                addReceivedMessage(response.msg)                
+            }            
         }
     };
     
