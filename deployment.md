@@ -38,22 +38,20 @@ cd question-answering-chatbot-with-vector-store/cdk-qa-with-rag/ && npm install
 
 6) bedrock-sdk를 설치합니다.
 
-```java
-cd ../lambda-chat &&
-wget https://db3lw8u6vdvwu.cloudfront.net/bedrock/bedrock-python-sdk.zip
-
-unzip bedrock-python-sdk.zip -d bedrock-sdk 
-python3 -m pip install -U ./bedrock-sdk/botocore-1.31.21-py3-none-any.whl --use-feature=2020-resolver
-python3 -m pip install -U ./bedrock-sdk/boto3-1.28.21-py3-none-any.whl -t .
-python3 -m pip install -U ./bedrock-sdk/awscli-1.29.21-py3-none-any.whl -t .
+```text
+cd ../lambda-chat && wget https://db3lw8u6vdvwu.cloudfront.net/bedrock/bedrock-python-sdk.zip &&
+unzip bedrock-python-sdk.zip -d bedrock-sdk &&
+python3 -m pip install -U ./bedrock-sdk/boto3-1.26.162-py3-none-any.whl -t . --use-feature=2020-resolver &&
+python3 -m pip install -U ./bedrock-sdk/awscli-1.27.162-py3-none-any.whl -t . &&
 cd ../cdk-qa-with-rag/
 ```
-old
 
-```java
-cd ../lambda-chat && wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
-unzip bedrock-python-sdk.zip -d bedrock-sdk && python3 -m pip install -U ./bedrock-sdk/boto3-1.26.162-py3-none-any.whl -t . && python3 -m pip install -U ./bedrock-sdk/awscli-1.27.162-py3-none-any.whl -t . && cd ../cdk-qa-with-rag/
+필요시, preview doc에서 bedrock-python-sdk.zip을 다운로드하여 사용할수 있는데 현재(Aug.6 2023)에 버전이 잘 안맞는지 동작을 잘 안하므로 기존 파일을 사용합니다.
+
+```text
+wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
 ```
+
 
 6) CDK 사용을 위해 Boostraping을 수행합니다.
 
