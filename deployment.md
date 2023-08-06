@@ -40,6 +40,13 @@ cd question-answering-chatbot-with-vector-store/cdk-qa-with-rag/ && npm install
 
 ```java
 cd ../lambda-chat && wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
+unzip bedrock-python-sdk.zip -d bedrock-sdk && python3 -m pip install -U ./bedrock-sdk/boto3-1.28.21-py3-none-any.whl -t . && python3 -m pip install -U ./bedrock-sdk/awscli-1.29.21-py3-none-any.whl -t . && cd ../cdk-qa-with-rag/
+```
+
+old
+
+```java
+cd ../lambda-chat && wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
 unzip bedrock-python-sdk.zip -d bedrock-sdk && python3 -m pip install -U ./bedrock-sdk/boto3-1.26.162-py3-none-any.whl -t . && python3 -m pip install -U ./bedrock-sdk/awscli-1.27.162-py3-none-any.whl -t . && cd ../cdk-qa-with-rag/
 ```
 
