@@ -38,7 +38,7 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 
 ### Bedrock을 LangChain으로 연결
 
-현재(2023년 7월) Bedrock은 Preview 상태이므로, Bedrock 사용을 위해서는 AWS를 통해 사용권한을 획득하여야 합니다. 사용 권한 받으면 특정 region의 endpoint를 사용할 수 있도록 허용하는데, 아래와 같이 bedrock client에서 관련 정보를 설정할 수 있습니다. 이후 [Bedrock](https://python.langchain.com/docs/integrations/providers/bedrock)을 import하여 LangChain로 application을 개발할 수 있습니다. 
+현재(2023년 7월) Bedrock은 Preview 상태이므로, Bedrock 사용을 위해서는 AWS를 통해 사용권한을 획득하여야 합니다. 사용 권한 받으면 특정 region의 endpoint를 사용할 수 있도록 허용하는데, 아래와 같이 bedrock client에서 관련 정보를 설정할 수 있습니다. 이후 [Bedrock](https://python.langchain.com/docs/integrations/providers/bedrock)을 import하여 LangChain로 application을 개발할 수 있습니다. 현재 bedrock은 aws의 internal 사용자와 preview 사용자의 endpoint url이 다르므로 아래와 같이 설정합니다.
 
 ```python
 from langchain.llms.bedrock import Bedrock
@@ -49,9 +49,13 @@ bedrock_config = {
     "endpoint_url":"https://prod.us-west-2.frontend.bedrock.aws.dev"
 }
     
-boto3_bedrock = bedrock.get_bedrock_client(
-    region=bedrock_config["region_name"],
-    url_override=bedrock_config["endpoint_url"])
+if accessType=='aws':  # internal user of aws
+    boto3_bedrock = bedrock.get_bedrock_client(
+        region=bedrock_config["region_name"],
+        url_override=bedrock_config["endpoint_url"])
+else: # preview user
+    boto3_bedrock = bedrock.get_bedrock_client(
+        region=bedrock_config["region_name"])
 
 modelId = 'amazon.titan-tg1-large'  # anthropic.claude-v1
 llm = Bedrock(model_id=modelId, client=boto3_bedrock)    
