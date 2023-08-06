@@ -24,6 +24,7 @@ const bucketName = `storage-for-${projectName}`;
 const rag_type = 'opensearch';  // faiss
 const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
+const accessType = "aws"; // aws or preview
 
 export class CdkQaWithRagStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -219,7 +220,8 @@ export class CdkQaWithRagStack extends cdk.Stack {
         configTableName: configTableName,
         rag_type: rag_type,
         opensearch_account: opensearch_account,
-        opensearch_passwd: opensearch_passwd
+        opensearch_passwd: opensearch_passwd,
+        accessType: accessType 
       }
     });     
     lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));  
