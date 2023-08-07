@@ -322,7 +322,7 @@ def lambda_handler(event, context):
                 msg = llm(text)
             else: 
                 querySize = len(text)
-                textCount = text.count()
+                textCount = len(text.split())
                 print(f"query size: {querySize}, workds: {textCount}")
 
                 if querySize<1800: 
