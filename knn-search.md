@@ -17,11 +17,3 @@
 - pure java로 만들어졌습니다.
 - maximum dimension count가 1024로 작습니다.
 
-## 기타
-
-
-- Elasticsearch: maximum length가 1024인데, OpenAI는 1536로 처리되므로 문제가 있는데, OpenSearch는 이 Limit 문제가 없다고 합니다.
-  - 참고: [KNN Search with OpenSearch and OpenAI Embeddings: An In-Depth Guide](https://blog.reactivesearch.io/knn-search-with-opensearch-and-openai-embeddings-an-in-depth-guide)
-- Elasticsearch에서 1024를 2048로 늘릴 예정이라고 합니다.
-  - [dense vector/embeddings dimension size](https://github.com/elastic/elasticsearch/issues/92458)
-- OpenSearch maxiumum length는 자체 테스트시에 1985자 (394workds)를 지원하고 있습니다.
