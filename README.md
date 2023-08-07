@@ -395,9 +395,9 @@ AWS 서울 리전에서 Amazon Bedrock과 vector store를 이용하여 질문과
 
 ## Troubleshooting
 
-### 1000자 이상의 query에 대한 OpenSearch 에러
+### long query에 대한 OpenSearch 에러
 
-[RAG Query Size Limitation](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/rag-query-size.md)과 같이 1000자 이상의 query에 대하여 처리할 수 없습니다. 이것은 검색엔진의 한계로 OpenSearch, Kendra, 구글 검색기 모두 같은 이슈를 가지고 있습니다. 따라서, 일정 크기(1000자) 이하의 검색만 허용하는식으로 입력기에서 제한하는 방법을 사용하여야 합니다.
+[RAG Query Size Limitation](./rag-query-size.md)과 같이 1985자 이상의 query에 대하여 처리할 수 없습니다. 이것은 검색엔진의 한계로 OpenSearch, Kendra, 구글 검색기 모두 같은 이슈를 가지고 있습니다. 따라서, 일정 크기(1800자) 이하의 검색만 허용하는식으로 입력기에서 제한하는 방법을 사용하여야 합니다.
 
 #### [Approximate k-NN search](https://opensearch.org/docs/latest/search-plugins/knn/approximate-knn/)에서의 Quota
 The knn_vector data type supports a vector of floats that can have a dimension count of up to 16,000 for the nmslib and faiss engines, as set by the dimension mapping parameter. The maximum dimension count for the Lucene library is 1,024.
