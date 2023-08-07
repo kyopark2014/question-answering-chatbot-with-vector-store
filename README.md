@@ -259,12 +259,15 @@ from langchain.vectorstores import OpenSearchVectorSearch
 new_vectorstore = OpenSearchVectorSearch(
     index_name = "rag-index-" + userId + '-' + requestId,
     is_aoss = False,
+    #engine="faiss",  # default: nmslib
     embedding_function = bedrock_embeddings,
     opensearch_url = opensearch_url,
     http_auth=(opensearch_account, opensearch_passwd),
 )
 new_vectorstore.add_documents(docs) 
 ```
+
+여기서 OpenSearch에서 search하는 engin은 기본값인 nmslib를 사용하고 있습니다. [knn-search](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/knn-search.md)에서 각 engine의 특성에 대해 이해할 수 있습니다.
 
 아래와 같이 OpenSearch는 [vector store로 부터 similarity_search()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 이용하여 관련된 문서를 조회할 수 있습니다.
 
