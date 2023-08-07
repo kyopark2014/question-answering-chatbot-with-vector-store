@@ -251,7 +251,7 @@ const OpenSearchAccessPolicy = new iam.PolicyStatement({
 });
 ```
   
-문서를 vector store인 OpenSearch에 저장할때에는 아래와 같이 [OpenSearchVectorSearch()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 이용하여 vector store를 지정하고 문서를 추가합니다. 이때 index_name은 OpenSearch에 저장된 vector들을 검색할때 유용합니다. 여기서는 OpenSearch에 저장할때 "rag-index-[userId]-[requestId]" 형식으로 저장합니다. 이렇게 함으로써 문서를 올린 사람의 데이터만 검색할 수 있습니다. "is_aoss"는 serverless 버번의 OpenSearch를 지정합니다. 
+문서를 vector store인 OpenSearch에 저장할때에는 아래와 같이 [OpenSearchVectorSearch()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 이용하여 vector store를 지정하고 문서를 추가합니다. 이때 index_name은 OpenSearch에 저장된 vector들을 검색할 때 유용합니다. 여기서는 OpenSearch에 저장할 때 "rag-index-[userId]-[requestId]" 형식으로 저장합니다. 이렇게 함으로써 문서를 올린 사람의 데이터만 검색할 수 있습니다. "is_aoss"는 serverless 버번의 OpenSearch를 지정합니다. 또한 OpenSearch에서 search하는 engin은 기본값인 nmslib를 사용하고 있습니다. [knn-search](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/knn-search.md)에서 각 engine의 특성에 대해 이해할 수 있습니다.
 
 ```python
 from langchain.vectorstores import OpenSearchVectorSearch
@@ -267,7 +267,7 @@ new_vectorstore = OpenSearchVectorSearch(
 new_vectorstore.add_documents(docs) 
 ```
 
-여기서 OpenSearch에서 search하는 engin은 기본값인 nmslib를 사용하고 있습니다. [knn-search](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/knn-search.md)에서 각 engine의 특성에 대해 이해할 수 있습니다.
+
 
 아래와 같이 OpenSearch는 [vector store로 부터 similarity_search()](https://python.langchain.com/docs/integrations/vectorstores/opensearch)를 이용하여 관련된 문서를 조회할 수 있습니다.
 
