@@ -24,4 +24,4 @@
   - 참고: [KNN Search with OpenSearch and OpenAI Embeddings: An In-Depth Guide](https://blog.reactivesearch.io/knn-search-with-opensearch-and-openai-embeddings-an-in-depth-guide)
 - Elasticsearch에서 1024를 2048로 늘릴 예정이라고 합니다.
   - [dense vector/embeddings dimension size](https://github.com/elastic/elasticsearch/issues/92458)
-- 
+- OpenSearch maxiumum length는 자체 테스트시에 1985자 (394workds)를 지원하고 있습니다.
