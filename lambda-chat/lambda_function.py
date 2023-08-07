@@ -239,6 +239,7 @@ def lambda_handler(event, context):
             # index_name = "rag-index-*", // all
             index_name = 'rag-index-'+userId+'-*',
             is_aoss = False,
+            engine="faiss",
             embedding_function = bedrock_embeddings,
             opensearch_url=opensearch_url,
             http_auth=(opensearch_account, opensearch_passwd),
@@ -335,6 +336,7 @@ def lambda_handler(event, context):
                 new_vectorstore = OpenSearchVectorSearch(
                     index_name="rag-index-"+userId+'-'+requestId,
                     is_aoss = False,
+                    engine="faiss",
                     embedding_function = bedrock_embeddings,
                     opensearch_url = opensearch_url,
                     http_auth=(opensearch_account, opensearch_passwd),
