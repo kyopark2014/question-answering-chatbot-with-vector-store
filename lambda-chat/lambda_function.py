@@ -134,12 +134,42 @@ def get_answer_using_query(query, vectorstore, rag_type):
 
     return answer
 
+def summerize_text(text):
+    docs = [
+        Document(
+            page_content=text
+        )
+    ]
+    prompt_template = """Write a concise summary of the following:
+
+    {text}
+                
+    CONCISE SUMMARY """
+
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+    summary = chain.run(docs)
+    print('summarized text: ', summary)
+
+    return summary
+
 def get_answer_using_template(query, vectorstore, rag_type):    
-    if rag_type == 'faiss':
-        query_embedding = vectorstore.embedding_function(query)
-        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-    elif rag_type == 'opensearch':
-        relevant_documents = vectorstore.similarity_search(query)
+    print('query size: ', len(query))
+
+    if(len[query]>1000):
+        summarized_query = summerize_text(query)        
+
+        if rag_type == 'faiss':
+            query_embedding = vectorstore.embedding_function(summarized_query)
+            relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+        elif rag_type == 'opensearch':
+            relevant_documents = vectorstore.similarity_search(summarized_query)
+    else:
+        if rag_type == 'faiss':
+            query_embedding = vectorstore.embedding_function(query)
+            relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+        elif rag_type == 'opensearch':
+            relevant_documents = vectorstore.similarity_search(query)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
