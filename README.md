@@ -398,6 +398,9 @@ AWS 서울 리전에서 Amazon Bedrock과 vector store를 이용하여 질문과
 
 "Error raised by inference endpoint: An error occurred (ValidationException) when calling the InvokeModel operation: The provided inference configurations are invalid","
 
+#### [Approximate k-NN search](https://opensearch.org/docs/latest/search-plugins/knn/approximate-knn/)에서의 Quota
+The knn_vector data type supports a vector of floats that can have a dimension count of up to 16,000 for the nmslib and faiss engines, as set by the dimension mapping parameter. The maximum dimension count for the Lucene library is 1,024.
+
 ## Reference 
 
 [Getting started - Faiss](https://github.com/facebookresearch/faiss/wiki/Getting-started)
