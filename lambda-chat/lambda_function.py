@@ -154,9 +154,10 @@ def summerize_text(text):
     return summary
 
 def get_answer_using_template(query, vectorstore, rag_type):    
-    print('query size: ', len(query))
-
-    if(len[query]>1000):
+    querySize = len(query)
+    print('query size: ', querySize)
+    
+    if(querySize>1000):
         summarized_query = summerize_text(query)        
 
         if rag_type == 'faiss':
