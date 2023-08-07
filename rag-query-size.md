@@ -5,7 +5,13 @@ RAG에 보내는 Query의 사이즈 제한이 있습니다.
 - OpenSearch
   - 에러 메시지: ValueError: Error raised by inference endpoint: An error occurred (ValidationException) when calling the InvokeModel operation: The provided inference configurations are invalid
   - [Approximate k-NN search](https://opensearch.org/docs/latest/search-plugins/knn/approximate-knn/): The knn_vector data type supports a vector of floats that can have a dimension count of up to 16,000 for the nmslib and faiss engines, as set by the dimension mapping parameter. The maximum dimension count for the Lucene library is 1,024.
-  - [KNN Search with OpenSearch and OpenAI Embeddings: An In-Depth Guide](https://blog.reactivesearch.io/knn-search-with-opensearch-and-openai-embeddings-an-in-depth-guide): OpenSearch는 limitation 없다고 함 (확인중)
+ 
+  - Elasticsearch: maximum length가 1024인데, OpenAI는 1536로 처리되므로 문제가 있는데, OpenSearch는 이 Limit 문제가 없다고 합니다.
+    - 참고: [KNN Search with OpenSearch and OpenAI Embeddings: An In-Depth Guide](https://blog.reactivesearch.io/knn-search-with-opensearch-and-openai-embeddings-an-in-depth-guide)
+  - Elasticsearch에서 1024를 2048로 늘릴 예정이라고 합니다.
+    - [dense vector/embeddings dimension size](https://github.com/elastic/elasticsearch/issues/92458)
+  - OpenSearch maxiumum length는 자체 테스트시에 1985자 (394workds)를 지원하고 있습니다.
+
 
 - Kendra
   - 에러 메시지: ValidationException: An error occurred (ValidationException) when calling the Retrieve operation: The provided QueryText has a character count of 3630, which exceeds the limit. The character count must be less than or equal to 1000.
