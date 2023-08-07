@@ -153,24 +153,19 @@ def summerize_text(text):
 
     return summary
 
-def get_answer_using_template(query, vectorstore, rag_type):    
-    querySize = len(query)
-    print('query size: ', querySize)
+def get_answer_using_template(query, vectorstore, rag_type):        
+    #summarized_query = summerize_text(query)        
+    #    if rag_type == 'faiss':
+    #        query_embedding = vectorstore.embedding_function(summarized_query)
+    #        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+    #    elif rag_type == 'opensearch':
+    #        relevant_documents = vectorstore.similarity_search(summarized_query)
     
-    if(querySize>1000):
-        summarized_query = summerize_text(query)        
-
-        if rag_type == 'faiss':
-            query_embedding = vectorstore.embedding_function(summarized_query)
-            relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-        elif rag_type == 'opensearch':
-            relevant_documents = vectorstore.similarity_search(summarized_query)
-    else:
-        if rag_type == 'faiss':
-            query_embedding = vectorstore.embedding_function(query)
-            relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-        elif rag_type == 'opensearch':
-            relevant_documents = vectorstore.similarity_search(query)
+    if rag_type == 'faiss':
+        query_embedding = vectorstore.embedding_function(query)
+        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+    elif rag_type == 'opensearch':
+        relevant_documents = vectorstore.similarity_search(query)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
@@ -326,7 +321,13 @@ def lambda_handler(event, context):
             if rag_type == 'faiss' and enableRAGForFaiss == False: 
                 msg = llm(text)
             else: 
-                msg = get_answer_using_template(text, vectorstore, rag_type)
+                querySize = len(text)
+                print('query size: ', querySize)
+
+                if querySize>1000: 
+                    msg = get_answer_using_template(text, vectorstore, rag_type)
+                else:
+                    msg = llm(text)
             #print('msg: ', msg)
             
         elif type == 'document':
