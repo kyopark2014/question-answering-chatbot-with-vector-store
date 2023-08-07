@@ -394,9 +394,7 @@ AWS 서울 리전에서 Amazon Bedrock과 vector store를 이용하여 질문과
 
 ### 1000자 이상의 query에 대한 OpenSearch 에러
 
-아래와 같이 1000자 이상의 query에 대하여 에러가 발생합니다. 현재 RAG가 enable하면 모든 text를 vector store에 질의하게 되어 있어서, OpenSearch에 대한 질의를 어떻게 처리할지 고민이 필요합니다. 
-
-"Error raised by inference endpoint: An error occurred (ValidationException) when calling the InvokeModel operation: The provided inference configurations are invalid","
+[RAG Query Size Limitation](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/rag-query-size.md)과 같이 1000자 이상의 query에 대하여 처리할 수 없습니다. 이것은 검색엔진의 한계로 OpenSearch, Kendra, 구글 검색기 모두 같은 이슈를 가지고 있습니다. 따라서, 일정 크기(1000자) 이하의 검색만 허용하는식으로 입력기에서 제한하는 방법을 사용하여야 합니다.
 
 #### [Approximate k-NN search](https://opensearch.org/docs/latest/search-plugins/knn/approximate-knn/)에서의 Quota
 The knn_vector data type supports a vector of floats that can have a dimension count of up to 16,000 for the nmslib and faiss engines, as set by the dimension mapping parameter. The maximum dimension count for the Lucene library is 1,024.
