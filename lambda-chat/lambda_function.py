@@ -324,7 +324,7 @@ def lambda_handler(event, context):
                 querySize = len(text)
                 print('query size: ', querySize)
 
-                if querySize>1000: 
+                if querySize<1000: 
                     msg = get_answer_using_template(text, vectorstore, rag_type)
                 else:
                     msg = llm(text)
