@@ -10,8 +10,8 @@ RAG에 보내는 Query의 사이즈 제한이 있습니다.
     - [KNN Search with OpenSearch and OpenAI Embeddings: An In-Depth Guide](https://blog.reactivesearch.io/knn-search-with-opensearch-and-openai-embeddings-an-in-depth-guide)
   - 관련 이슈로 Elasticsearch에서 1024를 2048로 늘릴 예정이라고 합니다.
     - [dense vector/embeddings dimension size](https://github.com/elastic/elasticsearch/issues/92458)
-  - Search Engine 자체적으로 limitation을 가지고 있습니다.
-    - [Approximate k-NN search](https://opensearch.org/docs/latest/search-plugins/knn/approximate-knn/)에 의하면 nmslib, faiss는 16000, Lucene library는 1024의 dimension limit을 engine이 가지고 있습니다.
+  - Search Engine들은 nmslib, faiss는 16000, Lucene library는 1024의 dimension limit을 engine이 가지고 있습니다.
+    - [Approximate k-NN search](https://opensearch.org/docs/latest/search-plugins/knn/approximate-knn/)
   - 자체 시험시에 OpenSearch maxiumum length는 1985자 (394workds)입니다.
 
 - Kendra
