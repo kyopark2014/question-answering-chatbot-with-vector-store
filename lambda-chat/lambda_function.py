@@ -322,9 +322,10 @@ def lambda_handler(event, context):
                 msg = llm(text)
             else: 
                 querySize = len(text)
-                print('query size: ', querySize)
+                textCount = text.count()
+                print(f"query size: {querySize}, workds: {textCount}")
 
-                if querySize<1000: 
+                if querySize<1800: 
                     msg = get_answer_using_template(text, vectorstore, rag_type)
                 else:
                     msg = llm(text)
