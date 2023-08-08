@@ -165,9 +165,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
         query_embedding = vectorstore.embedding_function(query)
         relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
     elif rag_type == 'opensearch':
-        #relevant_documents = vectorstore.similarity_search(query)
-        query_embedding = vectorstore.embedding_function(query)
-        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+        relevant_documents = vectorstore.similarity_search(query)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
@@ -327,10 +325,10 @@ def lambda_handler(event, context):
                 textCount = len(text.split())
                 print(f"query size: {querySize}, workds: {textCount}")
 
-                #if querySize<1800: # max 1985
-                msg = get_answer_using_template(text, vectorstore, rag_type)
-                #else:
-                #    msg = llm(text)
+                if querySize<1800: # max 1985
+                    msg = get_answer_using_template(text, vectorstore, rag_type)
+                else:
+                    msg = llm(text)
             #print('msg: ', msg)
             
         elif type == 'document':
