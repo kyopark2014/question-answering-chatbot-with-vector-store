@@ -22,7 +22,7 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 
 아래는 문서 업로드시의 sequence diagram입니다. 
 
-<img src="./sequence/seq-upload.png" width="600">
+![seq-upload](./sequence/seq-upload.png)
 
 채팅 창에서 텍스트 입력(Prompt)를 통해 RAG를 활용하는 과정은 아래와 같습니다.
 1) 사용자가 채팅창에서 질문(Question)을 입력합니다.
@@ -32,7 +32,8 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 
 아래는 vectore store를 이용한 메시지 동작을 설명하는 sequence diagram입니다. 
 
-<img src="./sequence/seq-chat.png" width="600">
+![seq-chat](./sequence/seq-chat.png)
+
 
 ## 주요 구성
 
