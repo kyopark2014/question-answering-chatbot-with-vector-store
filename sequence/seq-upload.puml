@@ -32,6 +32,7 @@ participant "<color:#green><$SimpleStorageServiceS3></color>\nAmazon S3" as s3
 participant "<color:#D86613><$Lambda></color>\nAmazon Lambda\n(chat)" as lambdaChat
 participant "<color:#D86613><$Database></color>\nVector Store" as vectorstore
 participant "<color:#green><$SageMaker></color>\nLLM" as llm
+participant "<color:#blue><$DynamoDB></color>\nDynamoDB" as dynamodb
 
 user -> cdn: POST /upload
 
@@ -66,7 +67,13 @@ lambdaChat -> vectorstore ++: store document
 
 vectorstore -> lambdaChat --: 200OK
 
-lambdaChat -> lambdaChat: Summerization
+lambdaChat -> llm ++: Summerization
+
+llm -> lambdaChat --: 200OK \n(summerized text)
+
+lambdaChat -> dynamodb ++: Store call log
+dynamodb -> lambdaChat --: 200OK
+
 
 lambdaChat -> api --: 200OK \n(summerized text)
 
