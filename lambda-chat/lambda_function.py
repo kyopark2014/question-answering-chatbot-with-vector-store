@@ -327,10 +327,10 @@ def lambda_handler(event, context):
                 textCount = len(text.split())
                 print(f"query size: {querySize}, workds: {textCount}")
 
-                if querySize<1800: # max 1985
-                    msg = get_answer_using_template(text, vectorstore, rag_type)
-                else:
-                    msg = llm(text)
+                #if querySize<1800: # max 1985
+                msg = get_answer_using_template(text, vectorstore, rag_type)
+                #else:
+                #    msg = llm(text)
             #print('msg: ', msg)
             
         elif type == 'document':
