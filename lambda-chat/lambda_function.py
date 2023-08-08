@@ -165,7 +165,9 @@ def get_answer_using_template(query, vectorstore, rag_type):
         query_embedding = vectorstore.embedding_function(query)
         relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
     elif rag_type == 'opensearch':
-        relevant_documents = vectorstore.similarity_search(query)
+        #relevant_documents = vectorstore.similarity_search(query)
+        query_embedding = vectorstore.embedding_function(query)
+        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
