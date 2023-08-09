@@ -290,6 +290,19 @@ vectorstore = OpenSearchVectorSearch(
 
 ### Question/Answering
 
+#### RAG의 텍스트 크기 제한
+
+RAG는 구글검색과 같이 일종의 검색엔진이므로 Query할 수 있는 텍스트의 길이 제한이 있습니다. 따라서, query size 이하에 대해서만 RAG를 적용하는데, 여기서는 query size를 1800자 이하로 적용합니다.
+
+```python
+querySize = len(text)
+if querySize<1800: 
+    msg = get_answer_using_template(text, vectorstore, rag_type)
+else:
+    msg = llm(text)
+```
+
+
 아래와 같이 vector store에 직접 Query 하는 방식과, Template를 이용하는 2가지 방법으로 Question/Answering 구현하는 것을 설명합니다.
 
 #### Vector Store에서 query를 이용하는 방법
