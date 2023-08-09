@@ -422,3 +422,5 @@ AWS 서울 리전에서 Amazon Bedrock과 vector store를 이용하여 질문과
 [Domain - CDK](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_opensearchservice.Domain.html)
 
 [interface CapacityConfig - CDK](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_opensearchservice.CapacityConfig.html)
+
+[RAG-based-ai-chatbot](https://github.com/hijigoo/RAG-based-ai-chatbot/tree/main)
