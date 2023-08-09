@@ -42,8 +42,15 @@ endpoint_url = os.environ.get('endpoint_url')
 opensearch_url = os.environ.get('opensearch_url')
 bedrock_region = os.environ.get('bedrock_region')
 rag_type = os.environ.get('rag_type')
+
+# opensearch authorization - id/passwd
 opensearch_account = os.environ.get('opensearch_account')
 opensearch_passwd = os.environ.get('opensearch_passwd')
+# opensearch authorization - aws auth
+# from requests_aws4auth import AWS4Auth
+# credentials = boto3.Session().get_credentials()
+# awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
+
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
 enableRAGForFaiss = False   
@@ -236,7 +243,7 @@ modelInfo = boto3_bedrock.list_foundation_models()
 print('models: ', modelInfo)
 
 parameters = {
-    "maxTokenCount":512,
+    "maxTokenCount":4096,  
     "stopSequences":[],
     "temperature":0,
     "topP":0.9
@@ -268,7 +275,7 @@ def lambda_handler(event, context):
             #engine="faiss",  # default: nmslib
             embedding_function = bedrock_embeddings,
             opensearch_url=opensearch_url,
-            http_auth=(opensearch_account, opensearch_passwd),
+            http_auth=(opensearch_account, opensearch_passwd), # http_auth=awsauth,
         )
     elif rag_type == 'faiss':
         print('enableRAGForFaiss = ', enableRAGForFaiss)
