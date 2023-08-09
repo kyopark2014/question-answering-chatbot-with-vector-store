@@ -202,7 +202,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
         chain_type_kwargs={"prompt": PROMPT}
     )
     result = qa({"query": query})
-        
+    print('result: ', result)
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
