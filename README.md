@@ -314,7 +314,7 @@ elif rag_type == 'opensearch':
     relevant_documents = vectorstore.similarity_search(query)
 ```
 
-#### Vector Store에서 query를 이용하는 방법
+#### VectorStoreIndexWrapper를 이용하여 질문하는 방법
 
 아래와 같이 vector store에 직접 Query 하는 방식과, Template를 이용하는 2가지 방법으로 Question/Answering 구현하는 것을 설명합니다.
 
@@ -333,7 +333,7 @@ relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 answer = wrapper_store.query(question = query, llm = llm)
 ```
 
-#### Template를 이용하는 방법
+#### Template를 이용하여 질문하는 방법
 
 Template를 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용하여, 일반적으로 vectorstore에서 query를 이용하는 방법보다 나은 결과를 얻습니다.
 
