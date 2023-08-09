@@ -302,16 +302,32 @@ else:
     msg = llm(text)
 ```
 
+##### Vector Store를 이용하여 관련 문서 조회
 
-아래와 같이 vector store에 직접 Query 하는 방식과, Template를 이용하는 2가지 방법으로 Question/Answering 구현하는 것을 설명합니다.
+아래와 같이 [similarity_search()](https://python.langchain.com/docs/integrations/vectorstores/opensearch#similarity_search-using-approximate-k-nn)를 이용하여 vector store에서 관련된 문서를 조회할 수 있습니다. Faiss는 embeding한 query로 조회를 하고, OpenSearch는 query를 하면 vector store 선언시 정의한 embedding을 이용하여 조회를 수행합니다.
+
+```python
+if rag_type == 'faiss':
+    query_embedding = vectorstore.embedding_function(query)
+    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+elif rag_type == 'opensearch':
+    relevant_documents = vectorstore.similarity_search(query)
+```
 
 #### Vector Store에서 query를 이용하는 방법
+
+아래와 같이 vector store에 직접 Query 하는 방식과, Template를 이용하는 2가지 방법으로 Question/Answering 구현하는 것을 설명합니다.
 
 embedding한 query를 가지고 vectorstore에서 검색한 후에 vectorstore의 query()를 이용하여 답변을 얻습니다.
 
 ```python
 wrapper_store = VectorStoreIndexWrapper(vectorstore = vectorstore)
-query_embedding = vectorstore.embedding_function(query)
+
+    if rag_type == 'faiss':
+        query_embedding = vectorstore.embedding_function(query)
+        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+    elif rag_type == 'opensearch':
+        relevant_documents = vectorstore.similarity_search(query)
 
 relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 answer = wrapper_store.query(question = query, llm = llm)
