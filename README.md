@@ -323,13 +323,6 @@ embedding한 query를 가지고 vectorstore에서 검색한 후에 vectorstore�
 ```python
 wrapper_store = VectorStoreIndexWrapper(vectorstore = vectorstore)
 
-if rag_type == 'faiss':
-    query_embedding = vectorstore.embedding_function(query)
-    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-elif rag_type == 'opensearch':
-    relevant_documents = vectorstore.similarity_search(query)
-
-relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
 answer = wrapper_store.query(question = query, llm = llm)
 ```
 
