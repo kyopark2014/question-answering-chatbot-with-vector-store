@@ -292,7 +292,7 @@ vectorstore = OpenSearchVectorSearch(
 
 #### RAG의 텍스트 크기 제한
 
-RAG는 구글검색과 같이 일종의 검색엔진이므로 Query할 수 있는 텍스트의 길이 제한이 있습니다. 따라서, query size 이하에 대해서만 RAG를 적용하는데, 여기서는 query size를 1800자 이하로 적용합니다.
+RAG는 구글검색과 같이 일종의 검색엔진이므로 Query할 수 있는 텍스트의 길이 제한이 있습니다. 따라서, query size 이하에 대해서만 RAG를 적용하는데, 여기서는 query size를 1800자 이하로 적용합니다. (OpenSearch에 대해 시험시 1985자까지 허용하고 있습니다.)
 
 ```python
 querySize = len(text)
