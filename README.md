@@ -334,12 +334,6 @@ Template를 이용하는 방법은 [RetrievalQA](https://python.langchain.com/do
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
-if rag_type == 'faiss':
-    query_embedding = vectorstore.embedding_function(query)
-    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-elif rag_type == 'opensearch':
-    relevant_documents = vectorstore.similarity_search(query)
-
 prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
 { context }
