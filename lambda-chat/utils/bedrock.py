@@ -12,8 +12,9 @@ def get_bedrock_client(assumed_role=None, region='us-west-2', url_override = Non
     boto3_kwargs = {}
     session = boto3.Session()
 
-    target_region = os.environ.get('AWS_DEFAULT_REGION',region)
-    target_region = 'us-west-2'
+    #target_region = os.environ.get('AWS_DEFAULT_REGION',region)
+    #target_region = 'us-west-2'
+    target_region = region
 
     print(f"Create new client\n  Using region: {target_region}")
     if 'AWS_PROFILE' in os.environ:
