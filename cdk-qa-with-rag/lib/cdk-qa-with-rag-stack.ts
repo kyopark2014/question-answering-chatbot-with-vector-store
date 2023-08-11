@@ -13,6 +13,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as opensearch from 'aws-cdk-lib/aws-opensearchservice';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
+const region = process.env.CDK_DEFAULT_REGION;   
 const debug = false;
 const stage = 'dev';
 const s3_prefix = 'docs';
@@ -21,7 +22,7 @@ const endpoint_url = "https://prod.us-west-2.frontend.bedrock.aws.dev";
 const model_id = "amazon.titan-tg1-large"; // amazon.titan-e1t-medium, anthropic.claude-v1
 const userName = "kyopark";
 const projectName = `chatbot-os-${userName}`;
-const bucketName = `storage-for-${projectName}`;
+const bucketName = `storage-for-${projectName}-${region}`; 
 const rag_type = 'opensearch';  // faiss or opensearch
 const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
@@ -97,7 +98,6 @@ export class CdkQaWithRagStack extends cdk.Stack {
     
     // Permission for OpenSearch
     const domainName = `os-${projectName}`
-    const region = process.env.CDK_DEFAULT_REGION;
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
     if(debug) {
