@@ -17,7 +17,6 @@ const region = process.env.CDK_DEFAULT_REGION;
 const debug = false;
 const stage = 'dev';
 const s3_prefix = 'docs';
-const bedrock_region = "us-west-2";
 const endpoint_url = "https://prod.us-west-2.frontend.bedrock.aws.dev";
 const model_id = "amazon.titan-tg1-large"; // amazon.titan-e1t-medium, anthropic.claude-v1
 const userName = "kyopark";
@@ -27,6 +26,7 @@ const rag_type = 'opensearch';  // faiss or opensearch
 const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
 const accessType = "aws"; // aws or preview
+const bedrock_region = "us-west-2";  // "us-east-1" "us-west-2" 
 
 export class CdkQaWithRagStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
