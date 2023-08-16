@@ -25,8 +25,8 @@ const bucketName = `storage-for-${projectName}-${region}`;
 const rag_type = 'opensearch';  // faiss or opensearch
 const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
-const accessType = "aws"; // aws or preview
-const bedrock_region = "us-west-2";  // "us-east-1" "us-west-2" 
+const accessType = "preview"; // aws or preview
+const bedrock_region = "us-east-1";  // "us-east-1" "us-west-2" 
 
 export class CdkQaWithRagStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
