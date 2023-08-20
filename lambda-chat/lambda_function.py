@@ -29,10 +29,6 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores import OpenSearchVectorSearch
 
-module_path = "."
-sys.path.append(os.path.abspath(module_path))
-from utils import bedrock, print_ww
-
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
 s3_prefix = os.environ.get('s3_prefix')
@@ -165,7 +161,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
     for i, rel_doc in enumerate(relevant_documents):
-        print_ww(f'## Document {i+1}: {rel_doc.page_content}.......')
+        print(f'## Document {i+1}: {rel_doc.page_content}.......')
         print('---')
     
     print('length of relevant_documents: ', len(relevant_documents))
