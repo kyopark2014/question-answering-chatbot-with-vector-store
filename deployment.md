@@ -18,9 +18,9 @@
 curl https://raw.githubusercontent.com/kyopark2014/technical-summary/main/resize.sh -o resize.sh
 ```
 
-이후 아래 명령어로 용량을 100G로 변경합니다.
+이후 아래 명령어로 용량을 80G로 변경합니다.
 ```text
-chmod a+rx resize.sh && ./resize.sh 100
+chmod a+rx resize.sh && ./resize.sh 80
 ```
 
 
@@ -39,19 +39,12 @@ cd question-answering-chatbot-with-vector-store/cdk-qa-with-rag/ && npm install
 6) bedrock-sdk를 설치합니다.
 
 ```text
-cd ../lambda-chat && wget https://db3lw8u6vdvwu.cloudfront.net/bedrock/bedrock-python-sdk.zip &&
-unzip bedrock-python-sdk.zip -d bedrock-sdk &&
-python3 -m pip install -U ./bedrock-sdk/boto3-1.26.162-py3-none-any.whl -t . --use-feature=2020-resolver &&
-python3 -m pip install -U ./bedrock-sdk/awscli-1.27.162-py3-none-any.whl -t . &&
+cd ../lambda-chat
+curl https://d2eo22ngex1n9g.cloudfront.net/Documentation/SDK/bedrock-python-sdk.zip --output bedrock-python-sdk.zip
+unzip bedrock-python-sdk.zip -d bedrock-sdk
+rm bedrock-python-sdk.zip
 cd ../cdk-qa-with-rag/
 ```
-
-필요시, preview doc에서 bedrock-python-sdk.zip을 다운로드하여 사용할수 있는데 현재(Aug.6 2023)에 버전이 잘 안맞는지 동작을 잘 안하므로 기존 파일을 사용합니다.
-
-```text
-wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
-```
-
 
 6) CDK 사용을 위해 Boostraping을 수행합니다.
 
