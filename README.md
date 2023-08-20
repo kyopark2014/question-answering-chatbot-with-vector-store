@@ -50,16 +50,19 @@ bedrock_config = {
     "endpoint_url":"https://prod.us-west-2.frontend.bedrock.aws.dev"
 }
     
-if accessType=='aws':  # internal user of aws
-    boto3_bedrock = bedrock.get_bedrock_client(
-        region=bedrock_config["region_name"],
-        url_override=bedrock_config["endpoint_url"])
+if accessType=='aws': # internal user of aws
+    boto3_bedrock = boto3.client(
+        service_name='bedrock’,
+        region_name=bedrock_config["region_name"],
+        endpoint_url=bedrock_config["endpoint_url"],
+    )
 else: # preview user
-    boto3_bedrock = bedrock.get_bedrock_client(
-        region=bedrock_config["region_name"])
-
-modelId = 'amazon.titan-tg1-large'  # anthropic.claude-v1
-llm = Bedrock(model_id=modelId, client=boto3_bedrock)    
+    boto3_bedrock = boto3.client(
+        service_name='bedrock’,
+        region_name=bedrock_config["region_name"],
+    )
+modelId = 'amazon.titan-tg1-large’
+llm = Bedrock(model_id=modelId, client=boto3_bedrock) 
 ```
 
 
