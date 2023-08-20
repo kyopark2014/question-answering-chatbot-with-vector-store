@@ -220,18 +220,22 @@ bedrock_config = {
     
 # supported llm list from bedrock
 if accessType=='aws':  # internal user of aws
-    boto3_bedrock = bedrock.get_bedrock_client(
-        region=bedrock_config["region_name"],
-        url_override=bedrock_config["endpoint_url"])
+    boto3_bedrock = boto3.client(
+        service_name='bedrock',
+        region_name=bedrock_config["region_name"],
+        endpoint_url=bedrock_config["endpoint_url"],
+    )
 else: # preview user
-    boto3_bedrock = bedrock.get_bedrock_client(
-        region=bedrock_config["region_name"])
+    boto3_bedrock = boto3.client(
+        service_name='bedrock',
+        region_name=bedrock_config["region_name"],
+    )
 
 modelInfo = boto3_bedrock.list_foundation_models()    
 print('models: ', modelInfo)
 
 parameters = {
-    "maxTokenCount":4096,  
+    "maxTokenCount":1024,  
     "stopSequences":[],
     "temperature":0,
     "topP":0.9
