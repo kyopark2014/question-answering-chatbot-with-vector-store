@@ -325,6 +325,9 @@ def lambda_handler(event, context):
                 else:
                     msg = llm(text)
             #print('msg: ', msg)
+            num_tokens = llm.get_num_tokens(text)
+            print(f"Our prompt has {num_tokens} tokens")
+
             
         elif type == 'document':
             object = body
