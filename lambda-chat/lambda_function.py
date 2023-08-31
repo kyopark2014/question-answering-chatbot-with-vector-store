@@ -121,7 +121,10 @@ def get_answer_using_template_with_history(query, vectorstore):
     {chat_history}
     Follow Up Input: {question}
     Standalone question:"""
-    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(prompt_template)
+    prompt = PromptTemplate.from_template(prompt_template)
+
+    from langchain import LLMChain
+    question_generator_chain = LLMChain(llm=llm, prompt=prompt)
 
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
@@ -131,7 +134,8 @@ def get_answer_using_template_with_history(query, vectorstore):
         ), 
         return_source_documents=True,
         memory=memory_chain,
-        condense_question_prompt=CONDENSE_QUESTION_PROMPT,
+        #condense_question_prompt=CONDENSE_QUESTION_PROMPT,
+        #question_generator=question_generator_chain,
         verbose=False, 
         #max_tokens_limit=300,
         #chain_type_kwargs={"question": query}
