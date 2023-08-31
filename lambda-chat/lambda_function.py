@@ -150,7 +150,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         #chain_type_kwargs={"prompt": PROMPT}
         return_generated_question=True,
         get_chat_history=get_chat_history,
-        combine_docs_chain_kwargs={"prompt": query})
+        combine_docs_chain_kwargs={"prompt": query}
     )
 
     #qa = RetrievalQA.from_chain_type(
