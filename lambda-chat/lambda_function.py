@@ -343,7 +343,7 @@ def lambda_handler(event, context):
                     if conversationMode == 'enabled':
                         msg = get_answer_using_template_with_history(text, vectorstore)
                     else:
-                        msg = get_answer_using_template(text, vectorstore)
+                        msg = get_answer_using_template(text, vectorstore, rag_type)
                 else:
                     msg = llm(text)
             #print('msg: ', msg)
