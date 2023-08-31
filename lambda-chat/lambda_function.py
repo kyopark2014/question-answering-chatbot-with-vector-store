@@ -54,6 +54,7 @@ modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
 enableRAGForFaiss = False   
 accessType = os.environ.get('accessType')
+enableReference = os.environ.get('enableReference', 'true')
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -135,7 +136,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         #condense_question_prompt=CONDENSE_QUESTION_PROMPT,
         verbose=False, 
         #max_tokens_limit=300,
-        chain_type_kwargs={"prompt": PROMPT}
+        #chain_type_kwargs={"question": query}
     )
 
     #qa = RetrievalQA.from_chain_type(
@@ -147,7 +148,7 @@ def get_answer_using_template_with_history(query, vectorstore):
     #    return_source_documents=True,
     #    chain_type_kwargs={"prompt": PROMPT}
     #)
-    result = qa({"query": query})
+    result = qa({"question": query})
     print('result: ', result)
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
