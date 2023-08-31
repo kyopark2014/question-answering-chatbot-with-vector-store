@@ -114,6 +114,10 @@ def summerize_text(text):
 
     return summary
 
+def get_chat_history(inputs):
+    inputs = [i.content for i in inputs]
+    return  '\n'.join(inputs)
+
 def get_answer_using_template_with_history(query, vectorstore):  
     prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
@@ -139,10 +143,14 @@ def get_answer_using_template_with_history(query, vectorstore):
         ), 
         return_source_documents=True,
         memory=memory_chain,
+        #qa_prompt=CONDENSE_QUESTION_TEMPLATE,
         condense_question_prompt=CONDENSE_QUESTION_TEMPLATE,
         verbose=False, 
         #max_tokens_limit=300,
         #chain_type_kwargs={"prompt": PROMPT}
+        return_generated_question=True,
+        get_chat_history=get_chat_history,
+        combine_docs_chain_kwargs={"prompt": query})
     )
 
     #qa = RetrievalQA.from_chain_type(
@@ -274,7 +282,7 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 # conversation retrival chain
-memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True, output_key='answer')
 
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
