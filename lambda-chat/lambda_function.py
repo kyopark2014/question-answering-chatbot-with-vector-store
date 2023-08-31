@@ -125,8 +125,6 @@ def get_answer_using_template_with_history(query, vectorstore):
         template=prompt_template, input_variables=["context", "question"]
     )
 
-    from langchain import LLMChain
-
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         chain_type='stuff', # 'refine',
@@ -135,10 +133,10 @@ def get_answer_using_template_with_history(query, vectorstore):
         ), 
         return_source_documents=True,
         memory=memory_chain,
-        #condense_question_prompt=CONDENSE_QUESTION_PROMPT,
+        condense_question_prompt=PROMPT,
         verbose=False, 
         #max_tokens_limit=300,
-        chain_type_kwargs={"prompt": PROMPT}
+        #chain_type_kwargs={"prompt": PROMPT}
     )
 
     #qa = RetrievalQA.from_chain_type(
@@ -150,7 +148,7 @@ def get_answer_using_template_with_history(query, vectorstore):
     #    return_source_documents=True,
     #    chain_type_kwargs={"prompt": PROMPT}
     #)
-    result = qa({"query": query})
+    result = qa({"question": query})
     print('result: ', result)
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
