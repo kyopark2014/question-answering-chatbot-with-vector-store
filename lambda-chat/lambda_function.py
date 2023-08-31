@@ -115,15 +115,13 @@ def summerize_text(text):
     return summary
 
 def get_answer_using_template_with_history(query, vectorstore):  
-    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
-    {context}
-
-    Question: {question}
-    Assistant:"""
-    PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
+    Chat History:
+    {chat_history}
+    Follow Up Input: {question}
+    Standalone question:"""
+    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(prompt_template)
 
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
@@ -133,7 +131,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         ), 
         return_source_documents=True,
         memory=memory_chain,
-        condense_question_prompt=PROMPT,
+        condense_question_prompt=CONDENSE_QUESTION_PROMPT,
         verbose=False, 
         #max_tokens_limit=300,
         #chain_type_kwargs={"question": query}
