@@ -125,6 +125,12 @@ def get_answer_using_template_with_history(query, vectorstore):
         template=prompt_template, input_variables=["context", "question"]
     )
 
+    CONDENSE_QUESTION_TEMPLATE = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
+    Chat History:
+    {chat_history}
+    Follow Up Input: {question}
+    Standalone question:"""
+
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         chain_type='stuff', # 'refine',
@@ -133,7 +139,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         ), 
         return_source_documents=True,
         memory=memory_chain,
-        condense_question_prompt=PROMPT,
+        condense_question_prompt=CONDENSE_QUESTION_TEMPLATE,
         verbose=False, 
         #max_tokens_limit=300,
         #chain_type_kwargs={"prompt": PROMPT}
