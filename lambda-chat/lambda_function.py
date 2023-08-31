@@ -144,12 +144,14 @@ def get_answer_using_template_with_history(query, vectorstore):
         return_source_documents=True,
         memory=memory_chain,
         #qa_prompt=CONDENSE_QUESTION_TEMPLATE,
-        condense_question_prompt=CONDENSE_QUESTION_TEMPLATE,
+        #condense_question_prompt=CONDENSE_QUESTION_TEMPLATE,
         verbose=False, 
+        output_key='answer',
         #max_tokens_limit=300,
         #chain_type_kwargs={"prompt": PROMPT}
         return_generated_question=True,
-        get_chat_history=get_chat_history,
+        #get_chat_history=get_chat_history,
+        get_chat_history=lambda h:h,
         combine_docs_chain_kwargs={"prompt": query}
     )
 
