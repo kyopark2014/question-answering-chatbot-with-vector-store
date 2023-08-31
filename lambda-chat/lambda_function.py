@@ -133,7 +133,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         return_source_documents=True,
         memory=memory_chain,
         #condense_question_prompt=CONDENSE_QUESTION_PROMPT,
-        verbose=True, 
+        verbose=False, 
         #max_tokens_limit=300,
         chain_type_kwargs={"prompt": PROMPT}
     )
