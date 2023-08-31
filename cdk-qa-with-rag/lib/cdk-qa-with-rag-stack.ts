@@ -27,6 +27,7 @@ const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
 const accessType = "preview"; // aws or preview
 const bedrock_region = "us-east-1";  // "us-east-1" "us-west-2" 
+const conversationMode = 'enabled'; 
 
 export class CdkQaWithRagStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -212,7 +213,8 @@ export class CdkQaWithRagStack extends cdk.Stack {
         rag_type: rag_type,
         opensearch_account: opensearch_account,
         opensearch_passwd: opensearch_passwd,
-        accessType: accessType 
+        accessType: accessType,
+        conversationMode: conversationMode
       }
     });     
     lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));  

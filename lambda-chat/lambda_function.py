@@ -28,6 +28,8 @@ from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores import OpenSearchVectorSearch
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
@@ -38,6 +40,7 @@ endpoint_url = os.environ.get('endpoint_url')
 opensearch_url = os.environ.get('opensearch_url')
 bedrock_region = os.environ.get('bedrock_region')
 rag_type = os.environ.get('rag_type')
+conversationMode = os.environ.get('conversationMode', 'enabled')
 
 # opensearch authorization - id/passwd
 opensearch_account = os.environ.get('opensearch_account')
@@ -109,6 +112,56 @@ def summerize_text(text):
     print('summarized text: ', summary)
 
     return summary
+
+def get_answer_using_template_with_history(query, vectorstore):  
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    {context}
+
+    Question: {question}
+    Assistant:"""
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+
+    from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
+    print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
+
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=llm, 
+        chain_type='stuff', # 'refine',
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ), 
+        return_source_documents=True,
+        memory=memory_chain,
+        condense_question_prompt=CONDENSE_QUESTION_PROMPT,
+        verbose=True, 
+        max_tokens_limit=300
+    )
+
+    #qa = RetrievalQA.from_chain_type(
+    #    llm=llm,
+    #    chain_type="stuff",
+    #    retriever=vectorstore.as_retriever(
+    #        search_type="similarity", search_kwargs={"k": 3}
+    #    ),
+    #    return_source_documents=True,
+    #    chain_type_kwargs={"prompt": PROMPT}
+    #)
+    result = qa({"query": query})
+    print('result: ', result)
+    source_documents = result['source_documents']
+    print('source_documents: ', source_documents)
+
+    if len(source_documents)>=1 and enableReference == 'true':
+        reference = get_reference(source_documents)
+        #print('reference: ', reference)
+
+        return result['result']+reference
+    else:
+        return result['result']
+
 
 def get_answer_using_template(query, vectorstore, rag_type):        
     #summarized_query = summerize_text(query)        
@@ -214,6 +267,9 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 
 # embedding
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+
+# conversation retrival chain
+memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 def lambda_handler(event, context):
     print(event)
