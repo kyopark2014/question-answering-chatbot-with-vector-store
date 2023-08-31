@@ -124,9 +124,6 @@ def get_answer_using_template_with_history(query, vectorstore):
         template=prompt_template, input_variables=["context", "question"]
     )
 
-    from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
-    print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
-
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         chain_type='stuff', # 'refine',
@@ -270,6 +267,9 @@ bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 # conversation retrival chain
 memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
+from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
+print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
 
 def lambda_handler(event, context):
     print(event)
