@@ -138,22 +138,25 @@ def get_answer_using_template_with_history(query, vectorstore):
 
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
-        chain_type='stuff', # 'refine',
         retriever=vectorstore.as_retriever(
             search_type="similarity", search_kwargs={"k": 3}
         ),         
+        #condense_question_prompt=CONDENSE_QUESTION_TEMPLATE, # chat history and new question
+        chain_type='stuff', # 'refine',
+        verbose=False, #  for logging to stdout
+        #condense_question_llm
+        #combine_docs_chain_kwargs={"prompt": query}  #  load_qa_chain
+        
         #memory=memory_chain,
         #qa_prompt=CONDENSE_QUESTION_TEMPLATE,
-        #condense_question_prompt=CONDENSE_QUESTION_TEMPLATE,
-        verbose=False, 
-        output_key='answer',
+        #output_key='answer', # (x)
         #max_tokens_limit=300,
-        #chain_type_kwargs={"prompt": PROMPT}
+        #chain_type_kwargs={"prompt": PROMPT} <-- (x)
         return_source_documents=True, # retrieved source
         return_generated_question=False, # generated question
         #get_chat_history=get_chat_history,
         #get_chat_history=lambda h:h,
-        #combine_docs_chain_kwargs={"prompt": query}
+        
     )
 
     #qa = RetrievalQA.from_chain_type(
