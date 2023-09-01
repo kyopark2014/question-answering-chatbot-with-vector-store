@@ -124,30 +124,16 @@ def summerize_text(text):
 #    return "\n".join(res)
 
 def get_answer_using_template_with_history(query, vectorstore, chat_history):  
-    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-    {context}
-
-    Question: {question}
-    Assistant:"""
-    PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
-
-    #CONDENSE_QUESTION_TEMPLATE = """Given the following conversation and a follow up question, #rephrase the follow up question to be a standalone question.
-    #Chat History:
-    #{chat_history}
-    #Follow Up Input: {question}
-    #Standalone question:"""
-
     # Condense Prompt
     condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
     Chat History:
+    
     {chat_history}
+
     Follow Up Input: {question}
     Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
-   
+    
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         retriever=vectorstore.as_retriever(
@@ -174,7 +160,15 @@ def get_answer_using_template_with_history(query, vectorstore, chat_history):
         #get_chat_history=lambda h:h,
         
     )
-    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) # to combine any retrieved documents.
+
+    # combine any retrieved documents.
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    {context}
+
+    Question: {question}
+    Assistant:"""
+    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
     
     # extract chat history
     chats = chat_memory.load_memory_variables({})
@@ -185,9 +179,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_history):
     result = qa({"question": query, "chat_history": chat_history})    
     print('result: ', result)    
     
-    #chat_history.append([(query, result["answer"])])
-    #print('chat_history: ', chat_history)
-
+    # get the reference
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
@@ -198,7 +190,6 @@ def get_answer_using_template_with_history(query, vectorstore, chat_history):
         return result['answer']+reference
     else:
         return result['answer']
-
 
 def get_answer_using_template(query, vectorstore, rag_type):        
     #summarized_query = summerize_text(query)        
