@@ -306,7 +306,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, enableRAGForFaiss
+    global modelId, llm, vectorstore, enableRAGForFaiss, conversationMode
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
