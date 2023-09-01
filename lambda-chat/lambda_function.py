@@ -137,7 +137,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     Chat History:
     {chat_history}
     Human: {question}
-    AI:"""
+    Assistant:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     
     qa = ConversationalRetrievalChain.from_llm(
