@@ -170,6 +170,9 @@ def get_answer_using_template_with_history(query, vectorstore):
     print('chat_history: ', chat_history)
     print('result: ', result)
 
+    chats = memory.load_memory_variables({})
+    print('chats: ', chats)
+
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
