@@ -142,9 +142,10 @@ def get_answer_using_template_with_history(query, vectorstore):
 
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
-        retriever=vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 3}
-        ),         
+        #retriever=vectorstore.as_retriever(
+        #    search_type="similarity", search_kwargs={"k": 3}
+        #),         
+        retriever=vectorstore.as_retriever(),
         condense_question_prompt=template, # chat history and new question
         chain_type='stuff', # 'refine'
         verbose=False, # for logging to stdout
