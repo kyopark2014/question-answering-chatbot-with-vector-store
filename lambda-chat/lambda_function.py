@@ -116,9 +116,9 @@ def summerize_text(text):
 
     return summary
 
-def get_chat_history(inputs):
-    inputs = [i.content for i in inputs]
-    return  '\n'.join(inputs)
+#def get_chat_history(inputs):
+#    inputs = [i.content for i in inputs]
+#    return  '\n'.join(inputs)
 
 chat_history = []
 def get_answer_using_template_with_history(query, vectorstore):  
@@ -304,13 +304,14 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 # conversation retrival chain
-#memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer')
-memory = ConversationBufferMemory()
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer')
 
-from langchain.chains import ConversationChain
-conversation = ConversationChain(
-    llm=llm, verbose=True, memory=memory
-)
+
+#memory = ConversationBufferMemory()
+#from langchain.chains import ConversationChain
+#conversation = ConversationChain(
+#    llm=llm, verbose=True, memory=memory
+#)
 
 #from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 #print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
@@ -392,8 +393,8 @@ def lambda_handler(event, context):
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)
                     else:
-                        #msg = llm(text)
-                        msg = conversation.predict(input=text)
+                        msg = llm(text)
+                        #msg = conversation.predict(input=text)
                 #print('msg: ', msg)
             
         elif type == 'document':
