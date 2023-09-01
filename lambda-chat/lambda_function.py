@@ -388,7 +388,7 @@ def lambda_handler(event, context):
                         if enableConversationMode == 'true':
                             msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
 
-                            chat_memory.save_context(({"input": text}, {"output": msg}))
+                            chat_memory.save_context(({"inputs": text}, {"outputs": msg}))
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)
                     else:
