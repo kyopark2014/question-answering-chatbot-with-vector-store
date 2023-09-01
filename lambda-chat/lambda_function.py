@@ -41,6 +41,7 @@ opensearch_url = os.environ.get('opensearch_url')
 bedrock_region = os.environ.get('bedrock_region')
 rag_type = os.environ.get('rag_type')
 conversationMode = os.environ.get('conversationMode', 'enabled')
+print('conversationMode: ', conversationMode)
 enableReference = os.environ.get('enableReference', 'false')
 
 # opensearch authorization - id/passwd
@@ -142,8 +143,8 @@ def get_answer_using_template_with_history(query, vectorstore):
             search_type="similarity", search_kwargs={"k": 3}
         ),         
         condense_question_prompt=CONDENSE_QUESTION_TEMPLATE, # chat history and new question
-        chain_type='stuff', # 'refine',
-        verbose=False, #  for logging to stdout
+        chain_type='stuff', # 'refine'
+        verbose=False, # for logging to stdout
         #condense_question_llm
         #combine_docs_chain_kwargs={"prompt": query}  #  load_qa_chain
         
