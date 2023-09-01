@@ -43,6 +43,7 @@ rag_type = os.environ.get('rag_type')
 conversationMode = os.environ.get('conversationMode', 'enabled')
 print('conversationMode: ', conversationMode)
 enableReference = os.environ.get('enableReference', 'false')
+enableRAG = os.environ.get('enableRAG', 'true')
 
 # opensearch authorization - id/passwd
 opensearch_account = os.environ.get('opensearch_account')
@@ -179,6 +180,9 @@ def get_answer_using_template_with_history(query, vectorstore):
 
     print('result: ', result)
     #chat_history = [(query, result["answer"])]
+    print('history: ', )
+    for chat in result[chat_history]:
+        print(chat+'\n')
 
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
@@ -300,6 +304,11 @@ bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 # conversation retrival chain
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer')
 
+from langchain.chains import ConversationChain
+conversation = ConversationChain(
+    llm=llm, verbose=True, memory=memory
+)
+
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
 
@@ -359,6 +368,10 @@ def lambda_handler(event, context):
             elif text == 'disableConversationMode':
                 conversationMode = 'false'
                 msg  = "Conversation mode is disabled"
+            elif text == 'enableRAG':
+                enableRAG = 'true'
+            elif text == 'disableRAG':
+                enableRAG = 'false'
             else:
 
                 if rag_type == 'faiss' and enableRAGForFaiss == False: 
@@ -368,13 +381,14 @@ def lambda_handler(event, context):
                     textCount = len(text.split())
                     print(f"query size: {querySize}, workds: {textCount}")
 
-                    if querySize<1800: # max 1985
+                    if querySize<1800 and enableRAG=='true': # max 1985
                         if conversationMode == 'true':
                             msg = get_answer_using_template_with_history(text, vectorstore)
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)
                     else:
-                        msg = llm(text)
+                        #msg = llm(text)
+                        msg = conversation.predict(input=text)
                 #print('msg: ', msg)
             
         elif type == 'document':

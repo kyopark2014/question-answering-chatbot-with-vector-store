@@ -29,6 +29,7 @@ const accessType = "preview"; // aws or preview
 const bedrock_region = "us-east-1";  // "us-east-1" "us-west-2" 
 const conversationMode = 'true'; 
 const enableReference = 'false';
+const enableRAG = 'true';
 
 export class CdkQaWithRagStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -216,7 +217,8 @@ export class CdkQaWithRagStack extends cdk.Stack {
         opensearch_passwd: opensearch_passwd,
         accessType: accessType,
         conversationMode: conversationMode,
-        enableReference: enableReference
+        enableReference: enableReference,
+        enableRAG: enableRAG
       }
     });     
     lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));  
