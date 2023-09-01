@@ -183,7 +183,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_history):
     print('chats: ', chats['chat_history'])
 
     
-    chat_history = [(query, result["answer"])]
+    chat_history.append([(query, result["answer"])])
     print('chat_history: ', chat_history)
 
     source_documents = result['source_documents']
