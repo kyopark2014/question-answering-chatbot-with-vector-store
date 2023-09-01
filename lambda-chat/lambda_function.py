@@ -155,8 +155,8 @@ def get_answer_using_template_with_history(query, vectorstore):
         #max_tokens_limit=300,
         #chain_type_kwargs={"prompt": PROMPT} <-- (x)
         
-        #return_source_documents=True, # retrieved source
-        #return_generated_question=False, # generated question
+        return_source_documents=True, # retrieved source
+        return_generated_question=False, # generated question
         
         #get_chat_history=get_chat_history,
         #get_chat_history=lambda h:h,
@@ -190,16 +190,17 @@ def get_answer_using_template_with_history(query, vectorstore):
     #chat_history = [(query, result["answer"])]
 
 
-    source_documents = result['source_documents']
-    print('source_documents: ', source_documents)
+    #source_documents = result['source_documents']
+    #print('source_documents: ', source_documents)
 
-    if len(source_documents)>=1 and enableReference == 'true':
-        reference = get_reference(source_documents)
+    #if len(source_documents)>=1 and enableReference == 'true':
+    #    reference = get_reference(source_documents)
         #print('reference: ', reference)
 
-        return result['result']+reference
-    else:
-        return result['result']
+    #    return result['result']+reference
+    #else:
+    #    return result['result']
+    return result['answer']
 
 
 def get_answer_using_template(query, vectorstore, rag_type):        
