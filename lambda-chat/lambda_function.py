@@ -137,7 +137,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     Chat History:
     {chat_history}
     Human: {question}
-    Assistant:"""
+    AI:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     
     qa = ConversationalRetrievalChain.from_llm(
@@ -172,7 +172,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     {context}
 
     Question: {question}
-    Assistant:"""
+    AI:"""
     qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
     
     # extract chat history
@@ -301,10 +301,10 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 # conversation retrival chain
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer')
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='AI')
 
 # Conversation
-chat_memory = ConversationBufferMemory()
+chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='AI')
 #conversation = ConversationChain(
 #    llm=llm, verbose=True, memory=memory
 #)
