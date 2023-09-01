@@ -41,6 +41,7 @@ opensearch_url = os.environ.get('opensearch_url')
 bedrock_region = os.environ.get('bedrock_region')
 rag_type = os.environ.get('rag_type')
 conversationMode = os.environ.get('conversationMode', 'enabled')
+enableReference = os.environ.get('enableReference', 'false')
 
 # opensearch authorization - id/passwd
 opensearch_account = os.environ.get('opensearch_account')
@@ -54,7 +55,6 @@ modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
 enableRAGForFaiss = False   
 accessType = os.environ.get('accessType')
-enableReference = os.environ.get('enableReference', 'true')
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -118,6 +118,7 @@ def get_chat_history(inputs):
     inputs = [i.content for i in inputs]
     return  '\n'.join(inputs)
 
+chat_history = []
 def get_answer_using_template_with_history(query, vectorstore):  
     prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
@@ -165,7 +166,12 @@ def get_answer_using_template_with_history(query, vectorstore):
     #    chain_type_kwargs={"prompt": PROMPT}
     #)
     result = qa({"question": query})
+    result = qa({"question": query, "chat_history": chat_history})
+
     print('result: ', result)
+
+
+    
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
@@ -332,21 +338,36 @@ def lambda_handler(event, context):
         if type == 'text':
             text = body
 
-            if rag_type == 'faiss' and enableRAGForFaiss == False: 
-                msg = llm(text)
-            else: 
-                querySize = len(text)
-                textCount = len(text.split())
-                print(f"query size: {querySize}, workds: {textCount}")
+             # debugging
+            if text == 'enableReference':
+                enableReference = 'true'
+                msg  = "Referece is enabled"
+            elif text == 'disableReference':
+                enableReference = 'false'
+                msg  = "Reference is disabled"
+            elif text == 'enableConversationMode':
+                conversationMode = 'true'
+                msg  = "Reference is enabled"
+            elif text == 'disableConversationMode':
+                conversationMode = 'false'
+                msg  = "Reference is disabled"
+            else:
 
-                if querySize<1800: # max 1985
-                    if conversationMode == 'enabled':
-                        msg = get_answer_using_template_with_history(text, vectorstore)
-                    else:
-                        msg = get_answer_using_template(text, vectorstore, rag_type)
-                else:
+                if rag_type == 'faiss' and enableRAGForFaiss == False: 
                     msg = llm(text)
-            #print('msg: ', msg)
+                else: 
+                    querySize = len(text)
+                    textCount = len(text.split())
+                    print(f"query size: {querySize}, workds: {textCount}")
+
+                    if querySize<1800: # max 1985
+                        if conversationMode == 'enabled':
+                            msg = get_answer_using_template_with_history(text, vectorstore)
+                        else:
+                            msg = get_answer_using_template(text, vectorstore, rag_type)
+                    else:
+                        msg = llm(text)
+                #print('msg: ', msg)
             
         elif type == 'document':
             object = body
