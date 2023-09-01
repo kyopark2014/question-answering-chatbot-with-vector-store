@@ -171,6 +171,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     
     # extract chat history
     chats = chat_memory.load_memory_variables({})
+    print('chats: ', chats)
     chat_history = chats['chat_history']
     print('chat_history: ', chat_history)
 
@@ -184,8 +185,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
 
     if len(source_documents)>=1 and enableReference == 'true':
         reference = get_reference(source_documents)
-        print('reference: ', reference)
-
+        #print('reference: ', reference)
         return result['answer']+reference
     else:
         return result['answer']
