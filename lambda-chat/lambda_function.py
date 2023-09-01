@@ -310,8 +310,8 @@ conversation = ConversationChain(
     llm=llm, verbose=True, memory=memory
 )
 
-from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
-print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
+#from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
+#print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
 
 def lambda_handler(event, context):
     print(event)
@@ -324,7 +324,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, isReady, conversationMode, enableReference
+    global modelId, llm, vectorstore, isReady, conversationMode, enableReference, enableRAG
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
