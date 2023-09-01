@@ -30,6 +30,7 @@ from langchain.prompts import PromptTemplate
 from langchain.vectorstores import OpenSearchVectorSearch
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationChain
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
@@ -176,17 +177,19 @@ def get_answer_using_template_with_history(query, vectorstore, chat_history):
     )
     qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) # to combine any retrieved documents.
 
-    
     result = qa({"question": query, "chat_history": chat_history})
     
     print('result: ', result)
 
-    chats = memory.load_memory_variables({})
-    print('chats: ', chats['chat_history'])
+    # extract history
+    chats = chat_memory.load_memory_variables({})
+    chat_history = chats['chat_history']
 
-    
-    chat_history.append([(query, result["answer"])])
     print('chat_history: ', chat_history)
+    
+    
+    #chat_history.append([(query, result["answer"])])
+    #print('chat_history: ', chat_history)
 
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
@@ -308,6 +311,11 @@ bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 # conversation retrival chain
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer')
 
+# Conversation
+chat_memory = ConversationBufferMemory()
+#conversation = ConversationChain(
+#    llm=llm, verbose=True, memory=memory
+#)
 
 #memory = ConversationBufferMemory()
 #from langchain.chains import ConversationChain
@@ -392,6 +400,8 @@ def lambda_handler(event, context):
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
                             msg = get_answer_using_template_with_history(text, vectorstore, chat_history)
+
+                            chat_memory.save_context(({"input": text}, {"output": msg}))
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)
                     else:
