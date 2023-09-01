@@ -133,11 +133,9 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     #Follow Up Input: {question}
     #Standalone question:"""
 
-    condense_template = """Given the following conversation and a follow up question, answer frendly.
+    condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
     Chat History:
-
     {chat_history}
-
     Human: {question}
     AI:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
