@@ -139,10 +139,10 @@ def get_answer_using_template_with_history(query, vectorstore):
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
-        #retriever=vectorstore.as_retriever(
-        #    search_type="similarity", search_kwargs={"k": 3}
-        #),         
-        retriever=vectorstore.as_retriever(),
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ),         
+        #retriever=vectorstore.as_retriever(),
         #condense_question_prompt=template, # chat history and new question
         chain_type='stuff', # 'refine'
         verbose=False, # for logging to stdout
@@ -189,18 +189,16 @@ def get_answer_using_template_with_history(query, vectorstore):
     print('result: ', result)
     #chat_history = [(query, result["answer"])]
 
+    source_documents = result['source_documents']
+    print('source_documents: ', source_documents)
 
-    #source_documents = result['source_documents']
-    #print('source_documents: ', source_documents)
-
-    #if len(source_documents)>=1 and enableReference == 'true':
-    #    reference = get_reference(source_documents)
+    if len(source_documents)>=1 and enableReference == 'true':
+        reference = get_reference(source_documents)
         #print('reference: ', reference)
 
-    #    return result['result']+reference
-    #else:
-    #    return result['result']
-    return result['answer']
+        return result['answer']+reference
+    else:
+        return result['answer']
 
 
 def get_answer_using_template(query, vectorstore, rag_type):        
