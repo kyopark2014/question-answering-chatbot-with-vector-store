@@ -153,8 +153,10 @@ def get_answer_using_template_with_history(query, vectorstore):
         #output_key='answer', # (x)
         #max_tokens_limit=300,
         #chain_type_kwargs={"prompt": PROMPT} <-- (x)
-        return_source_documents=True, # retrieved source
-        return_generated_question=False, # generated question
+        
+        #return_source_documents=True, # retrieved source
+        #return_generated_question=False, # generated question
+        
         #get_chat_history=get_chat_history,
         #get_chat_history=lambda h:h,
         
