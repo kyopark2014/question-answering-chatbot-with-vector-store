@@ -145,7 +145,7 @@ def get_answer_using_template_with_history(query, vectorstore):
     Follow Up Input: {question}
     Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
-    
+   
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         retriever=vectorstore.as_retriever(
@@ -169,17 +169,22 @@ def get_answer_using_template_with_history(query, vectorstore):
         return_generated_question=False, # generated question
         
         #get_chat_history=get_chat_history,
-        #get_chat_history=lambda h:h,
+        get_chat_history=lambda h:h,
         
     )
     qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) # to combine any retrieved documents.
 
+    
     result = qa({"question": query, "chat_history": chat_history})
-    print('chat_history: ', chat_history)
+    
     print('result: ', result)
 
     chats = memory.load_memory_variables({})
     print('chats: ', chats['chat_history'])
+
+    
+    chat_history = [(query, result["answer"])]
+    print('chat_history: ', chat_history)
 
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
