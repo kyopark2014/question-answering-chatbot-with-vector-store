@@ -149,11 +149,11 @@ def get_answer_using_template_with_history(query, vectorstore):
         #condense_question_llm
         #combine_docs_chain_kwargs={"prompt": query}  #  load_qa_chain
 
-        rephrase_question=False,  # to pass the new generated question to the combine_docs_chain
+        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
         
         memory=memory,
         #qa_prompt=CONDENSE_QUESTION_TEMPLATE,
-        #output_key='answer', # (x)
+        #output_key='answer', 
         #max_tokens_limit=300,
         #chain_type_kwargs={"prompt": PROMPT} <-- (x)
         
@@ -164,22 +164,10 @@ def get_answer_using_template_with_history(query, vectorstore):
         #get_chat_history=lambda h:h,
         
     )
-    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template)
+    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) # to combine any retrieved documents.
 
-    #qa = RetrievalQA.from_chain_type(
-    #    llm=llm,
-    #    chain_type="stuff",
-    #    retriever=vectorstore.as_retriever(
-    #        search_type="similarity", search_kwargs={"k": 3}
-    #    ),
-    #    return_source_documents=True,
-    #    chain_type_kwargs={"prompt": PROMPT}
-    #)
-    #result = qa({"question": query})
     result = qa({"question": query, "chat_history": chat_history})
-
     print('chat_history: ', chat_history)
-
     print('result: ', result)
 
     source_documents = result['source_documents']
