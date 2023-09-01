@@ -180,7 +180,8 @@ def get_answer_using_template_with_history(query, vectorstore):
 
     print('result: ', result)
     #chat_history = [(query, result["answer"])]
-    print('history: ', result[chat_history])
+    for chat in result['chat_history']:
+        print(chat+'\n')
 
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
