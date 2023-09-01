@@ -123,11 +123,11 @@ def summerize_text(text):
 #        res.append(f"Human:{human}\nAI:{ai}")
 #    return "\n".join(res)
 
-def get_answer_using_template_with_history(query, vectorstore, chat_history):  
+def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
     # Condense Prompt
     condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
     Chat History:
-    
+
     {chat_history}
 
     Follow Up Input: {question}
@@ -157,8 +157,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_history):
         return_generated_question=False, # generated question
         
         #get_chat_history=get_chat_history,
-        #get_chat_history=lambda h:h,
-        
+        #get_chat_history=lambda h:h,        
     )
 
     # combine any retrieved documents.
@@ -325,7 +324,8 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, isReady, enableConversationMode, enableReference, enableRAG, chat_history
+    global modelId, llm, vectorstore, isReady, chat_memory
+    global enableConversationMode, enableReference, enableRAG  # debug
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
@@ -387,7 +387,7 @@ def lambda_handler(event, context):
 
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
-                            msg = get_answer_using_template_with_history(text, vectorstore, chat_history)
+                            msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
 
                             chat_memory.save_context(({"input": text}, {"output": msg}))
                         else:
