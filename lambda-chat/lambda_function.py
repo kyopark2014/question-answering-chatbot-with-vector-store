@@ -116,11 +116,11 @@ def summerize_text(text):
 
     return summary
 
-def get_chat_history(inputs) -> str:
-    res = []
-    for human, ai in inputs:
-        res.append(f"Human:{human}\nAI:{ai}")
-    return "\n".join(res)
+#def get_chat_history(inputs) -> str:
+#    res = []
+#    for human, ai in inputs:
+#        res.append(f"Human:{human}\nAI:{ai}")
+#    return "\n".join(res)
 
 chat_history = []
 def get_answer_using_template_with_history(query, vectorstore, chat_history):  
@@ -170,7 +170,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_history):
         return_source_documents=True, # retrieved source
         return_generated_question=False, # generated question
         
-        get_chat_history=get_chat_history,
+        #get_chat_history=get_chat_history,
         #get_chat_history=lambda h:h,
         
     )
