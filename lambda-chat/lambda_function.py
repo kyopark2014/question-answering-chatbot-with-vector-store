@@ -171,8 +171,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     
     # extract chat history
     chats = chat_memory.load_memory_variables({})
-    print('chats: ', chats)
-    chat_history = chats['chat_history']
+    chat_history = chats['history']
     print('chat_history: ', chat_history)
 
     # make a question using chat history
