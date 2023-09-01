@@ -146,7 +146,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         #    search_type="similarity", search_kwargs={"k": 3}
         #),         
         retriever=vectorstore.as_retriever(),
-        condense_question_prompt=template, # chat history and new question
+        #condense_question_prompt=template, # chat history and new question
         chain_type='stuff', # 'refine'
         verbose=False, # for logging to stdout
         #condense_question_llm
@@ -165,6 +165,17 @@ def get_answer_using_template_with_history(query, vectorstore):
         #get_chat_history=lambda h:h,
         
     )
+
+    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template("""
+    {context}
+
+    Use at maximum 3 sentences to answer the question inside the <q></q> XML tags. 
+
+    <q>{question}</q>
+
+    Do not use any XML tags in the answer. If the answer is not in the context say "Sorry, I don't know, as the answer was not found in the context."
+
+    Answer:""")
 
     #qa = RetrievalQA.from_chain_type(
     #    llm=llm,
