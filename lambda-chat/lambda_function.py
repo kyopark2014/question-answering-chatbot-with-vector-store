@@ -136,13 +136,16 @@ def get_answer_using_template_with_history(query, vectorstore):
     {chat_history}
     Follow Up Input: {question}
     Standalone question:"""
+    template = PromptTemplate(
+        template=prompt_template, input_variables=["chat_history", "question"]
+    )
 
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         retriever=vectorstore.as_retriever(
             search_type="similarity", search_kwargs={"k": 3}
         ),         
-        condense_question_prompt=CONDENSE_QUESTION_TEMPLATE, # chat history and new question
+        condense_question_prompt=template, # chat history and new question
         chain_type='stuff', # 'refine'
         verbose=False, # for logging to stdout
         #condense_question_llm
