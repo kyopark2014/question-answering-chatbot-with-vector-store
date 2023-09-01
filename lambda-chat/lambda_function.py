@@ -55,7 +55,7 @@ opensearch_passwd = os.environ.get('opensearch_passwd')
 
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
-enableRAGForFaiss = False   
+isReady = False   
 accessType = os.environ.get('accessType')
 
 # load documents from s3
@@ -302,7 +302,8 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 # conversation retrival chain
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer')
+#memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer')
+memory = ConversationBufferMemory()
 
 from langchain.chains import ConversationChain
 conversation = ConversationChain(
@@ -323,7 +324,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, enableRAGForFaiss, conversationMode
+    global modelId, llm, vectorstore, isReady, conversationMode, enableReference
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
@@ -336,7 +337,7 @@ def lambda_handler(event, context):
             http_auth=(opensearch_account, opensearch_passwd), # http_auth=awsauth,
         )
     elif rag_type == 'faiss':
-        print('enableRAGForFaiss = ', enableRAGForFaiss)
+        print('isReady = ', isReady)
     
     start = int(time.time())    
 
@@ -370,11 +371,13 @@ def lambda_handler(event, context):
                 msg  = "Conversation mode is disabled"
             elif text == 'enableRAG':
                 enableRAG = 'true'
+                msg  = "RAG is enabled"
             elif text == 'disableRAG':
                 enableRAG = 'false'
+                msg  = "RAG is disabled"
             else:
 
-                if rag_type == 'faiss' and enableRAGForFaiss == False: 
+                if rag_type == 'faiss' and isReady == False: 
                     msg = llm(text)
                 else: 
                     querySize = len(text)
@@ -415,12 +418,12 @@ def lambda_handler(event, context):
             print('docs size: ', len(docs))
                         
             if rag_type == 'faiss':
-                if enableRAGForFaiss == False:   
+                if isReady == False:   
                     vectorstore = FAISS.from_documents( # create vectorstore from a document
                         docs,  # documents
                         bedrock_embeddings  # embeddings
                     )
-                    enableRAGForFaiss = True
+                    isReady = True
                 else:
                     vectorstore.add_documents(docs)
                     print('vector store size: ', len(vectorstore.docstore._dict))
