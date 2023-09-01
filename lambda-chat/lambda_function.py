@@ -351,10 +351,10 @@ def lambda_handler(event, context):
                 msg  = "Reference is disabled"
             elif text == 'enableConversationMode':
                 conversationMode = 'true'
-                msg  = "Reference is enabled"
+                msg  = "Conversation mode is enabled"
             elif text == 'disableConversationMode':
                 conversationMode = 'false'
-                msg  = "Reference is disabled"
+                msg  = "Conversation mode is disabled"
             else:
 
                 if rag_type == 'faiss' and enableRAGForFaiss == False: 
@@ -365,7 +365,7 @@ def lambda_handler(event, context):
                     print(f"query size: {querySize}, workds: {textCount}")
 
                     if querySize<1800: # max 1985
-                        if conversationMode == 'enabled':
+                        if conversationMode == 'true':
                             msg = get_answer_using_template_with_history(text, vectorstore)
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)
