@@ -163,16 +163,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         
     )
 
-    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template("""
-    {context}
-
-    Use at maximum 3 sentences to answer the question inside the <q></q> XML tags. 
-
-    <q>{question}</q>
-
-    Do not use any XML tags in the answer. If the answer is not in the context say "Sorry, I don't know, as the answer was not found in the context."
-
-    Answer:""")
+    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template)
 
     #qa = RetrievalQA.from_chain_type(
     #    llm=llm,
