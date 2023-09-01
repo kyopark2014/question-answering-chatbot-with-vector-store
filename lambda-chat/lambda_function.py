@@ -148,6 +148,8 @@ def get_answer_using_template_with_history(query, vectorstore):
         verbose=False, # for logging to stdout
         #condense_question_llm
         #combine_docs_chain_kwargs={"prompt": query}  #  load_qa_chain
+
+        rephrase_question=False,  # to pass the new generated question to the combine_docs_chain
         
         memory=memory,
         #qa_prompt=CONDENSE_QUESTION_TEMPLATE,
@@ -179,9 +181,6 @@ def get_answer_using_template_with_history(query, vectorstore):
     print('chat_history: ', chat_history)
 
     print('result: ', result)
-    #chat_history = [(query, result["answer"])]
-    for chat in result['chat_history']:
-        print(chat+'\n')
 
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
