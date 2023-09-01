@@ -148,7 +148,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         #condense_question_llm
         #combine_docs_chain_kwargs={"prompt": query}  #  load_qa_chain
         
-        #memory=memory_chain,
+        memory=memory,
         #qa_prompt=CONDENSE_QUESTION_TEMPLATE,
         #output_key='answer', # (x)
         #max_tokens_limit=300,
@@ -294,7 +294,7 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
 # conversation retrival chain
-memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True, output_key='answer')
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer')
 
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
