@@ -125,13 +125,21 @@ def summerize_text(text):
 
 def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
     # Condense Prompt
-    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
+    #condense_template = """Given the following conversation and a follow up question, rephrase the #follow up question to be a standalone question.
+    #Chat History:
+
+    #{chat_history}
+
+    #Follow Up Input: {question}
+    #Standalone question:"""
+
+    condense_template = """Given the following conversation and a follow up question, answer frendly.
     Chat History:
 
     {chat_history}
 
-    Follow Up Input: {question}
-    Standalone question:"""
+    Human: {question}
+    AI:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     
     qa = ConversationalRetrievalChain.from_llm(
