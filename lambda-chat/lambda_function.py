@@ -143,7 +143,7 @@ def get_answer_using_template_with_history(query, vectorstore):
             search_type="similarity", search_kwargs={"k": 3}
         ), 
         return_source_documents=True,
-        memory=memory_chain,
+        #memory=memory_chain,
         #qa_prompt=CONDENSE_QUESTION_TEMPLATE,
         #condense_question_prompt=CONDENSE_QUESTION_TEMPLATE,
         verbose=False, 
@@ -152,7 +152,7 @@ def get_answer_using_template_with_history(query, vectorstore):
         #chain_type_kwargs={"prompt": PROMPT}
         return_generated_question=True,
         #get_chat_history=get_chat_history,
-        get_chat_history=lambda h:h,
+        #get_chat_history=lambda h:h,
         combine_docs_chain_kwargs={"prompt": query}
     )
 
@@ -171,7 +171,7 @@ def get_answer_using_template_with_history(query, vectorstore):
     print('result: ', result)
 
 
-    
+
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
