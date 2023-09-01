@@ -132,18 +132,17 @@ def get_answer_using_template_with_history(query, vectorstore):
         template=prompt_template, input_variables=["context", "question"]
     )
 
-    CONDENSE_QUESTION_TEMPLATE = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
-    Chat History:
-    {chat_history}
-    Follow Up Input: {question}
-    Standalone question:"""
+    #CONDENSE_QUESTION_TEMPLATE = """Given the following conversation and a follow up question, #rephrase the follow up question to be a standalone question.
+    #Chat History:
+    #{chat_history}
+    #Follow Up Input: {question}
+    #Standalone question:"""
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         retriever=vectorstore.as_retriever(
             search_type="similarity", search_kwargs={"k": 3}
         ),         
-        #retriever=vectorstore.as_retriever(),
         #condense_question_prompt=template, # chat history and new question
         chain_type='stuff', # 'refine'
         verbose=False, # for logging to stdout
@@ -163,7 +162,6 @@ def get_answer_using_template_with_history(query, vectorstore):
         #get_chat_history=lambda h:h,
         
     )
-
     qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template)
 
     #qa = RetrievalQA.from_chain_type(
@@ -182,9 +180,7 @@ def get_answer_using_template_with_history(query, vectorstore):
 
     print('result: ', result)
     #chat_history = [(query, result["answer"])]
-    print('history: ', )
-    for chat in result[chat_history]:
-        print(chat+'\n')
+    print('history: ', result[chat_history])
 
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
@@ -366,10 +362,10 @@ def lambda_handler(event, context):
             elif text == 'disableReference':
                 enableReference = 'false'
                 msg  = "Reference is disabled"
-            elif text == 'enableenableConversationMode':
+            elif text == 'enableConversationMode':
                 enableConversationMode = 'true'
                 msg  = "Conversation mode is enabled"
-            elif text == 'disableenableConversationMode':
+            elif text == 'disableConversationMode':
                 enableConversationMode = 'false'
                 msg  = "Conversation mode is disabled"
             elif text == 'enableRAG':
