@@ -40,8 +40,8 @@ endpoint_url = os.environ.get('endpoint_url')
 opensearch_url = os.environ.get('opensearch_url')
 bedrock_region = os.environ.get('bedrock_region')
 rag_type = os.environ.get('rag_type')
-conversationMode = os.environ.get('conversationMode', 'enabled')
-print('conversationMode: ', conversationMode)
+enableConversationMode = os.environ.get('enableConversationMode', 'enabled')
+print('enableConversationMode: ', enableConversationMode)
 enableReference = os.environ.get('enableReference', 'false')
 enableRAG = os.environ.get('enableRAG', 'true')
 
@@ -175,8 +175,10 @@ def get_answer_using_template_with_history(query, vectorstore):
     #    return_source_documents=True,
     #    chain_type_kwargs={"prompt": PROMPT}
     #)
-    result = qa({"question": query})
-    #result = qa({"question": query, "chat_history": chat_history})
+    #result = qa({"question": query})
+    result = qa({"question": query, "chat_history": chat_history})
+
+    print('chat_history: ', chat_history)
 
     print('result: ', result)
     #chat_history = [(query, result["answer"])]
@@ -324,7 +326,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, isReady, conversationMode, enableReference, enableRAG
+    global modelId, llm, vectorstore, isReady, enableConversationMode, enableReference, enableRAG
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
@@ -363,11 +365,11 @@ def lambda_handler(event, context):
             elif text == 'disableReference':
                 enableReference = 'false'
                 msg  = "Reference is disabled"
-            elif text == 'enableConversationMode':
-                conversationMode = 'true'
+            elif text == 'enableenableConversationMode':
+                enableConversationMode = 'true'
                 msg  = "Conversation mode is enabled"
-            elif text == 'disableConversationMode':
-                conversationMode = 'false'
+            elif text == 'disableenableConversationMode':
+                enableConversationMode = 'false'
                 msg  = "Conversation mode is disabled"
             elif text == 'enableRAG':
                 enableRAG = 'true'
@@ -385,7 +387,7 @@ def lambda_handler(event, context):
                     print(f"query size: {querySize}, workds: {textCount}")
 
                     if querySize<1800 and enableRAG=='true': # max 1985
-                        if conversationMode == 'true':
+                        if enableConversationMode == 'true':
                             msg = get_answer_using_template_with_history(text, vectorstore)
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)
