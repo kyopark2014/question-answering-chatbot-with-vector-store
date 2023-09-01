@@ -174,8 +174,8 @@ def get_answer_using_template_with_history(query, vectorstore):
     #    return_source_documents=True,
     #    chain_type_kwargs={"prompt": PROMPT}
     #)
-    #result = qa({"question": query})
-    result = qa({"question": query, "chat_history": chat_history})
+    result = qa({"question": query})
+    #result = qa({"question": query, "chat_history": chat_history})
 
     print('result: ', result)
     #chat_history = [(query, result["answer"])]
