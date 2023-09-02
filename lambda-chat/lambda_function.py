@@ -117,22 +117,7 @@ def summerize_text(text):
 
     return summary
 
-#def get_chat_history(inputs) -> str:
-#    res = []
-#    for human, ai in inputs:
-#        res.append(f"Human:{human}\nAI:{ai}")
-#    return "\n".join(res)
-
 def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
-    # Condense Prompt
-    #condense_template = """Given the following conversation and a follow up question, rephrase the #follow up question to be a standalone question.
-    #Chat History:
-
-    #{chat_history}
-
-    #Follow Up Input: {question}
-    #Standalone question:"""
-
     condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
     Chat History:
     {chat_history}
@@ -148,22 +133,12 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
         chain_type='stuff', # 'refine'
         verbose=False, # for logging to stdout
-        #condense_question_llm
-        #combine_docs_chain_kwargs={"prompt": query}  #  load_qa_chain
-
         rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
         
         memory=memory,
-        #qa_prompt=CONDENSE_QUESTION_TEMPLATE,
-        #output_key='answer', 
         #max_tokens_limit=300,
-        #chain_type_kwargs={"prompt": PROMPT} <-- (x)
-        
         return_source_documents=True, # retrieved source
         return_generated_question=False, # generated question
-        
-        #get_chat_history=get_chat_history,
-        #get_chat_history=lambda h:h,        
     )
 
     # combine any retrieved documents.
@@ -300,23 +275,11 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 # embedding
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 
-# conversation retrival chain
+# memory for retrival docs
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='AI')
 
-# Conversation
+# memory for conversation
 chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='AI')
-#conversation = ConversationChain(
-#    llm=llm, verbose=True, memory=memory
-#)
-
-#memory = ConversationBufferMemory()
-#from langchain.chains import ConversationChain
-#conversation = ConversationChain(
-#    llm=llm, verbose=True, memory=memory
-#)
-
-#from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
-#print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
 
 def lambda_handler(event, context):
     print(event)
@@ -362,7 +325,7 @@ def lambda_handler(event, context):
         if type == 'text':
             text = body
 
-             # debugging
+            # debugging
             if text == 'enableReference':
                 enableReference = 'true'
                 msg  = "Referece is enabled"
@@ -382,7 +345,6 @@ def lambda_handler(event, context):
                 enableRAG = 'false'
                 msg  = "RAG is disabled"
             else:
-
                 if rag_type == 'faiss' and isReady == False: 
                     msg = llm(text)
                 else: 
@@ -393,14 +355,12 @@ def lambda_handler(event, context):
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
                             msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
-
-                            chat_memory.save_context({"input": text}, {"output": msg})
                         else:
-                            msg = get_answer_using_template(text, vectorstore, rag_type)
+                            msg = get_answer_using_template(text, vectorstore, rag_type)                            
                     else:
                         msg = llm(text)
-                        #msg = conversation.predict(input=text)
                 #print('msg: ', msg)
+                chat_memory.save_context({"input": text}, {"output": msg})
             
         elif type == 'document':
             object = body
