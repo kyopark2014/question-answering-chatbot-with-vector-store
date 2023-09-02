@@ -305,6 +305,62 @@ else:
     msg = llm(text)
 ```
 
+##### Vector Store를 이용하여 관련 문서 조회
+
+아래와 같이 [similarity_search()](https://python.langchain.com/docs/integrations/vectorstores/opensearch#similarity_search-using-approximate-k-nn)를 이용하여 vector store에서 관련된 문서를 조회할 수 있습니다. Faiss는 embeding한 query로 조회를 하고, OpenSearch는 query를 하면 vector store 선언시 정의한 embedding을 이용하여 조회를 수행합니다.
+
+```python
+if rag_type == 'faiss':
+    query_embedding = vectorstore.embedding_function(query)
+    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+elif rag_type == 'opensearch':
+    relevant_documents = vectorstore.similarity_search(query)
+```
+
+#### VectorStoreIndexWrapper를 이용하여 질문하는 방법
+
+아래와 같이 vector store에 직접 Query 하는 방식과, Template를 이용하는 2가지 방법으로 Question/Answering 구현하는 것을 설명합니다.
+
+embedding한 query를 가지고 vectorstore에서 검색한 후에 vectorstore의 query()를 이용하여 답변을 얻습니다.
+
+```python
+wrapper_store = VectorStoreIndexWrapper(vectorstore = vectorstore)
+
+answer = wrapper_store.query(question = query, llm = llm)
+```
+
+#### Template를 이용하여 질문하는 방법
+
+Template를 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용하여, 일반적으로 vectorstore에서 query를 이용하는 방법보다 나은 결과를 얻습니다.
+
+```python
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+
+prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+{ context }
+
+Question: { question }
+Assistant: """
+PROMPT = PromptTemplate(
+    template = prompt_template, input_variables = ["context", "question"]
+)
+
+qa = RetrievalQA.from_chain_type(
+    llm = llm,
+    chain_type = "stuff",
+    retriever = vectorstore.as_retriever(
+        search_type = "similarity", search_kwargs = { "k": 3 }
+    ),
+    return_source_documents = True,
+    chain_type_kwargs = { "prompt": PROMPT }
+)
+result = qa({ "query": query })
+
+return result['result']
+```
+
 #### Conversation
 
 대화(Conversation)을 위해서는 Chat History를 이용한 Prompt Engineering이 필요합니다. 여기서는 Chat History를 위한 chat_memory와 RAG에서 document를 retrieval을 하기 위한 memory를 이용합니다.
@@ -375,61 +431,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
         return result['answer']
 ```        
 
-##### Vector Store를 이용하여 관련 문서 조회
 
-아래와 같이 [similarity_search()](https://python.langchain.com/docs/integrations/vectorstores/opensearch#similarity_search-using-approximate-k-nn)를 이용하여 vector store에서 관련된 문서를 조회할 수 있습니다. Faiss는 embeding한 query로 조회를 하고, OpenSearch는 query를 하면 vector store 선언시 정의한 embedding을 이용하여 조회를 수행합니다.
-
-```python
-if rag_type == 'faiss':
-    query_embedding = vectorstore.embedding_function(query)
-    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-elif rag_type == 'opensearch':
-    relevant_documents = vectorstore.similarity_search(query)
-```
-
-#### VectorStoreIndexWrapper를 이용하여 질문하는 방법
-
-아래와 같이 vector store에 직접 Query 하는 방식과, Template를 이용하는 2가지 방법으로 Question/Answering 구현하는 것을 설명합니다.
-
-embedding한 query를 가지고 vectorstore에서 검색한 후에 vectorstore의 query()를 이용하여 답변을 얻습니다.
-
-```python
-wrapper_store = VectorStoreIndexWrapper(vectorstore = vectorstore)
-
-answer = wrapper_store.query(question = query, llm = llm)
-```
-
-#### Template를 이용하여 질문하는 방법
-
-Template를 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용하여, 일반적으로 vectorstore에서 query를 이용하는 방법보다 나은 결과를 얻습니다.
-
-```python
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
-
-prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-{ context }
-
-Question: { question }
-Assistant: """
-PROMPT = PromptTemplate(
-    template = prompt_template, input_variables = ["context", "question"]
-)
-
-qa = RetrievalQA.from_chain_type(
-    llm = llm,
-    chain_type = "stuff",
-    retriever = vectorstore.as_retriever(
-        search_type = "similarity", search_kwargs = { "k": 3 }
-    ),
-    return_source_documents = True,
-    chain_type_kwargs = { "prompt": PROMPT }
-)
-result = qa({ "query": query })
-
-return result['result']
-```
 
 ### AWS CDK로 인프라 구현하기
 
