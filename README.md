@@ -305,6 +305,76 @@ else:
     msg = llm(text)
 ```
 
+#### Conversation
+
+대화(Conversation)을 위해서는 Chat History를 이용한 Prompt Engineering이 필요합니다. 여기서는 Chat History를 위한 chat_memory와 RAG에서 document를 retrieval을 하기 위한 memory를 이용합니다.
+
+```python
+# memory for conversation
+chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='AI')
+
+# memory for retrival docs
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='AI')
+```
+
+Chat history를 위한 condense_template과 document retrieval시에 사용하는 prompt_template을 아래와 같이 정의하고, [ConversationalRetrievalChain](https://api.python.langchain.com/en/latest/chains/langchain.chains.conversational_retrieval.base.ConversationalRetrievalChain.html)을 이용하여 아래와 같이 구현합니다.
+
+
+```python
+def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
+    condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    Chat History:
+    {chat_history}
+    Human: {question}
+    AI:"""
+    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
+    
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=llm, 
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ),         
+        condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
+        chain_type='stuff', # 'refine'
+        verbose=False, # for logging to stdout
+        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
+        
+        memory=memory,
+        #max_tokens_limit=300,
+        return_source_documents=True, # retrieved source
+        return_generated_question=False, # generated question
+    )
+
+    # combine any retrieved documents.
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    {context}
+
+    Question: {question}
+    AI:"""
+    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
+    
+    # extract chat history
+    chats = chat_memory.load_memory_variables({})
+    chat_history = chats['history']
+    print('chat_history: ', chat_history)
+
+    # make a question using chat history
+    result = qa({"question": query, "chat_history": chat_history})    
+    print('result: ', result)    
+    
+    # get the reference
+    source_documents = result['source_documents']
+    print('source_documents: ', source_documents)
+
+    if len(source_documents)>=1 and enableReference == 'true':
+        reference = get_reference(source_documents)
+        #print('reference: ', reference)
+        return result['answer']+reference
+    else:
+        return result['answer']
+```        
+
 ##### Vector Store를 이용하여 관련 문서 조회
 
 아래와 같이 [similarity_search()](https://python.langchain.com/docs/integrations/vectorstores/opensearch#similarity_search-using-approximate-k-nn)를 이용하여 vector store에서 관련된 문서를 조회할 수 있습니다. Faiss는 embeding한 query로 조회를 하고, OpenSearch는 query를 하면 vector store 선언시 정의한 embedding을 이용하여 조회를 수행합니다.
