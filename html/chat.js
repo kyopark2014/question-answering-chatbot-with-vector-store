@@ -258,9 +258,15 @@ attachFile.addEventListener('click', function(){
     return false;
 });
 
+let isResponsed = new HashMap();
+let retryNum = new HashMap();
 function sendRequest(text) {
     const uri = "chat";
     const xhr = new XMLHttpRequest();
+
+    let requestId = uuidv4();
+    isResponsed.put(requestId, false);
+    retryNum.put(requestId, 12); // max 60s (5x12)
 
     xhr.open("POST", uri, true);
     xhr.onreadystatechange = () => {
@@ -270,11 +276,19 @@ function sendRequest(text) {
             
             addReceivedMessage(response.msg)
         }
+        else if(xhr.readyState ===4 && xhr.status === 504) {
+            console.log("response: " + xhr.readyState + ', xhr.status: '+xhr.status);
+
+            getResponse(userId, requestId);
+        }
+        else {
+            console.log("response: " + xhr.readyState + ', xhr.status: '+xhr.status);
+        }
     };
     
     var requestObj = {
         "user-id": userId,
-        "request-id": uuidv4(),
+        "request-id": requestId,
         "type": "text",
         "body":text
     }
@@ -289,6 +303,10 @@ function sendRequestForSummary(object) {
     const uri = "chat";
     const xhr = new XMLHttpRequest();
 
+    let requestId = uuidv4();
+    isResponsed.put(requestId, false);
+    retryNum.put(requestId, 60); // max 300s (5x60)
+
     xhr.open("POST", uri, true);
     xhr.onreadystatechange = () => {
         if (xhr.readyState === 4 && xhr.status === 200) {
@@ -296,12 +314,17 @@ function sendRequestForSummary(object) {
             console.log("response: " + JSON.stringify(response));
             
             addReceivedMessage(response.msg)
-            isResponsed = true;
+        }
+        else if(xhr.readyState ===4 && xhr.status === 504) {
+            console.log("response: " + xhr.readyState + ', xhr.status: '+xhr.status);
+
+            getResponse(userId, requestId);
+        }
+        else {
+            console.log("response: " + xhr.readyState + ', xhr.status: '+xhr.status);
         }
     };
 
-    requestId = uuidv4()
-    console.log('requestId: ', requestId)
     var requestObj = {
         "user-id": userId,
         "request-id": requestId,
@@ -315,6 +338,24 @@ function sendRequestForSummary(object) {
     xhr.send(blob);            
 }
 
+function delay(ms = 1000) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+async function getResponse(userId, requestId) {
+    await delay(5000);
+    
+    let n = retryNum.get(requestId);
+    if(n == 0) {
+        console.log('Failed!')
+        return;
+    }
+    else {
+        console.log('Retry!');
+        retryNum.put(requestId, n-1);
+        sendRequestForRetry(userId, requestId);
+    }    
+}
+
 function sendRequestForRetry(userId, requestId) {
     const uri = "query";
     const xhr = new XMLHttpRequest();
@@ -326,9 +367,16 @@ function sendRequestForRetry(userId, requestId) {
             console.log("response: " + JSON.stringify(response));
                         
             if(response.msg) {
-                isResponsed = true;
-                addReceivedMessage(response.msg)                
+                isResponsed.put(requestId, true);
+                addReceivedMessage(response.msg);        
+                
+                console.log('completed!');
             }            
+            else {
+                console.log('The request is not completed yet.');
+
+                getResponse(userId, requestId);
+            }
         }
     };
     
