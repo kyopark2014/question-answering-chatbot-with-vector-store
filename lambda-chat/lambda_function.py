@@ -123,7 +123,8 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     {chat_history}
     
     Human: {question}
-    AI:"""
+
+    Assistant:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     
     qa = ConversationalRetrievalChain.from_llm(
@@ -143,12 +144,13 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     )
 
     # combine any retrieved documents.
-    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
     {context}
 
     Question: {question}
-    AI:"""
+    
+    Assistant:"""
     qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
     
     # extract chat history
@@ -213,7 +215,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     {context}
 
     Question: {question}
-    
+
     Assistant:"""
     PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
