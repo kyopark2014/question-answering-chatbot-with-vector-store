@@ -43,7 +43,6 @@ var msgHistory = new HashMap();
 var callee = "John";
 var index=0;
 var userId = uuidv4();
-var isResponsed = true;
 var requestId;
 
 for (i=0;i<maxMsgItems;i++) {
@@ -57,13 +56,8 @@ for (i=0;i<maxMsgItems;i++) {
 
             console.log('click! index: '+index);
 
-            console.log('isResponsed: '+isResponsed);
             console.log('requestId: ', requestId);  
             console.log('userId: ', userId);  
-
-            if(!isResponsed) {
-                sendRequestForRetry(userId, requestId);
-            }
         })
     })(i);
 }
@@ -229,7 +223,6 @@ attachFile.addEventListener('click', function(){
                             console.log(xmlHttp.responseText);
                                            
                             // summary for the upload file
-                            isResponsed = false;       
                             sendRequestForSummary(filename);                            
                         }
                         else if(xmlHttp.readyState == XMLHttpRequest.DONE && xmlHttp.status != 200) {
