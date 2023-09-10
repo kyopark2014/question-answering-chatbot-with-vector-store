@@ -437,12 +437,15 @@ def lambda_handler(event, context):
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
                             msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
+                            
+                            storedMsg = str(msg).replace("\n"," ") 
+                            chat_memory.save_context({"input": text}, {"output": storedMsg})                  
                         else:
-                            msg = get_answer_using_template(text, vectorstore, rag_type)                            
+                            msg = get_answer_using_template(text, vectorstore, rag_type)         
+                                
                     else:
                         msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
                 #print('msg: ', msg)
-                chat_memory.save_context({"input": text}, {"output": msg})
             
         elif type == 'document':
             object = body
