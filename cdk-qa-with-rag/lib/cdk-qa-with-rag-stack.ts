@@ -27,7 +27,7 @@ const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
 const accessType = "preview"; // aws or preview
 const bedrock_region = "us-east-1";  // "us-east-1" "us-west-2" 
-const enableConversationMode = 'false'; 
+const enableConversationMode = 'true'; 
 const enableReference = 'false';
 const enableRAG = 'true';
 

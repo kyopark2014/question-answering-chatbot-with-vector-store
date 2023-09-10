@@ -118,6 +118,67 @@ def summerize_text(text):
     return summary
 
 def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
+    condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer. You will be acting as a thoughtful advisor.
+    
+    {chat_history}
+    
+    Human: {question}
+
+    Assistant:"""
+    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
+        
+    # extract chat history
+    chats = chat_memory.load_memory_variables({})
+    chat_history_all = chats['history']
+    print('chat_history_all: ', chat_history_all)
+
+    # use last two chunks of chat history
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000,chunk_overlap=0)
+    texts = text_splitter.split_text(chat_history_all) 
+
+    pages = len(texts)
+    print('pages: ', pages)
+
+    if pages >= 2:
+        chat_history = f"{texts[pages-2]} {texts[pages-1]}"
+    elif pages == 1:
+        chat_history = texts[0]
+    else:  # 0 page
+        chat_history = ""
+    
+    # load related docs
+    relevant_documents = vectorstore.similarity_search(query)
+    #print('relevant_documents: ', relevant_documents)
+
+    print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
+    print('----')
+    for i, rel_doc in enumerate(relevant_documents):
+        body = rel_doc.page_content[rel_doc.page_content.rfind('Document Excerpt:')+18:len(rel_doc.page_content)]
+        # print('body: ', body)
+        
+        chat_history = f"{chat_history}\nHuman: {body}"  # append relevant_documents 
+        print(f'## Document {i+1}: {rel_doc.page_content}')
+        print('---')
+
+    print('chat_history:\n ', chat_history)
+
+    # make a question using chat history
+    if pages >= 1:
+        result = llm(CONDENSE_QUESTION_PROMPT.format(question=query, chat_history=chat_history))
+    else:
+        result = llm(query)
+    # print('result: ', result)
+
+    # add refrence
+    if len(relevant_documents)>=1 and enableReference=='true':
+        reference = get_reference(relevant_documents)
+        # print('reference: ', reference)
+
+        return result+reference
+    else:
+        return result
+
+def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memory):  
     condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
     
     {chat_history}
