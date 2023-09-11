@@ -243,7 +243,7 @@ def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memor
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
-    if len(source_documents)>=1 and enableReference == 'true':
+    if len(source_documents)>=1 and enableReference=='true':
         reference = get_reference(source_documents)
         #print('reference: ', reference)
         return result['answer']+reference
