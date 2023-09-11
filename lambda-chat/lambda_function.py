@@ -493,7 +493,10 @@ def lambda_handler(event, context):
                 )
                 
                 for i in range(len(texts)):
-                    doc = Document(
+                    print('texts: ', texts[i])
+
+                    doc = []
+                    doc.append = Document(
                                 page_content=texts[i],
                                 metadata={
                                     'name': object,
