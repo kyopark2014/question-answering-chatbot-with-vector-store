@@ -356,7 +356,11 @@ AI_PROMPT = "\n\nAssistant:"
 llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 
 # embedding
-bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
+bedrock_embeddings = BedrockEmbeddings(
+    client=boto3_bedrock,
+    region_name = bedrock_region,
+    model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
+)
 
 # memory for retrival docs
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='Assistant')
