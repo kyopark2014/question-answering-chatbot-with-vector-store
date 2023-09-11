@@ -84,7 +84,8 @@ def load_document(file_type, s3_file_name):
     new_contents = str(contents).replace("\n"," ") 
     print('length: ', len(new_contents))
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
+    #text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100) # English
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=300,chunk_overlap=30) # Korean
     texts = text_splitter.split_text(new_contents) 
     #print('texts[0]: ', texts[0])
             
@@ -478,8 +479,7 @@ def lambda_handler(event, context):
                     )
                     isReady = True
                 else:
-                    for doc in docs:   
-                        vectorstore.add_documents(doc)
+                    vectorstore.add_documents(docs)
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':    
@@ -491,21 +491,7 @@ def lambda_handler(event, context):
                     opensearch_url = opensearch_url,
                     http_auth=(opensearch_account, opensearch_passwd),
                 )
-                
-                for i in range(len(texts)):
-                    print('texts: ', texts[i])
-
-                    doc = []                       
-                    doc.append(
-                        Document(
-                            page_content=texts[i],
-                            metadata={
-                                'name': object,
-                                'page':i+1
-                            }
-                        )
-                    )            
-                    new_vectorstore.add_documents(doc)                         
+                new_vectorstore.add_documents(docs)     
 
                 #vectorstore = OpenSearchVectorSearch.from_documents(
                 #    docs, 
