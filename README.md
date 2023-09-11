@@ -491,7 +491,7 @@ AWS 서울 리전에서 Amazon Bedrock과 vector store를 이용하여 질문과
 
 [RAG Query Size Limitation](./rag-query-size.md)과 같이 1985자 이상의 query에 대하여 처리할 수 없습니다. 이것은 검색엔진의 한계로 OpenSearch, Kendra, 구글 검색기 모두 같은 이슈를 가지고 있습니다. 따라서, 일정 크기(1800자) 이하의 검색만 허용하는식으로 입력기에서 제한하는 방법을 사용하여야 합니다.
 
-### 한국어 Token 이슈
+### 한국어 Embedding시에 Token 이슈
 
 Bedrock embedding의 경우에 영문 1000자는 문자가 없었으나 한글 포함시 아래와 같은 token숫자를 사용하였으므로 문서를 OpenSearch에 넣을때 유의하여야 합니다.
 
