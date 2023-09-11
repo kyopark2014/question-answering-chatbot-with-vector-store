@@ -84,8 +84,9 @@ def load_document(file_type, s3_file_name):
     new_contents = str(contents).replace("\n"," ") 
     print('length: ', len(new_contents))
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100) # English
-    #text_splitter = RecursiveCharacterTextSplitter(chunk_size=250,chunk_overlap=20) # Korean
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100) # amazon.titan-embed-g1-text-02
+    #text_splitter = RecursiveCharacterTextSplitter(chunk_size=250,chunk_overlap=20) # amazon.titan-e1t-medium
+    
     texts = text_splitter.split_text(new_contents) 
     #print('texts[0]: ', texts[0])
             
