@@ -491,10 +491,16 @@ def lambda_handler(event, context):
                     opensearch_url = opensearch_url,
                     http_auth=(opensearch_account, opensearch_passwd),
                 )
-                for doc in docs:                    
-                    doc_chunk = []
-                    doc_chunk.append(doc)
-                    new_vectorstore.add_documents(doc_chunk)                         
+                
+                for i in range(len(texts)):
+                    doc = Document(
+                                page_content=texts[i],
+                                metadata={
+                                    'name': object,
+                                    'page':i+1
+                                }
+                            )                    
+                    new_vectorstore.add_documents(doc)                         
 
                 #vectorstore = OpenSearchVectorSearch.from_documents(
                 #    docs, 
