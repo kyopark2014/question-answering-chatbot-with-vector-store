@@ -506,11 +506,18 @@ def lambda_handler(event, context):
                     page_content=t
                 ) for t in texts[:3]
             ]
-            prompt_template = """Write a concise summary of the following:
+            if modelId == 'anthropic.claude-v1' or modelId == 'anthropic.claude-v2':
+                prompt_template = """다음 텍스트를 간결하게 요약하십시오. 텍스트의 요점을 다루는 글머리 기호로 응답을 반환합니다.
 
-            {text}
+                {text}
                 
-            CONCISE SUMMARY """
+                SUMMARY """
+            else:
+                prompt_template = """Write a concise summary of the following:
+
+                {text}
+                
+                CONCISE SUMMARY """
 
             PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
             chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
