@@ -68,12 +68,24 @@ llm = Bedrock(model_id=modelId, client=boto3_bedrock)
 
 ### Embedding
 
-[BedrockEmbeddings](https://python.langchain.com/docs/integrations/text_embedding/bedrock)을 이용하여 Embedding을 합니다.
+[BedrockEmbeddings](https://python.langchain.com/docs/integrations/text_embedding/bedrock)과 [langchain.embeddings.bedrock.BedrockEmbeddings](https://api.python.langchain.com/en/latest/embeddings/langchain.embeddings.bedrock.BedrockEmbeddings.html)을 참조하여 Embedding을 합니다.
 
 ```python
 from langchain.embeddings import BedrockEmbeddings
 bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
 ```
+
+현재 Bodrock은 "amazon.titan-e1t-medium"와 "amazon.titan-embed-g1-text-02"을 제공하고 있습니다. "amazon.titan-e1t-medium"은 input vector와 output vector가 각각 512, 4096이며, "amazon.titan-embed-g1-text-02"d은 input과 output vector가 각각 8192, 1536입니다. 아래와 같이 model_id 파라메터를 이용하여 설정합니다.
+
+```python
+bedrock_embeddings = BedrockEmbeddings(
+    client=boto3_bedrock,
+    region_name = bedrock_region,
+    model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
+)
+```
+
+
 
 ### 문서 읽어오기
 
