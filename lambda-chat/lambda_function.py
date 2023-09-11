@@ -478,7 +478,8 @@ def lambda_handler(event, context):
                     )
                     isReady = True
                 else:
-                    vectorstore.add_documents(docs)
+                    for doc in docs:   
+                        vectorstore.add_documents(doc)
                     print('vector store size: ', len(vectorstore.docstore._dict))
 
             elif rag_type == 'opensearch':    
@@ -490,7 +491,8 @@ def lambda_handler(event, context):
                     opensearch_url = opensearch_url,
                     http_auth=(opensearch_account, opensearch_passwd),
                 )
-                new_vectorstore.add_documents(docs)     
+                for doc in docs:                    
+                    new_vectorstore.add_documents(doc)                         
 
                 #vectorstore = OpenSearchVectorSearch.from_documents(
                 #    docs, 
