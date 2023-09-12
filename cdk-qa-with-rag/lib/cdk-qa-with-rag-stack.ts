@@ -19,7 +19,6 @@ const stage = 'dev';
 const s3_prefix = 'docs';
 const endpoint_url = "https://prod.us-west-2.frontend.bedrock.aws.dev";
 const model_id = "anthropic.claude-v2"; // amazon.titan-e1t-medium, anthropic.claude-v1, anthropic.claude-v2
-const userName = "kyopark";
 const projectName = `bedrock-with-os`;
 const bucketName = `storage-for-${projectName}-${region}`; 
 const rag_type = 'opensearch';  // faiss or opensearch
