@@ -38,7 +38,7 @@ HashMap.prototype = {
 
 // message log list
 var msglist = [];
-var maxMsgItems = 50;
+var maxMsgItems = 500;
 var msgHistory = new HashMap();
 var callee = "John";
 var index=0;
