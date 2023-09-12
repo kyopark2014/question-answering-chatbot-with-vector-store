@@ -369,6 +369,44 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
+def get_summary(texts):
+    docs = [
+        Document(
+            page_content=t
+        ) for t in texts[:3]
+    ]
+
+    # check korean
+    pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
+    word_kor = pattern_hangul.search(str(texts))
+    print('word_kor: ', word_kor)
+    
+    if word_kor:
+        #prompt_template = """\n\nHuman: 다음 텍스트를 간결하게 요약하세오. 텍스트의 요점을 다루는 글머리 기호로 응답을 반환합니다.
+        prompt_template = """\n\nHuman: 다음 텍스트를 요약해서 500자 이내로 설명하세오.
+
+        {text}
+        
+        Assistant:"""        
+    else:         
+        prompt_template = """\n\nWrite a concise summary of the following:
+
+        {text}
+        
+        Assistant:"""
+        
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+    summary = chain.run(docs)
+    print('summary: ', summary)
+
+    if summary == '':  # error notification
+        summary = 'Fail to summarize the document. Try agan...'
+        return summary
+    else:
+        # return summary[1:len(summary)-1]   
+        return summary
+
 def lambda_handler(event, context):
     print(event)
     userId  = event['user-id']
@@ -448,7 +486,8 @@ def lambda_handler(event, context):
                             storedMsg = str(msg).replace("\n"," ") 
                             chat_memory.save_context({"input": text}, {"output": storedMsg})                  
                         else:
-                            msg = get_answer_using_template(text, vectorstore, rag_type)         
+                            msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
+                            #msg = get_answer_using_query(query, vectorstore, rag_type) # direct query
                                 
                     else:
                         msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
@@ -506,43 +545,8 @@ def lambda_handler(event, context):
                 #    http_auth=(opensearch_account, opensearch_passwd),
                 #)
 
-            # summerization to show the document
-            docs = [
-                Document(
-                    page_content=t
-                ) for t in texts[:3]
-            ]
-
-            hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
-            word = hangul.search(str(texts))
-            print('word: ', word)
-            
-            if word:
-                prompt_template = """\n\nHuman: 다음 텍스트를 요약해서 500자 이내로 설명하세오.
-
-                {text}
-                
-                Assistant:"""        
-            else:         
-                prompt_template = """\n\nWrite a concise summary of the following:
-
-                {text}
-                
-                Assistant:"""
-    
-            PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-            chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
-            summary = chain.run(docs)
-            print('summary: ', summary)
-
-            msg = summary
-            # summerization
-            #query = "summerize the documents"
-            #msg = get_answer_using_query(query, vectorstore, rag_type)
-            #print('msg1: ', msg)
-
-            #msg = get_answer_using_template(query, vectorstore, rag_type)
-            #print('msg2: ', msg)
+            # summerize the document
+            msg = get_summary(texts)
                 
         elapsed_time = int(time.time()) - start
         print("total run time(sec): ", elapsed_time)
