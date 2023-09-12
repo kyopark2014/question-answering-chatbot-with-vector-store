@@ -35,7 +35,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     super(scope, id, props);
 
     // s3 
-    const s3Bucket = new s3.Bucket(this, `storage-${projectName}`,{
+    const s3Bucket = new s3.Bucket(this, `storage-${projectName}-${region}`,{
       bucketName: bucketName,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
