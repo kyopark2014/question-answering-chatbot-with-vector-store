@@ -7,6 +7,7 @@ from io import BytesIO
 import PyPDF2
 import csv
 import sys
+import re
 
 from langchain import PromptTemplate, SagemakerEndpoint
 from langchain.llms.sagemaker_endpoint import LLMContentHandler
@@ -120,7 +121,7 @@ def summerize_text(text):
     return summary
 
 def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
-    condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer. You will be acting as a thoughtful advisor.
+    condense_template = """\n\nHuman: Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer. You will be acting as a thoughtful advisor.
     
     {chat_history}
     
@@ -511,19 +512,24 @@ def lambda_handler(event, context):
                     page_content=t
                 ) for t in texts[:3]
             ]
-            if modelId == 'anthropic.claude-v1' or modelId == 'anthropic.claude-v2':
-                prompt_template = """\n\nHuman: 다음 텍스트를 간결하게 요약하십시오. 텍스트의 요점을 다루는 글머리 기호로 응답을 반환합니다.
+
+            hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
+            word = hangul.search(str(texts))
+            print('word: ', word)
+            
+            if word:
+                prompt_template = """\n\nHuman: 다음 텍스트를 요약해서 500자 이내로 설명하세오.
+
+                {text}
+                
+                Assistant:"""        
+            else:         
+                prompt_template = """\n\nWrite a concise summary of the following:
 
                 {text}
                 
                 Assistant:"""
-            else:
-                prompt_template = """Write a concise summary of the following:
-
-                {text}
-                
-                CONCISE SUMMARY """
-
+    
             PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
             chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
             summary = chain.run(docs)
