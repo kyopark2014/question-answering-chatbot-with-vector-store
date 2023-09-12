@@ -60,6 +60,59 @@ print('model_id: ', modelId)
 isReady = False   
 accessType = os.environ.get('accessType')
 
+# Bedrock Contiguration
+bedrock_config = {
+    "region_name":bedrock_region,
+    "endpoint_url":endpoint_url
+}
+    
+# supported llm list from bedrock
+if accessType=='aws':  # internal user of aws
+    boto3_bedrock = boto3.client(
+        service_name='bedrock',
+        region_name=bedrock_config["region_name"],
+        endpoint_url=bedrock_config["endpoint_url"],
+    )
+else: # preview user
+    boto3_bedrock = boto3.client(
+        service_name='bedrock',
+        region_name=bedrock_config["region_name"],
+    )
+
+modelInfo = boto3_bedrock.list_foundation_models()    
+print('models: ', modelInfo)
+
+def get_parameter(modelId):
+    if modelId == 'amazon.titan-tg1-large': 
+        return {
+            "maxTokenCount":1024,
+            "stopSequences":[],
+            "temperature":0,
+            "topP":0.9
+        }
+    elif modelId == 'anthropic.claude-v1' or modelId == 'anthropic.claude-v2':
+        return {
+            "max_tokens_to_sample":1024,
+        }
+parameters = get_parameter(modelId)
+HUMAN_PROMPT = "\n\nHuman:"
+AI_PROMPT = "\n\nAssistant:"
+
+llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
+
+# embedding
+bedrock_embeddings = BedrockEmbeddings(
+    client=boto3_bedrock,
+    region_name = bedrock_region,
+    model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
+)
+
+# memory for retrival docs
+#memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='Assistant')
+
+# memory for conversation
+chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
+
 # load documents from s3
 def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")
@@ -201,7 +254,7 @@ def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memor
         verbose=False, # for logging to stdout
         rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
         
-        memory=memory,
+        memory=chat_memory,
         #max_tokens_limit=300,
         return_source_documents=True, # retrieved source
         return_generated_question=False, # generated question
@@ -316,60 +369,6 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
-# Bedrock Contiguration
-bedrock_region = bedrock_region
-bedrock_config = {
-    "region_name":bedrock_region,
-    "endpoint_url":endpoint_url
-}
-    
-# supported llm list from bedrock
-if accessType=='aws':  # internal user of aws
-    boto3_bedrock = boto3.client(
-        service_name='bedrock',
-        region_name=bedrock_config["region_name"],
-        endpoint_url=bedrock_config["endpoint_url"],
-    )
-else: # preview user
-    boto3_bedrock = boto3.client(
-        service_name='bedrock',
-        region_name=bedrock_config["region_name"],
-    )
-
-modelInfo = boto3_bedrock.list_foundation_models()    
-print('models: ', modelInfo)
-
-def get_parameter(modelId):
-    if modelId == 'amazon.titan-tg1-large': 
-        return {
-            "maxTokenCount":1024,
-            "stopSequences":[],
-            "temperature":0,
-            "topP":0.9
-        }
-    elif modelId == 'anthropic.claude-v1' or modelId == 'anthropic.claude-v2':
-        return {
-            "max_tokens_to_sample":1024,
-        }
-parameters = get_parameter(modelId)
-HUMAN_PROMPT = "\n\nHuman:"
-AI_PROMPT = "\n\nAssistant:"
-
-llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
-
-# embedding
-bedrock_embeddings = BedrockEmbeddings(
-    client=boto3_bedrock,
-    region_name = bedrock_region,
-    model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
-)
-
-# memory for retrival docs
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='Assistant')
-
-# memory for conversation
-chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
-
 def lambda_handler(event, context):
     print(event)
     userId  = event['user-id']
@@ -444,6 +443,7 @@ def lambda_handler(event, context):
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
                             msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
+                            #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore, chat_memory)  
                             
                             storedMsg = str(msg).replace("\n"," ") 
                             chat_memory.save_context({"input": text}, {"output": storedMsg})                  
