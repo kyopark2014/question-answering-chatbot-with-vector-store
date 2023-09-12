@@ -222,7 +222,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     if pages >= 1:
         result = llm(CONDENSE_QUESTION_PROMPT.format(question=query, chat_history=chat_history))
     else:
-        result = llm(query)
+        result = llm(HUMAN_PROMPT+query+AI_PROMPT)
     # print('result: ', result)
 
     # add refrence
@@ -434,7 +434,7 @@ def lambda_handler(event, context):
                 msg  = "RAG is disabled"
             else:
                 if rag_type == 'faiss' and isReady == False: 
-                    msg = llm(text)
+                    msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
                 else: 
                     querySize = len(text)
                     textCount = len(text.split())
