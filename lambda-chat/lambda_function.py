@@ -86,7 +86,7 @@ def load_document(file_type, s3_file_name):
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100) # amazon.titan-embed-g1-text-02
     #text_splitter = RecursiveCharacterTextSplitter(chunk_size=250,chunk_overlap=20) # amazon.titan-e1t-medium
-    
+
     texts = text_splitter.split_text(new_contents) 
     #print('texts[0]: ', texts[0])
             
@@ -298,7 +298,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
-    if len(relevant_documents)>=1:
+    if len(relevant_documents)>=1 and enableReference=='true':
         reference = get_reference(source_documents)
         #print('reference: ', reference)
 
