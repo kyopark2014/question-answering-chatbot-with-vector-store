@@ -146,13 +146,7 @@ def load_document(file_type, s3_file_name):
             
     return texts
 
-def get_summary(texts):
-    docs = [
-        Document(
-            page_content=t
-        ) for t in texts[:3]
-    ]
-
+def get_summary(texts):    
     # check korean
     pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
     word_kor = pattern_hangul.search(str(texts))
@@ -171,9 +165,15 @@ def get_summary(texts):
         {text}
         
         Assistant:"""
-        
+    
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
     chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+
+    docs = [
+        Document(
+            page_content=t
+        ) for t in texts[:3]
+    ]
     summary = chain.run(docs)
     print('summary: ', summary)
 
