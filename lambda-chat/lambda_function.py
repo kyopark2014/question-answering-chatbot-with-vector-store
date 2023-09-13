@@ -145,6 +145,44 @@ def load_document(file_type, s3_file_name):
     #print('texts[0]: ', texts[0])
             
     return texts
+
+def get_summary(texts):
+    docs = [
+        Document(
+            page_content=t
+        ) for t in texts[:3]
+    ]
+
+    # check korean
+    pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
+    word_kor = pattern_hangul.search(str(texts))
+    print('word_kor: ', word_kor)
+    
+    if word_kor:
+        #prompt_template = """\n\nHuman: 다음 텍스트를 간결하게 요약하세오. 텍스트의 요점을 다루는 글머리 기호로 응답을 반환합니다.
+        prompt_template = """\n\nHuman: 다음 텍스트를 요약해서 500자 이내로 설명하세오.
+
+        {text}
+        
+        Assistant:"""        
+    else:         
+        prompt_template = """\n\nWrite a concise summary of the following:
+
+        {text}
+        
+        Assistant:"""
+        
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+    summary = chain.run(docs)
+    print('summary: ', summary)
+
+    if summary == '':  # error notification
+        summary = 'Fail to summarize the document. Try agan...'
+        return summary
+    else:
+        # return summary[1:len(summary)-1]   
+        return summary
               
 def get_answer_using_query(query, vectorstore, rag_type):
     wrapper_store = VectorStoreIndexWrapper(vectorstore=vectorstore)        
@@ -174,14 +212,28 @@ def summerize_text(text):
     return summary
 
 def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
-    condense_template = """\n\nHuman: Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer. You will be acting as a thoughtful advisor.
+    # check korean
+    pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
+    word_kor = pattern_hangul.search(str(texts))
+    print('word_kor: ', word_kor)
     
-    {chat_history}
+    if word_kor:
+        condense_template = """\n\nHuman: 다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
     
-    Human: {question}
+        {chat_history}
+        
+        Human: {question}
 
-    Assistant:"""
-    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
+        Assistant:"""
+    else:
+        condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer. You will be acting as a thoughtful advisor.
+        
+        {chat_history}
+        
+        Human: {question}
+
+        Assistant:"""
+    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)     
         
     # extract chat history
     chats = chat_memory.load_memory_variables({})
@@ -326,14 +378,29 @@ def get_answer_using_template(query, vectorstore, rag_type):
         print('---')
     
     print('length of relevant_documents: ', len(relevant_documents))
+
+    # check korean
+    pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
+    word_kor = pattern_hangul.search(str(query))
+    print('word_kor: ', word_kor)
     
-    prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    if word_kor:
+        prompt_template = """\n\nHuman: 다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
+    
+        {context}
+        
+        Question: {question}
 
-    {context}
+        Assistant:"""
+    else:
+        prompt_template = """\n\nHuman: Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer. You will be acting as a thoughtful advisor.
+        
+        {context}
 
-    Question: {question}
+        Question: {question}
 
-    Assistant:"""
+        Assistant:"""
+    
     PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
@@ -368,44 +435,6 @@ def get_reference(docs):
     
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
-
-def get_summary(texts):
-    docs = [
-        Document(
-            page_content=t
-        ) for t in texts[:3]
-    ]
-
-    # check korean
-    pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
-    word_kor = pattern_hangul.search(str(texts))
-    print('word_kor: ', word_kor)
-    
-    if word_kor:
-        #prompt_template = """\n\nHuman: 다음 텍스트를 간결하게 요약하세오. 텍스트의 요점을 다루는 글머리 기호로 응답을 반환합니다.
-        prompt_template = """\n\nHuman: 다음 텍스트를 요약해서 500자 이내로 설명하세오.
-
-        {text}
-        
-        Assistant:"""        
-    else:         
-        prompt_template = """\n\nWrite a concise summary of the following:
-
-        {text}
-        
-        Assistant:"""
-        
-    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
-    summary = chain.run(docs)
-    print('summary: ', summary)
-
-    if summary == '':  # error notification
-        summary = 'Fail to summarize the document. Try agan...'
-        return summary
-    else:
-        # return summary[1:len(summary)-1]   
-        return summary
 
 def lambda_handler(event, context):
     print(event)
