@@ -452,8 +452,8 @@ def lambda_handler(event, context):
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
-            # index_name = "rag-index-*", // all
-            index_name = 'rag-index-'+userId+'-*',
+            index_name = "rag-index-*", // all
+            #index_name = 'rag-index-'+userId+'-*',
             is_aoss = False,
             #engine="faiss",  # default: nmslib
             embedding_function = bedrock_embeddings,
