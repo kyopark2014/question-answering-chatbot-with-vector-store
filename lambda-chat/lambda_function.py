@@ -479,7 +479,8 @@ def lambda_handler(event, context):
     else:             
         if type == 'text':
             text = body
-
+            print('query: ', text)
+            
             # debugging
             if text == 'enableReference':
                 enableReference = 'true'
