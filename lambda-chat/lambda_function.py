@@ -100,8 +100,7 @@ AI_PROMPT = "\n\nAssistant:"
 
 llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 
-# Conversation
-map = dict()
+map = dict()  # Conversation
 
 # embedding
 bedrock_embeddings = BedrockEmbeddings(
