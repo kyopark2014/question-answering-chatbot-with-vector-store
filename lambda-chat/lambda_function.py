@@ -214,7 +214,7 @@ def summerize_text(text):
 def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
     # check korean
     pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
-    word_kor = pattern_hangul.search(str(texts))
+    word_kor = pattern_hangul.search(str(query))
     print('word_kor: ', word_kor)
     
     if word_kor:
