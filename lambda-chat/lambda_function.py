@@ -47,7 +47,7 @@ print('enableConversationMode: ', enableConversationMode)
 enableReference = os.environ.get('enableReference', 'false')
 enableRAG = os.environ.get('enableRAG', 'true')
 
-conversationMothod = 'ConversationalRetrievalChain' # ConversationalRetrievalChain or PromptTemplate
+conversationMothod = 'PromptTemplate' # ConversationalRetrievalChain or PromptTemplate
 
 # opensearch authorization - id/passwd
 opensearch_account = os.environ.get('opensearch_account')
@@ -318,7 +318,6 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     else:
         return result
     
-
 # We are also providing a different chat history retriever which outputs the history as a Claude chat (ie including the \n\n)
 from langchain.schema import BaseMessage
 _ROLE_MAP = {"human": "\n\nHuman: ", "ai": "\n\nAssistant: "}
@@ -377,7 +376,7 @@ def create_ConversationalRetrievalChain(vectorstore):
     Human: Use at maximum 5 sentences to answer the following question.
     {question}
 
-    If the answer is not in the context say "주어진 내용에서 관련 답변을 찾을 수 없습니다."
+    If the answer is not in the context, say "I don't know"
 
     Assistant:"""  
     
