@@ -364,19 +364,19 @@ def create_ConversationalRetrievalChain(vectorstore):
             search_type="similarity", search_kwargs={"k": 3}
         ),         
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
-        #combine_docs_chain_kwargs={'prompt': qa_prompt_template},  
+        combine_docs_chain_kwargs={'prompt': qa_prompt_template},  
 
         memory=memory_chain,
         get_chat_history=_get_chat_history,
         verbose=False, # for logging to stdout
         
         #max_tokens_limit=300,
-        chain_type='stuff', # 'refine'
-        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain                
-        return_source_documents=True, # retrieved source
-        return_generated_question=False, # generated question
+        #chain_type='stuff', # 'refine'
+        #rephrase_question=True,  # to pass the new generated question to the combine_docs_chain                
+        #return_source_documents=True, # retrieved source
+        #return_generated_question=False, # generated question
     )
-    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
+    #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
     
     return qa
 
