@@ -342,23 +342,44 @@ def _get_chat_history(chat_history):
 memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 def create_ConversationalRetrievalChain(vectorstore):  
-    condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    #condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
     
-    {chat_history}
+    #{chat_history}
     
-    Human: {question}
+    #Human: {question}
 
-    Assistant:"""
+    #Assistant:"""
+    condense_template = """To create condense_question, given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+
+    Chat History:
+    {chat_history}
+    Follow Up Input: {question}
+    Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
 
     # combine any retrieved documents.
-    qa_prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    #qa_prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
-    {context}
+    #{context}
 
-    Question: {question}
+    #Question: {question}
     
-    Assistant:"""    
+    #Assistant:"""    
+    
+    qa_prompt_template = """\n\nHuman:
+    Here is the context, inside <context></context> XML tags.    
+    Based on the context as below, answer the question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    <context>
+    {context}
+    </context>
+
+    Human: Use at maximum 5 sentences to answer the following question.
+    {question}
+
+    If the answer is not in the context say "주어진 내용에서 관련 답변을 찾을 수 없습니다."
+
+    Assistant:"""  
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
