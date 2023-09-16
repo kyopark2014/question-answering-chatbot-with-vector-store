@@ -654,34 +654,33 @@ def lambda_handler(event, context):
             else:
                 if rag_type == 'faiss' and isReady == False: 
                     msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
-                else: 
+                else: # opensearch
                     querySize = len(text)
                     textCount = len(text.split())
                     print(f"query size: {querySize}, workds: {textCount}")
 
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
-                            msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
+                            #msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
                             #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore, chat_memory)  
                             
-                            storedMsg = str(msg).replace("\n"," ") 
-                            chat_memory.save_context({"input": text}, {"output": storedMsg})                  
-                        else:
-                            #if isReady==False:
-                            #    isReady = True
-                            #    qa = create_ConversationalRetrievalChain(vectorstore)
-                            #msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
-                            #msg = get_answer_using_query(text, vectorstore, rag_type) # direct query
-                            #msg = qa(prompt=text)
+                            #storedMsg = str(msg).replace("\n"," ") 
+                            #chat_memory.save_context({"input": text}, {"output": storedMsg})                  
+
+                            if isReady==False:
+                                isReady = True
+                                qa = create_ConversationalRetrievalChain(vectorstore)
                             #msg = qa({"question": text})
-
-                            msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore)
-
+                            msg = qa(text)
+                            #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore)
+                            
                             # extract chat history
-                            chats = memory_chain.load_memory_variables({})
-                            chat_history_all = chats['chat_history']
-                            print('chat_history_all: ', chat_history_all)
-                                
+                            #chats = memory_chain.load_memory_variables({})
+                            #chat_history_all = chats['chat_history']
+                            #print('chat_history_all: ', chat_history_all)
+                        else:
+                            msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
+                            #msg = get_answer_using_query(text, vectorstore, rag_type) # direct query                                                            
                     else:
                         msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
                 #print('msg: ', msg)
