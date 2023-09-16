@@ -565,10 +565,8 @@ def lambda_handler(event, context):
                             
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
-                            #msg = get_answer_using_query(text, vectorstore, rag_type) # direct query                                                            
                     else:
                         msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
-                #print('msg: ', msg)
             
         elif type == 'document':
             object = body
