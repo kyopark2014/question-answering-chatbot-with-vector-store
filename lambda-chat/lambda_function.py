@@ -109,7 +109,7 @@ bedrock_embeddings = BedrockEmbeddings(
     model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
 )
 
-# load documents from s3
+# load documents from s3 for pdf and txt
 def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")
     doc = s3r.Object(s3_bucket, s3_prefix+'/'+s3_file_name)
@@ -125,22 +125,56 @@ def load_document(file_type, s3_file_name):
         
     elif file_type == 'txt':        
         contents = doc.get()['Body'].read().decode('utf-8')
-    elif file_type == 'csv':        
-        body = doc.get()['Body'].read().decode('utf-8')
-        reader = csv.reader(body)        
-        contents = CSVLoader(reader)
-    
-    #print('contents: ', contents)
+        
+    print('contents: ', contents)
     new_contents = str(contents).replace("\n"," ") 
     print('length: ', len(new_contents))
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100) # amazon.titan-embed-g1-text-02
-    #text_splitter = RecursiveCharacterTextSplitter(chunk_size=250,chunk_overlap=20) # amazon.titan-e1t-medium
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=100,
+        separators=["\n\n", "\n", ".", " ", ""],
+        length_function = len,
+    ) 
 
     texts = text_splitter.split_text(new_contents) 
-    #print('texts[0]: ', texts[0])
-            
+    print('texts[0]: ', texts[0])
+    
     return texts
+
+# load csv documents from s3
+def load_csv_document(s3_file_name):
+    s3r = boto3.resource("s3")
+    doc = s3r.Object(s3_bucket, s3_prefix+'/'+s3_file_name)
+
+    lines = doc.get()['Body'].read().decode('utf-8').split('\n')   # read csv per line
+    print('lins: ', len(lines))
+        
+    columns = lines[0].split(',')  # get columns
+    #columns = ["Category", "Information"]  
+    #columns_to_metadata = ["type","Source"]
+    print('columns: ', columns)
+    
+    docs = []
+    n = 0
+    for row in csv.DictReader(lines, delimiter=',',quotechar='"'):
+        # print('row: ', row)
+        #to_metadata = {col: row[col] for col in columns_to_metadata if col in row}
+        values = {k: row[k] for k in columns if k in row}
+        content = "\n".join(f"{k.strip()}: {v.strip()}" for k, v in values.items())
+        doc = Document(
+            page_content=content,
+            metadata={
+                'name': s3_file_name,
+                'row': n+1,
+            }
+            #metadata=to_metadata
+        )
+        docs.append(doc)
+        n = n+1
+    print('docs[0]: ', docs[0])
+
+    return docs
 
 def get_summary(texts):    
     # check korean
@@ -156,7 +190,7 @@ def get_summary(texts):
         
         Assistant:"""        
     else:         
-        prompt_template = """\n\nWrite a concise summary of the following:
+        prompt_template = """\n\nHuman: Write a concise summary of the following:
 
         {text}
         
@@ -538,22 +572,31 @@ def lambda_handler(event, context):
             print('file_type: ', file_type)
             
             # load documents where text, pdf, csv are supported
-            texts = load_document(file_type, object)
+            if file_type == 'csv':
+                docs = load_csv_document(object)
 
-            docs = []
-            for i in range(len(texts)):
-                docs.append(
-                    Document(
-                        page_content=texts[i],
-                        metadata={
-                            'name': object,
-                            'page':i+1
-                        }
-                    )
-                )        
-            print('docs[0]: ', docs[0])    
-            print('docs size: ', len(docs))
-                        
+                texts = []
+                for doc in docs:
+                    texts.append(doc.page_content)
+                print('texts: ', texts)
+
+            else:
+                texts = load_document(file_type, object)
+
+                docs = []
+                for i in range(len(texts)):
+                    docs.append(
+                        Document(
+                            page_content=texts[i],
+                            metadata={
+                                'name': object,
+                                'page':i+1
+                            }
+                        )
+                    )        
+                print('docs[0]: ', docs[0])    
+                print('docs size: ', len(docs))
+                                
             if rag_type == 'faiss':
                 if isReady == False:   
                     vectorstore = FAISS.from_documents( # create vectorstore from a document
