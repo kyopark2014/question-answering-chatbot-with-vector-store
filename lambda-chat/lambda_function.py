@@ -315,6 +315,76 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
         return result+reference
     else:
         return result
+    
+
+# We are also providing a different chat history retriever which outputs the history as a Claude chat (ie including the \n\n)
+from langchain.schema import BaseMessage
+_ROLE_MAP = {"human": "\n\nHuman: ", "ai": "\n\nAssistant: "}
+def _get_chat_history(chat_history):
+    buffer = ""
+    for dialogue_turn in chat_history:
+        if isinstance(dialogue_turn, BaseMessage):
+            role_prefix = _ROLE_MAP.get(dialogue_turn.type, f"{dialogue_turn.type}: ")
+            buffer += f"\n{role_prefix}{dialogue_turn.content}"
+        elif isinstance(dialogue_turn, tuple):
+            human = "\n\nHuman: " + dialogue_turn[0]
+            ai = "\n\nAssistant: " + dialogue_turn[1]
+            buffer += "\n" + "\n".join([human, ai])
+        else:
+            raise ValueError(
+                f"Unsupported chat history format: {type(dialogue_turn)}."
+                f" Full chat history: {chat_history} "
+            )
+    return buffer
+
+memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
+def create_ConversationalRetrievalChain(vectorstore):  
+    condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    
+    {chat_history}
+    
+    Human: {question}
+
+    Assistant:"""
+    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
+
+    # combine any retrieved documents.
+    qa_prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    {context}
+
+    Question: {question}
+    
+    Assistant:"""    
+    
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=llm, 
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ),         
+        condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
+        combine_docs_chain_kwargs={'prompt': qa_prompt_template},  
+
+        memory=memory_chain,
+        get_chat_history=_get_chat_history,
+
+        verbose=False, # for logging to stdout
+        
+        #max_tokens_limit=300,
+        chain_type='stuff', # 'refine'
+        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
+                
+        return_source_documents=True, # retrieved source
+        return_generated_question=False, # generated question
+    )
+
+    #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
+    
+    return qa
+
+qa = create_ConversationalRetrievalChain(vectorstore)
+
 
 def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memory):  
     condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
@@ -558,8 +628,14 @@ def lambda_handler(event, context):
                             storedMsg = str(msg).replace("\n"," ") 
                             chat_memory.save_context({"input": text}, {"output": storedMsg})                  
                         else:
-                            msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
-                            #msg = get_answer_using_query(query, vectorstore, rag_type) # direct query
+                            #msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
+                            #msg = get_answer_using_query(text, vectorstore, rag_type) # direct query
+                            msg = qa(text)
+
+                            # extract chat history
+                            chats = memory_chain.load_memory_variables({})
+                            chat_history_all = chats['chat_history']
+                            print('chat_history_all: ', chat_history_all)
                                 
                     else:
                         msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
@@ -596,6 +672,7 @@ def lambda_handler(event, context):
                     )        
                 print('docs[0]: ', docs[0])    
                 print('docs size: ', len(docs))
+
                                 
             if rag_type == 'faiss':
                 if isReady == False:   
