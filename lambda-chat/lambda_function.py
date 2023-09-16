@@ -373,7 +373,7 @@ def create_ConversationalRetrievalChain(vectorstore):
         #max_tokens_limit=300,
         #chain_type='stuff', # 'refine'
         #rephrase_question=True,  # to pass the new generated question to the combine_docs_chain                
-        return_source_documents=True, # retrieved source
+        #return_source_documents=True, # retrieved source
         #return_generated_question=False, # generated question
     )
     qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
@@ -631,14 +631,14 @@ def lambda_handler(event, context):
                             print('result: ', result)    
     
                             # get the reference
-                            source_documents = result['source_documents']
-                            print('source_documents: ', source_documents)
-                            if len(source_documents)>=1 and enableReference=='true':
-                                reference = get_reference(source_documents)
-                                #print('reference: ', reference)
-                                msg = result['answer']+reference
-                            else:
-                                msg = result['answer']
+                            #source_documents = result['source_documents']
+                            #print('source_documents: ', source_documents)
+                            #if len(source_documents)>=1 and enableReference=='true':
+                            #    reference = get_reference(source_documents)
+                            #    #print('reference: ', reference)
+                            #    msg = result['answer']+reference
+                            #else:
+                            msg = result['answer']
 
                             #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore)
                             
