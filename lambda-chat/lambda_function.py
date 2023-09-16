@@ -625,9 +625,9 @@ def lambda_handler(event, context):
                             if isReady==False:
                                 isReady = True
                                 qa = create_ConversationalRetrievalChain(vectorstore)
-                            result = qa({"question": text})
+                            #result = qa({"question": text})
                             
-                            #result = qa(text)
+                            result = qa(text)
                             print('result: ', result)    
     
                             # get the reference
@@ -643,9 +643,9 @@ def lambda_handler(event, context):
                             #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore)
                             
                             # extract chat history
-                            #chats = memory_chain.load_memory_variables({})
-                            #chat_history_all = chats['chat_history']
-                            #print('chat_history_all: ', chat_history_all)
+                            chats = memory_chain.load_memory_variables({})
+                            chat_history_all = chats['chat_history']
+                            print('chat_history_all: ', chat_history_all)
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
                             #msg = get_answer_using_query(text, vectorstore, rag_type) # direct query                                                            
