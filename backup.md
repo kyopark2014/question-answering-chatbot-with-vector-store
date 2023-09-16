@@ -4,6 +4,8 @@
 ConversationalRetrievalChain을 테스트하기 위해 만든 코드입니다. 제대로 동작안해서 수정중입니다.
 
 ```python
+msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore, chat_memory)
+
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='Assistant')
 
 def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memory):  
