@@ -383,9 +383,6 @@ def create_ConversationalRetrievalChain(vectorstore):
     
     return qa
 
-qa = create_ConversationalRetrievalChain(vectorstore)
-
-
 def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memory):  
     condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
     
@@ -547,7 +544,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, isReady, map
+    global modelId, llm, vectorstore, isReady, map, qa
     global enableConversationMode, enableReference, enableRAG  # debug
 
     # memory for retrival docs
@@ -628,6 +625,9 @@ def lambda_handler(event, context):
                             storedMsg = str(msg).replace("\n"," ") 
                             chat_memory.save_context({"input": text}, {"output": storedMsg})                  
                         else:
+                            if isReady==False:
+                                isReady = True
+                                qa = create_ConversationalRetrievalChain(vectorstore)
                             #msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
                             #msg = get_answer_using_query(text, vectorstore, rag_type) # direct query
                             msg = qa(text)
