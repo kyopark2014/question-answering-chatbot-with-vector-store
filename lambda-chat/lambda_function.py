@@ -445,7 +445,7 @@ def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memor
         verbose=False, # for logging to stdout
         rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
         
-        memory=chat_memory,
+        memory=memory_chain,
         get_chat_history=_get_chat_history,
         #max_tokens_limit=300,
         return_source_documents=True, # retrieved source
