@@ -376,7 +376,6 @@ def create_ConversationalRetrievalChain(vectorstore):
         return_source_documents=True, # retrieved source
         return_generated_question=False, # generated question
     )
-
     qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
     
     return qa
@@ -627,7 +626,20 @@ def lambda_handler(event, context):
                                 isReady = True
                                 qa = create_ConversationalRetrievalChain(vectorstore)
                             #msg = qa({"question": text})
-                            msg = qa(text)
+                            
+                            result = qa(text)
+                            print('result: ', result)    
+    
+                            # get the reference
+                            source_documents = result['source_documents']
+                            print('source_documents: ', source_documents)
+                            if len(source_documents)>=1 and enableReference=='true':
+                                reference = get_reference(source_documents)
+                                #print('reference: ', reference)
+                                msg = result['answer']+reference
+                            else:
+                                msg = result['answer']
+
                             #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore)
                             
                             # extract chat history
