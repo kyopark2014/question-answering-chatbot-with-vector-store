@@ -364,7 +364,7 @@ def create_ConversationalRetrievalChain(vectorstore):
             search_type="similarity", search_kwargs={"k": 3}
         ),         
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
-        combine_docs_chain_kwargs={'prompt': qa_prompt_template},  
+        #combine_docs_chain_kwargs={'prompt': qa_prompt_template},  
 
         memory=memory_chain,
         get_chat_history=_get_chat_history,
@@ -377,53 +377,9 @@ def create_ConversationalRetrievalChain(vectorstore):
         return_generated_question=False, # generated question
     )
 
-    #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
+    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
     
     return qa
-
-def get_answer_using_ConversationalRetrievalChain(query, vectorstore):  
-    condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    
-    {chat_history}
-    
-    Human: {question}
-
-    Assistant:"""
-    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
-
-    # combine any retrieved documents.
-    qa_prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-    {context}
-
-    Question: {question}
-    
-    Assistant:"""    
-    
-    qa = ConversationalRetrievalChain.from_llm(
-        llm=llm, 
-        retriever=vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 3}
-        ),         
-        condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
-        combine_docs_chain_kwargs={'prompt': qa_prompt_template},  
-
-        memory=memory_chain,
-        get_chat_history=_get_chat_history,
-        verbose=False, # for logging to stdout
-        
-        #max_tokens_limit=300,
-        chain_type='stuff', # 'refine'
-        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain                
-        return_source_documents=True, # retrieved source
-        return_generated_question=False, # generated question
-    )
-
-    result = qa({"question": query})    
-    print('result: ', result)   
-
-    return result
-
 
 def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memory):  
     condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
@@ -445,8 +401,7 @@ def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memor
         verbose=False, # for logging to stdout
         rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
         
-        memory=memory_chain,
-        get_chat_history=_get_chat_history,
+        memory=chat_memory,
         #max_tokens_limit=300,
         return_source_documents=True, # retrieved source
         return_generated_question=False, # generated question
@@ -663,16 +618,16 @@ def lambda_handler(event, context):
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
                             #msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
-                            msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore, chat_memory)  
+                            #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore, chat_memory)  
                             
                             #storedMsg = str(msg).replace("\n"," ") 
                             #chat_memory.save_context({"input": text}, {"output": storedMsg})                  
 
-                            #if isReady==False:
-                            #    isReady = True
-                            #    qa = create_ConversationalRetrievalChain(vectorstore)
+                            if isReady==False:
+                                isReady = True
+                                qa = create_ConversationalRetrievalChain(vectorstore)
                             #msg = qa({"question": text})
-                            #msg = qa(text)
+                            msg = qa(text)
                             #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore)
                             
                             # extract chat history
