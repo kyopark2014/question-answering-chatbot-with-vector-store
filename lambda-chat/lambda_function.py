@@ -446,6 +446,7 @@ def get_answer_using_ConversationalRetrievalChain(query, vectorstore, chat_memor
         rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
         
         memory=chat_memory,
+        get_chat_history=_get_chat_history,
         #max_tokens_limit=300,
         return_source_documents=True, # retrieved source
         return_generated_question=False, # generated question
@@ -662,16 +663,16 @@ def lambda_handler(event, context):
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
                             #msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
-                            #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore, chat_memory)  
+                            msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore, chat_memory)  
                             
                             #storedMsg = str(msg).replace("\n"," ") 
                             #chat_memory.save_context({"input": text}, {"output": storedMsg})                  
 
-                            if isReady==False:
-                                isReady = True
-                                qa = create_ConversationalRetrievalChain(vectorstore)
+                            #if isReady==False:
+                            #    isReady = True
+                            #    qa = create_ConversationalRetrievalChain(vectorstore)
                             #msg = qa({"question": text})
-                            msg = qa(text)
+                            #msg = qa(text)
                             #msg = get_answer_using_ConversationalRetrievalChain(text, vectorstore)
                             
                             # extract chat history
