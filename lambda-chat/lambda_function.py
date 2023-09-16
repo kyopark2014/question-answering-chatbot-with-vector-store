@@ -628,7 +628,8 @@ def lambda_handler(event, context):
                                 qa = create_ConversationalRetrievalChain(vectorstore)
                             #msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
                             #msg = get_answer_using_query(text, vectorstore, rag_type) # direct query
-                            msg = qa(text)
+                            #msg = qa(prompt=text)
+                            msg = qa({"question": text})
 
                             # extract chat history
                             chats = memory_chain.load_memory_variables({})
