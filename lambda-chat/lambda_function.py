@@ -47,7 +47,7 @@ print('enableConversationMode: ', enableConversationMode)
 enableReference = os.environ.get('enableReference', 'false')
 enableRAG = os.environ.get('enableRAG', 'true')
 
-conversationMothod = 'PromptTemplate' # ConversationalRetrievalChain or PromptTemplate
+conversationMothod = 'ConversationalRetrievalChain' # ConversationalRetrievalChain or PromptTemplate
 
 # opensearch authorization - id/passwd
 opensearch_account = os.environ.get('opensearch_account')
