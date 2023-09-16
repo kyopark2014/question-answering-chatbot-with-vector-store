@@ -373,7 +373,7 @@ def create_ConversationalRetrievalChain(vectorstore):
         verbose=False, # for logging to stdout
         
         #max_tokens_limit=300,
-        #chain_type='stuff', # 'refine'
+        chain_type='stuff', # 'refine'
         #rephrase_question=True,  # to pass the new generated question to the combine_docs_chain                
         #return_source_documents=True, # retrieved source
         #return_generated_question=False, # generated question
