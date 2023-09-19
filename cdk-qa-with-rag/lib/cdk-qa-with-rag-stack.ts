@@ -90,7 +90,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     });
     
     // Permission for OpenSearch
-    const domainName = `os-${projectName}`
+    const domainName = projectName
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
     if(debug) {
