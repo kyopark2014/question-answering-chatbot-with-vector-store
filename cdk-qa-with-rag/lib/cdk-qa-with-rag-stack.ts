@@ -293,7 +293,7 @@ export class CdkQaWithRagStack extends cdk.Stack {
     });    
    
     new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
-      value: 'https://'+distribution.domainName+'/chat.html',      
+      value: 'https://'+distribution.domainName+'/index.html',      
       description: 'The web url of request for chat',
     });
 
