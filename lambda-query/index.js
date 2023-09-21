@@ -2,37 +2,44 @@ const aws = require('aws-sdk');
 
 var dynamo = new aws.DynamoDB();
 const tableName = process.env.tableName;
+const indexName = process.env.indexName;
 
 exports.handler = async (event, context) => {
     //console.log('## ENVIRONMENT VARIABLES: ' + JSON.stringify(process.env));
     //console.log('## EVENT: ' + JSON.stringify(event));
 
-    const userId = event['user-id'];
-    const requestId = event['request-id'];
-
+    let requestId = event['request_id'];
+    console.log('requestId: ', requestId);    
+    
     let msg = "";
-    try {
-        const key = {
-            "user-id": {"S": userId}, 
-            "request-id": {"S": requestId}
-        };
-        console.log("key: ", key);
-
-        var params = {
-            Key: key, 
-            TableName: tableName
-        };
-        var result = await dynamo.getItem(params).promise();
-        console.log(JSON.stringify(result));
-
-        msg = result['Item']['msg']['S'];
-    } catch (error) {
-        console.error(error);
-    }
-
-    const response = {
-        statusCode: 200,
-        msg: msg
+    let queryParams = {
+        TableName: tableName,
+        IndexName: indexName, 
+        KeyConditionExpression: "request_id = :requestId",
+        ExpressionAttributeValues: {
+            ":requestId": {'S': requestId}
+        }
     };
-    return response;
+    
+    try {
+        let result = await dynamo.query(queryParams).promise();    
+        // console.log('result: ', JSON.stringify(result));    
+
+        if(result['Items'])
+            msg = result['Items']['msg']['S'];
+
+        console.log('msg: ', msg);   
+        const response = {
+            statusCode: 200,
+            msg: msg
+        };
+        return response;
+    } catch (error) {
+        console.log(error);
+        const response = {
+            statusCode: 500,
+            msg: error
+        };
+        return response;
+    }     
 };
