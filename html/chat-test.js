@@ -40,7 +40,7 @@ HashMap.prototype = {
 var msglist = [];
 var maxMsgItems = 200;
 var msgHistory = new HashMap();
-var callee = "AWS";
+var callee = "John";
 var index=0;
 
 var userId = localStorage.getItem('userId'); // set userID if exists 
