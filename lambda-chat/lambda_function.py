@@ -491,6 +491,8 @@ def lambda_handler(event, context):
     print('userId: ', userId)
     requestId  = event['request_id']
     print('requestId: ', requestId)
+    requestTime  = event['request_time']
+    print('requestTime: ', requestTime)
     type  = event['type']
     print('type: ', type)
     body = event['body']
@@ -665,8 +667,9 @@ def lambda_handler(event, context):
         item = {
             'user_id': {'S':userId},
             'request_id': {'S':requestId},
+            'request_time': {'S':requestTime},
             'type': {'S':type},
-            'body': {'S':body},
+            'body': {'S':body}, 
             'msg': {'S':msg}
         }
 
