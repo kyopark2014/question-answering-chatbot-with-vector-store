@@ -73,14 +73,14 @@ export class CdkQaWithRagStack extends cdk.Stack {
     const callLogDataTable = new dynamodb.Table(this, `db-call-log-for-${projectName}`, {
       tableName: callLogTableName,
       partitionKey: { name: 'user_id', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'request_id', type: dynamodb.AttributeType.STRING }, 
+      sortKey: { name: 'request_time', type: dynamodb.AttributeType.STRING }, 
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
     const callLogIndexName = `index-type-for-${projectName}`;
     callLogDataTable.addGlobalSecondaryIndex({ // GSI
       indexName: callLogIndexName,
-      partitionKey: { name: 'type', type: dynamodb.AttributeType.STRING },
+      partitionKey: { name: 'request_id', type: dynamodb.AttributeType.STRING },
     });
 
     // copy web application files into s3 bucket
