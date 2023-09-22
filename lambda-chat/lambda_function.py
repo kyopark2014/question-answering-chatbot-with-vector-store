@@ -243,7 +243,7 @@ def summerize_text(text):
 
     return summary
 
-def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
+def get_answer_using_template_with_history_test(query, vectorstore, chat_memory):  
     # check korean
     pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
     word_kor = pattern_hangul.search(str(query))
@@ -334,7 +334,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     else:
         return result
 
-def get_answer_using_template_with_history_backup(query, vectorstore, chat_memory):  
+def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
     # check korean
     pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
     word_kor = pattern_hangul.search(str(query))
@@ -342,8 +342,8 @@ def get_answer_using_template_with_history_backup(query, vectorstore, chat_memor
     
     if word_kor:
         #condense_template = """\n\nHuman: 다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. 모르는 질문을 받으면, "주어진 내용에서 관련 답변을 찾을 수 없습니다."라고 합니다.
-        condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer. You will be acting as a thoughtful advisor.
-
+        condense_template = """If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        
         {chat_history}
         
         Human: {question}
