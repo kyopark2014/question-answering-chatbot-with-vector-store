@@ -243,7 +243,7 @@ def summerize_text(text):
 
     return summary
 
-def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
+def get_answer_using_template_with_history_backup(query, vectorstore, chat_memory):  
     # check korean
     pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
     word_kor = pattern_hangul.search(str(query))
@@ -322,14 +322,10 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     print('relevant_docs_context:\n ', relevant_docs_context)
 
     # make a question using chat history
-    if pages >= 1:
-        result = llm(CONDENSE_QUESTION_PROMPT.format(            
-            chat_history=chat_history, 
-            context=relevant_docs_context,
-            question=query))
-    else:
-        result = llm(HUMAN_PROMPT+query+AI_PROMPT)
-    # print('result: ', result)
+    result = llm(CONDENSE_QUESTION_PROMPT.format(            
+        chat_history=chat_history, 
+        context=relevant_docs_context,
+        question=query))
 
     # add refrence
     if len(relevant_documents)>=1 and enableReference=='true':
@@ -340,7 +336,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     else:
         return result
 
-def get_answer_using_template_with_history_backup(query, vectorstore, chat_memory):  
+def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
     # check korean
     pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
     word_kor = pattern_hangul.search(str(query))
@@ -404,11 +400,7 @@ def get_answer_using_template_with_history_backup(query, vectorstore, chat_memor
     print('chat_history:\n ', chat_history)
 
     # make a question using chat history
-    if pages >= 1:
-        result = llm(CONDENSE_QUESTION_PROMPT.format(question=query, chat_history=chat_history))
-    else:
-        result = llm(HUMAN_PROMPT+query+AI_PROMPT)
-    # print('result: ', result)
+    result = llm(CONDENSE_QUESTION_PROMPT.format(question=query, chat_history=chat_history))
 
     # add refrence
     if len(relevant_documents)>=1 and enableReference=='true':
