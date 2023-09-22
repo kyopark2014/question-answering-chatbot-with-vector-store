@@ -523,7 +523,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     print('word_kor: ', word_kor)
     
     if word_kor:
-        prompt_template = """\n\nHuman: 아래 내용의 문맥(context)을 참조했음에도 답을 알 수 없다면, 솔직히 모른다고 말합니다.
+        prompt_template = """\n\nHuman: 아래 내용(context)을 참조합니다. 모르면 솔직히 모른다고 말합니다.
 
         {context}
         
