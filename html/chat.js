@@ -446,7 +446,7 @@ function sendRequestForSummary(object, requestTime) {
 function delay(ms = 1000) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
-async function getResponse(userId, requestId) {
+async function getResponse(requestId) {
     await delay(5000);
     
     let n = retryNum.get(requestId);
@@ -480,7 +480,7 @@ function sendRequestForRetry(requestId) {
             else {
                 console.log('The request is not completed yet.');
 
-                getResponse(userId, requestId);
+                getResponse(requestId);
             }
         }
     };
