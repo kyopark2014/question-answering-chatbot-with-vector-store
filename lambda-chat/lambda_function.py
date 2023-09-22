@@ -485,6 +485,37 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
+def load_chatHistory(userId, allowTime, chat_memory):
+    dynamodb_client = boto3.client('dynamodb')
+
+    response = dynamodb_client.query(
+        TableName=callLogTableName,
+        KeyConditionExpression='user_id = :userId AND request_time > :allowTime',
+        ExpressionAttributeValues={
+            ':userId': {'S': userId},
+            ':allowTime': {'S': allowTime}
+        }
+    )
+    print('query result: ', response['Items'])
+
+    for item in response['Items']:
+        text = item['body']['S']
+        msg = item['msg']['S']
+        type = item['type']['S']
+
+        if type == 'text':
+            print('text: ', text)
+            print('msg: ', msg)        
+
+            chat_memory.save_context({"input": text}, {"output": msg})             
+
+def getAllowaTime():
+    d = datetime.datetime.now() - datetime.timedelta(days = 2)
+    timeStr = str(d)[0:19]
+    print('allow time: ',timeStr)
+
+    return timeStr
+
 def lambda_handler(event, context):
     print(event)
     userId  = event['user_id']
@@ -509,11 +540,14 @@ def lambda_handler(event, context):
         chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
         map[userId] = chat_memory
         print('chat_memory does not exist. create new one!')
+
+        allowTime = getAllowaTime()
+        load_chatHistory(userId, allowTime, chat_memory)
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
-            index_name = "rag-index-*", # all
-            #index_name = 'rag-index-'+userId+'-*',
+            #index_name = "rag-index-*", # all
+            index_name = 'rag-index-'+userId+'-*',
             is_aoss = False,
             #engine="faiss",  # default: nmslib
             embedding_function = bedrock_embeddings,
