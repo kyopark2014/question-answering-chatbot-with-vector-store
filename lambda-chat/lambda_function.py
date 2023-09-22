@@ -523,7 +523,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     print('word_kor: ', word_kor)
     
     if word_kor:
-        prompt_template = """\n\nHuman: 다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다. If you don't know the answer, just say "주어진 내용에서 관련 답변을 찾을 수 없습니다.".
+        prompt_template = """\n\nHuman: 다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. If you don't know the answer, just say "주어진 내용에서 관련 답변을 찾을 수 없습니다.".
         
         {context}
         
