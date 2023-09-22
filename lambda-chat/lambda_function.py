@@ -524,7 +524,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     
     if word_kor:
         #prompt_template = """\n\nHuman: 아래 문맥(context)을 참조했음에도 답을 알 수 없다면, 솔직히 모른다고 말합니다.
-        prompt_template = """\n\nHuman: 아래 문맥(context)을 참조했음에도 답을 알 수 없다면, 솔직히 모른다고 말합니다. Assistant은 상황에 맞는 구체적인 정보를 친절하게 답변합니다.
+        prompt_template = """\n\nHuman: 아래 문맥(context)을 참조했음에도 답을 알 수 없다면, 솔직히 모른다고 말합니다.
         
         {context}
         
