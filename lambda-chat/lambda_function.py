@@ -518,7 +518,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     print('length of relevant_documents: ', len(relevant_documents))
 
     # check korean
-    prompt_template = """\n\nHuman: Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer. You will be acting as a thoughtful advisor.
+    prompt_template = """\n\nHuman: Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
     {context}
 
