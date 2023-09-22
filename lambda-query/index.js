@@ -26,7 +26,7 @@ exports.handler = async (event, context) => {
         // console.log('result: ', JSON.stringify(result));    
 
         if(result['Items'])
-            msg = result['Items']['msg']['S'];
+            msg = result['Items'][0]['msg']['S'];
 
         console.log('msg: ', msg);   
         const response = {
