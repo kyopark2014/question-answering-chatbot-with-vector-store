@@ -323,10 +323,10 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
 
     # make a question using chat history
     if pages >= 1:
-        result = llm(CONDENSE_QUESTION_PROMPT.format(
-            question=query, 
+        result = llm(CONDENSE_QUESTION_PROMPT.format(            
             chat_history=chat_history, 
-            context=relevant_docs_context))
+            context=relevant_docs_context,
+            question=query))
     else:
         result = llm(HUMAN_PROMPT+query+AI_PROMPT)
     # print('result: ', result)
