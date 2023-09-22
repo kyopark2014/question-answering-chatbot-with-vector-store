@@ -523,7 +523,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     print('word_kor: ', word_kor)
     
     if word_kor:
-        prompt_template = """\n\nHuman: If you don't know the answer, 솔직히 모른다고 말합니다.
+        prompt_template = """\n\nHuman: If the answer is not in the context, 솔직히 모른다고 말합니다.
         
         {context}
         
