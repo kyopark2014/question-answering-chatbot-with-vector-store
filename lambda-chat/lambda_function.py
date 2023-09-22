@@ -254,7 +254,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     
         {chat_history}
 
-        Human: Here is the context, inside <context></context> XML tags. Based on the context as below, answer the question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        Human: Here is the context, inside <context></context> XML tags. Based on the context as below, answer the question. If the answer is not in the context say "주어진 내용에서 관련 답변을 찾을 수 없습니다."
 
         <context>
         {context}
@@ -560,7 +560,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
         return_source_documents=True,
         chain_type_kwargs={"prompt": PROMPT}
     )
-    result = qa({"query": query})
+    result = qa({"question": query})
     print('result: ', result)
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
