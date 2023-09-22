@@ -382,7 +382,7 @@ function sendRequest(text, requestTime) {
         else if(xhr.readyState ===4 && xhr.status === 504) {
             console.log("response: " + xhr.readyState + ', xhr.status: '+xhr.status);
 
-            getResponse(userId, requestId);
+            getResponse(requestId);
         }
         else {
             console.log("response: " + xhr.readyState + ', xhr.status: '+xhr.status);
@@ -422,7 +422,7 @@ function sendRequestForSummary(object, requestTime) {
         else if(xhr.readyState ===4 && xhr.status === 504) {
             console.log("response: " + xhr.readyState + ', xhr.status: '+xhr.status);
 
-            getResponse(userId, requestId);
+            getResponse(requestId);
         }
         else {
             console.log("response: " + xhr.readyState + ', xhr.status: '+xhr.status);
