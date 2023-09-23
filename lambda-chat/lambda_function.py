@@ -116,7 +116,12 @@ bedrock_embeddings = BedrockEmbeddings(
     model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
 )
 
-
+def toUtf8(s):
+    typeArg = str(type(s))
+    if typeArg is "<class 'bytes'>":
+        return s.encode('utf8').decode('utf8')
+    elif typeArg is "<type 'unicode'>":
+        return str(s)
     
 # load documents from s3 for pdf and txt
 def load_document(file_type, s3_file_name):
@@ -124,16 +129,12 @@ def load_document(file_type, s3_file_name):
     doc = s3r.Object(s3_bucket, s3_prefix+'/'+s3_file_name)
     
     if file_type == 'pdf':
-        contents = doc.get()['Body'].read()
+        contents = doc.get()['Body'].read().decode('utf-8')
         reader = PyPDF2.PdfReader(BytesIO(contents))
         
         raw_text = []
         for page in reader.pages:
-            extracted_text = page.extract_text()
-            print('extracted_text: ', extracted_text)
-            encoded_text = extracted_text.encode('utf8').decode('utf8')
-            print('encoded_text: ', encoded_text)
-            raw_text.append(extracted_text)
+            raw_text.append(page.extract_text())
         contents = '\n'.join(raw_text)    
         
     elif file_type == 'txt':        
