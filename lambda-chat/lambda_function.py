@@ -356,6 +356,7 @@ def get_answer_using_template_with_history(query, vectorstore, rag_type, chat_me
         chat_history = ""
     
     # load related docs
+    print('reg_type: ', rag_type)
     relevant_documents = vectorstore.similarity_search(query)
     if rag_type == 'faiss':
         query_embedding = vectorstore.embedding_function(query)
