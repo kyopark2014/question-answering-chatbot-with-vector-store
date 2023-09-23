@@ -23,19 +23,6 @@ function deleteItems(userId, requestTime) {
     });
 }
 
-let isCompleted = false;
-
-function wait() {
-    return new Promise((resolve, reject) => {
-        if (!isCompleted) {
-            setTimeout(() => resolve("wait..."), 1000);
-        }
-        else {
-            setTimeout(() => resolve("done..."), 0);
-        }
-    });
-}
-
 exports.handler = async (event, context) => {
     //console.log('## ENVIRONMENT VARIABLES: ' + JSON.stringify(process.env));
     //console.log('## EVENT: ' + JSON.stringify(event));
@@ -51,6 +38,7 @@ exports.handler = async (event, context) => {
         }
     };
 
+    let response;
     try {
         let result = await dynamo.query(queryParams).promise();
 
@@ -71,18 +59,34 @@ exports.handler = async (event, context) => {
         console.log(await wait());
         console.log(await wait());
 
-        const response = {
+        response = {
             statusCode: 200,
             msg: "done"
         };
-        return response;
     } catch (error) {
         console.log(error);
 
-        const response = {
+        response = {
             statusCode: 500,
             msg: error
         };
-        return response;
     }
+
+    function wait(){
+        return new Promise((resolve, reject) => {
+            if(!isCompleted) {
+                setTimeout(() => resolve("wait..."), 1000);
+            }
+            else {
+                setTimeout(() => resolve("done..."), 0);
+            }
+        });
+    }
+    console.log(await wait());
+    console.log(await wait());
+    console.log(await wait());
+    console.log(await wait());
+    console.log(await wait());
+
+    return response;
 };

@@ -162,11 +162,11 @@ function addSentMessage(text, timestr) {
         msglist[index].innerHTML = 
             `<div class="chat-sender20 chat-sender--right"><h1>${timestr}</h1>${text}&nbsp;<h2 id="status${index}"></h2></div>`;   
     }
-    else if(length < 15) {
+    else if(length < 14) {
         msglist[index].innerHTML = 
             `<div class="chat-sender25 chat-sender--right"><h1>${timestr}</h1>${text}&nbsp;<h2 id="status${index}"></h2></div>`;   
     }
-    else if(length < 18) {
+    else if(length < 17) {
         msglist[index].innerHTML = 
             `<div class="chat-sender30 chat-sender--right"><h1>${timestr}</h1>${text}&nbsp;<h2 id="status${index}"></h2></div>`;
     }  
@@ -228,10 +228,10 @@ function addReceivedMessage(msg) {
     if(length < 10) {
         msglist[index].innerHTML = `<div class="chat-receiver20 chat-receiver--left"><h1>${sender}</h1>${msg}&nbsp;</div>`;  
     }
-    else if(length < 15) {
+    else if(length < 14) {
         msglist[index].innerHTML = `<div class="chat-receiver25 chat-receiver--left"><h1>${sender}</h1>${msg}&nbsp;</div>`;  
     }
-    else if(length < 18) {
+    else if(length < 17) {
         msglist[index].innerHTML = `<div class="chat-receiver30 chat-receiver--left"><h1>${sender}</h1>${msg}&nbsp;</div>`;  
     }
     else if(length < 23) {
