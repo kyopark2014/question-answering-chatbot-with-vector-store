@@ -531,6 +531,8 @@ Bedrock embedding의 경우에 영문 1000자는 문자가 없었으나 한글 �
 
 [FAISS - LangChain](https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/faiss)
 
+[langchain.vectorstores.opensearch_vector_search.OpenSearchVectorSearch](https://api.python.langchain.com/en/latest/vectorstores/langchain.vectorstores.opensearch_vector_search.OpenSearchVectorSearch.html?highlight=opensearchvectorsearch#langchain.vectorstores.opensearch_vector_search.OpenSearchVectorSearch.similarity_search_with_relevance_scores)
+
 [langchain.vectorstores.faiss.FAISS](https://api.python.langchain.com/en/latest/vectorstores/langchain.vectorstores.faiss.FAISS.html)
 
 [Welcome to Faiss Documentation](https://faiss.ai/)
