@@ -322,7 +322,7 @@ def get_answer_using_template_with_history_test(query, vectorstore, chat_memory)
     else:
         return result
 
-def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
+def get_answer_using_template_with_history(query, vectorstore, rag_type, chat_memory):  
     condense_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.  
         
     {chat_history}
@@ -357,6 +357,11 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     
     # load related docs
     relevant_documents = vectorstore.similarity_search(query)
+    if rag_type == 'faiss':
+        query_embedding = vectorstore.embedding_function(query)
+        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+    elif rag_type == 'opensearch':
+        relevant_documents = vectorstore.similarity_search(query)
     #print('relevant_documents: ', relevant_documents)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
@@ -653,7 +658,7 @@ def lambda_handler(event, context):
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
                             if conversationMothod == 'PromptTemplate':
-                                msg = get_answer_using_template_with_history(text, vectorstore, chat_memory)
+                                msg = get_answer_using_template_with_history(text, vectorstore, rag_type, chat_memory)
                                                               
                                 storedMsg = str(msg).replace("\n"," ") 
                                 chat_memory.save_context({"input": text}, {"output": storedMsg})                  
