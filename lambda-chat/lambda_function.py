@@ -129,9 +129,9 @@ def load_document(file_type, s3_file_name):
         for page in reader.pages:
             extracted_text = page.extract_text()
             print('extracted_text: ', extracted_text)
-            decoded_text = extracted_text.decode(encoding='UTF-8', errors='strict')
-            print('decoded_text: ', decoded_text)
-            raw_text.append(decoded_text)
+            #decoded_text = extracted_text.decode(encoding='UTF-8', errors='strict')
+            #print('decoded_text: ', decoded_text)
+            raw_text.append(extracted_text)
         contents = '\n'.join(raw_text)    
         
     elif file_type == 'txt':        
