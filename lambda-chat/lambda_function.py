@@ -115,13 +115,6 @@ bedrock_embeddings = BedrockEmbeddings(
     region_name = bedrock_region,
     model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
 )
-
-#def toUtf8(s):
-#    typeArg = str(type(s))
-#    if typeArg is "<class 'bytes'>":
-#        return s.encode('utf8').decode('utf8')
-#    elif typeArg is "<type 'unicode'>":
-#        return str(s)
     
 # load documents from s3 for pdf and txt
 def load_document(file_type, s3_file_name):
@@ -139,7 +132,6 @@ def load_document(file_type, s3_file_name):
 
         typeArg = str(type(contents))
         print('typeArg: ', typeArg)
-        print('contents str: ', str(contents))
         
     elif file_type == 'txt':        
         contents = doc.get()['Body'].read().decode('utf-8')
