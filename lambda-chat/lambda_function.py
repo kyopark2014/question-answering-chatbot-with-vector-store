@@ -139,6 +139,7 @@ def load_document(file_type, s3_file_name):
 
         typeArg = str(type(contents))
         print('typeArg: ', typeArg)
+        print('contents str: ', str(contents))
         
     elif file_type == 'txt':        
         contents = doc.get()['Body'].read().decode('utf-8')
