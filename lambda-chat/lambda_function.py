@@ -57,6 +57,9 @@ opensearch_passwd = os.environ.get('opensearch_passwd')
 # credentials = boto3.Session().get_credentials()
 # awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
 
+HUMAN_PROMPT = "\n\nHuman:"
+AI_PROMPT = "\n\nAssistant:"
+
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
 isReady = False   
@@ -101,8 +104,6 @@ def get_parameter(modelId):
             "top_p": 0.1
         }
 parameters = get_parameter(modelId)
-HUMAN_PROMPT = "\n\nHuman:"
-AI_PROMPT = "\n\nAssistant:"
 
 llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
 
