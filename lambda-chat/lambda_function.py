@@ -320,7 +320,6 @@ def get_answer_using_template_with_history_test(query, vectorstore, chat_memory)
         return result
 
 def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
-    #condense_template = """\n\nHuman: Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
     condense_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.  
         
     {chat_history}
