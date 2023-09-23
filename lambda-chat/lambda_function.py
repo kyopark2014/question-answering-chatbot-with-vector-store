@@ -592,6 +592,8 @@ def lambda_handler(event, context):
             #index_name = "rag-index-*", # all
             index_name = 'rag-index-'+userId+'-*',
             is_aoss = False,
+            ef_search = 1024, # 512(default)
+            m=48,
             #engine="faiss",  # default: nmslib
             embedding_function = bedrock_embeddings,
             opensearch_url=opensearch_url,
