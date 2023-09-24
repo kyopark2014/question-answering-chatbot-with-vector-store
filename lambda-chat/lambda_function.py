@@ -285,32 +285,41 @@ def get_answer_using_template_with_history(query, vectorstore, rag_type, chat_me
         chat_history = ""
     
     # load related docs
-    #print('reg_type: ', rag_type)
-    #if rag_type == 'faiss':
-    #    query_embedding = vectorstore.embedding_function(query)
-    #    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-    #elif rag_type == 'opensearch':
-    #    relevant_documents = vectorstore.similarity_search(query)
-    #print('relevant_documents: ', relevant_documents)
-
-    print('reg_type: ', rag_type)    
+    print('reg_type: ', rag_type)
     if rag_type == 'faiss':
         query_embedding = vectorstore.embedding_function(query)
         relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
     elif rag_type == 'opensearch':
-        kwargs = {"score_threshold":0.8}
-        relevant_documents = vectorstore.similarity_search(query=query, k=3, **kwargs)
+        relevant_documents = vectorstore.similarity_search(query)
     print('relevant_documents: ', relevant_documents)
-
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
     for i, rel_doc in enumerate(relevant_documents):
         body = rel_doc.page_content[rel_doc.page_content.rfind('Document Excerpt:')+18:len(rel_doc.page_content)]
-        # print('body: ', body)
+        print('body: ', body)
         
         chat_history = f"{chat_history}\nHuman: {body}"  # append relevant_documents 
         print(f'## Document {i+1}: {rel_doc.page_content}')
         print('---')
+
+    #print('reg_type: ', rag_type)    
+    #if rag_type == 'faiss':
+    #    query_embedding = vectorstore.embedding_function(query)
+    #    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+    #elif rag_type == 'opensearch':
+    #    kwargs = {"score_threshold":0.8}
+    #    relevant_documents = vectorstore.similarity_search(query=query, k=3, **kwargs)
+    #print('relevant_documents: ', relevant_documents)
+
+    #print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
+    #print('----')
+    #for i, rel_doc in enumerate(relevant_documents):
+    #    body = rel_doc.page_content
+    #    print('body: ', body)
+        
+    #    chat_history = f"{chat_history}\nHuman: {body}"  # append relevant_documents 
+    #    print(f'## Document {i+1}: {rel_doc.page_content}')
+    #    print('---')
 
     print('chat_history:\n ', chat_history)
 
