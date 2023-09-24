@@ -299,7 +299,7 @@ def get_answer_using_template_with_history(query, vectorstore, rag_type, chat_me
         relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
     elif rag_type == 'opensearch':
         kwargs = {"score_threshold":0.8}
-        relevant_documents = vectorstore.similarity_search_with_relevance_scores(query=query, k=3, **kwargs)
+        relevant_documents = vectorstore.similarity_search_with_score(query=query, k=3, **kwargs)
     print('relevant_documents: ', relevant_documents)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
@@ -589,6 +589,7 @@ def lambda_handler(event, context):
                 enableRAG = 'false'
                 msg  = "RAG is disabled"
             elif text == 'clearMemory':
+                chat_memory = ""
                 chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
                 map[userId] = chat_memory
                 print('initiate the chat memory!')
