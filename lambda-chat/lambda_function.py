@@ -286,7 +286,6 @@ def get_answer_using_template_with_history(query, vectorstore, rag_type, chat_me
     
     # load related docs
     #print('reg_type: ', rag_type)
-    #relevant_documents = vectorstore.similarity_search(query)
     #if rag_type == 'faiss':
     #    query_embedding = vectorstore.embedding_function(query)
     #    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
@@ -294,13 +293,13 @@ def get_answer_using_template_with_history(query, vectorstore, rag_type, chat_me
     #    relevant_documents = vectorstore.similarity_search(query)
     #print('relevant_documents: ', relevant_documents)
 
-    print('reg_type: ', rag_type)
-    relevant_documents = vectorstore.similarity_search_with_relevance_scores(query=query, k=3, kwargs={"score_threshold":0.8})
+    print('reg_type: ', rag_type)    
     if rag_type == 'faiss':
-        query_embedding = vectorstore.embedding_function(query=query, k=3, kwargs={"score_threshold":0.8})
-        relevant_documents = vectorstore.similarity_search_with_relevance_scores(query_embedding)
+        query_embedding = vectorstore.embedding_function(query)
+        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
     elif rag_type == 'opensearch':
-        relevant_documents = vectorstore.similarity_search_with_relevance_scores(query=query, k=3, kwargs={"score_threshold":0.8})
+        kwargs = {"score_threshold":0.8}
+        relevant_documents = vectorstore.similarity_search(query=query, k=3, **kwargs)
     print('relevant_documents: ', relevant_documents)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
