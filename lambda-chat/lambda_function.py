@@ -295,13 +295,13 @@ def get_answer_using_template_with_history(query, vectorstore, rag_type, chat_me
     #print('relevant_documents: ', relevant_documents)
 
     print('reg_type: ', rag_type)
-    relevant_documents = vectorstore.similarity_search(query=query, k=3, score_threshold=0.8)
+    relevant_documents = vectorstore.similarity_search_with_relevance_scores(query=query, k=3, score_threshold=0.8)
     if rag_type == 'faiss':
         query_embedding = vectorstore.embedding_function(query=query, k=3, score_threshold=0.8)
-        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
+        relevant_documents = vectorstore.similarity_search_with_relevance_scores(query_embedding)
     elif rag_type == 'opensearch':
-        relevant_documents = vectorstore.similarity_search(query=query, k=3, score_threshold=0.8)
-    #print('relevant_documents: ', relevant_documents)
+        relevant_documents = vectorstore.similarity_search_with_relevance_scores(query=query, k=3, score_threshold=0.8)
+    print('relevant_documents: ', relevant_documents)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
     print('----')
@@ -593,7 +593,7 @@ def lambda_handler(event, context):
                 chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
                 map[userId] = chat_memory
                 print('initiate the chat memory!')
-                msg  = "The chat memory was intialized."
+                msg  = "The chat memory was intialized in this session."
             else:
                 if rag_type == 'faiss' and isReady == False: 
                     msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
