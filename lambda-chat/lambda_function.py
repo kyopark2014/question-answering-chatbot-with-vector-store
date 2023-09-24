@@ -448,7 +448,10 @@ def get_answer_using_template(query, vectorstore, rag_type):
         llm=llm,
         chain_type="stuff",
         retriever=vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 3}
+            search_type="similarity", 
+            search_kwargs={
+                "k": 3, 'score_threshold': 0.8
+            }
         ),
         return_source_documents=True,
         chain_type_kwargs={"prompt": PROMPT}
