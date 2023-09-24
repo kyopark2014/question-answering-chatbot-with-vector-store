@@ -589,6 +589,11 @@ def lambda_handler(event, context):
             elif text == 'disableRAG':
                 enableRAG = 'false'
                 msg  = "RAG is disabled"
+            elif text == 'clearMemory':
+                chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
+                map[userId] = chat_memory
+                print('initiate the chat memory!')
+                msg  = "The chat memory was intialized."
             else:
                 if rag_type == 'faiss' and isReady == False: 
                     msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
