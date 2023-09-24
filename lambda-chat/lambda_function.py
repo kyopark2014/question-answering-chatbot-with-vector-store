@@ -481,7 +481,7 @@ def get_reference(docs):
     reference = "\n\nFrom\n"
     for doc in docs:
         name = doc.metadata['name']
-        page = doc.metadata['page']
+        page = doc.metadata['row']
     
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
