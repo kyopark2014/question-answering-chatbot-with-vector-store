@@ -36,6 +36,7 @@ git clone https://github.com/kyopark2014/question-answering-chatbot-with-vector-
 cd question-answering-chatbot-with-vector-store/cdk-qa-with-rag/ && npm install
 ```
 
+<!--
 6) bedrock-sdk를 설치합니다.
 
 ```text
@@ -45,8 +46,9 @@ unzip bedrock-python-sdk.zip -d bedrock-sdk
 rm bedrock-python-sdk.zip
 cd ../cdk-qa-with-rag/
 ```
+-->
 
-6) CDK 사용을 위해 Boostraping을 수행합니다.
+7) CDK 사용을 위해 Boostraping을 수행합니다.
 
 아래 명령어로 Account ID를 확인합니다.
 
