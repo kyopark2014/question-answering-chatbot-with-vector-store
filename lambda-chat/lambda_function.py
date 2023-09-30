@@ -9,9 +9,7 @@ import csv
 import sys
 import re
 
-from langchain import PromptTemplate, SagemakerEndpoint
-from langchain.llms.sagemaker_endpoint import LLMContentHandler
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
 from langchain.chains.summarize import load_summarize_chain
@@ -38,7 +36,6 @@ s3_bucket = os.environ.get('s3_bucket') # bucket name
 s3_prefix = os.environ.get('s3_prefix')
 callLogTableName = os.environ.get('callLogTableName')
 configTableName = os.environ.get('configTableName')
-endpoint_url = os.environ.get('endpoint_url')
 opensearch_url = os.environ.get('opensearch_url')
 bedrock_region = os.environ.get('bedrock_region')
 rag_type = os.environ.get('rag_type')
@@ -57,38 +54,20 @@ opensearch_passwd = os.environ.get('opensearch_passwd')
 # credentials = boto3.Session().get_credentials()
 # awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
 
-HUMAN_PROMPT = "\n\nHuman:"
-AI_PROMPT = "\n\nAssistant:"
-
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
 isReady = False   
 accessType = os.environ.get('accessType')
 
-# Bedrock Contiguration
-bedrock_config = {
-    "region_name":bedrock_region,
-    "endpoint_url":endpoint_url
-}
-    
-# supported llm list from bedrock
-if accessType=='aws':  # internal user of aws
-    boto3_bedrock = boto3.client(
-        service_name='bedrock',
-        region_name=bedrock_config["region_name"],
-        endpoint_url=bedrock_config["endpoint_url"],
-    )
-else: # preview user
-    boto3_bedrock = boto3.client(
-        service_name='bedrock',
-        region_name=bedrock_config["region_name"],
-    )
+boto3_bedrock = boto3.client(
+    service_name='bedrock-runtime',
+    region_name=bedrock_region,
+)
 
-modelInfo = boto3_bedrock.list_foundation_models()    
-print('models: ', modelInfo)
-
+HUMAN_PROMPT = "\n\nHuman:"
+AI_PROMPT = "\n\nAssistant:"
 def get_parameter(modelId):
-    if modelId == 'amazon.titan-tg1-large': 
+    if modelId == 'amazon.titan-tg1-large' or modelId == 'amazon.titan-tg1-xlarge': 
         return {
             "maxTokenCount":1024,
             "stopSequences":[],
@@ -97,17 +76,21 @@ def get_parameter(modelId):
         }
     elif modelId == 'anthropic.claude-v1' or modelId == 'anthropic.claude-v2':
         return {
-            "stop_sequences": [HUMAN_PROMPT],
             "max_tokens_to_sample":1024,
             "temperature":0.1,
-            "top_k":3,
-            "top_p": 0.1
+            "top_k":250,
+            "top_p": 0.9,
+            "stop_sequences": [HUMAN_PROMPT]            
         }
 parameters = get_parameter(modelId)
 
-llm = Bedrock(model_id=modelId, client=boto3_bedrock, model_kwargs=parameters)
+llm = Bedrock(
+    model_id=modelId, 
+    client=boto3_bedrock, 
+    #streaming=True,
+    model_kwargs=parameters)
 
-map = dict()  # Conversation
+map = dict() # Conversation
 
 # embedding
 bedrock_embeddings = BedrockEmbeddings(
@@ -530,7 +513,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, isReady, map, qa
+    global modelId, llm, vectorstore, isReady, map, qa, conversation
     global enableConversationMode, enableReference, enableRAG  # debug
     
     # memory for conversation
@@ -544,6 +527,8 @@ def lambda_handler(event, context):
 
         allowTime = getAllowTime()
         load_chatHistory(userId, allowTime, chat_memory)
+
+        conversation = ConversationChain(llm=llm, verbose=False, memory=chat_memory)      
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
@@ -564,6 +549,13 @@ def lambda_handler(event, context):
 
     msg = ""
     if type == 'text' and body[:11] == 'list models':
+        bedrock_client = boto3.client(
+            service_name='bedrock',
+            region_name=bedrock_region,
+        )
+        modelInfo = bedrock_client.list_foundation_models()    
+        print('models: ', modelInfo)
+
         msg = f"The list of models: \n"
         lists = modelInfo['modelSummaries']
         
@@ -571,7 +563,7 @@ def lambda_handler(event, context):
             msg += f"{model['modelId']}\n"
         
         msg += f"current model: {modelId}"
-        print('model lists: ', msg)
+        print('model lists: ', msg)    
     
     else:             
         if type == 'text':
@@ -591,6 +583,12 @@ def lambda_handler(event, context):
             elif text == 'disableConversationMode':
                 enableConversationMode = 'false'
                 msg  = "Conversation mode is disabled"
+            elif text == 'clearMemory':
+                chat_memory = ""
+                chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
+                map[userId] = chat_memory
+                print('initiate the chat memory!')
+                msg  = "The chat memory was intialized in this session."
             elif text == 'enableRAG':
                 enableRAG = 'true'
                 msg  = "RAG is enabled"

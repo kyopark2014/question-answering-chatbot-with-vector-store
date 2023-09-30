@@ -14,8 +14,7 @@ RUN /var/lang/bin/python3 -m pip install faiss-cpu
 RUN /var/lang/bin/python3 -m pip install opensearch-py
 RUN /var/lang/bin/python3 -m pip install transformers
 
-RUN pip install -U /var/task/bedrock-sdk/boto3-1.28.21-py3-none-any.whl
-RUN pip install -U /var/task/bedrock-sdk/botocore-1.31.21-py3-none-any.whl 
-RUN rm -rf /var/task/bedrock-sdk
+RUN /var/lang/bin/python3 -m pip install botocore --upgrade
+RUN /var/lang/bin/python3 -m pip install boto3 --upgrade
 
 CMD ["lambda_function.lambda_handler"]
