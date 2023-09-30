@@ -45,24 +45,17 @@ Vector store는 이미지, 문서(text document), 오디오와 같은 구조화 
 from langchain.llms.bedrock import Bedrock
 
 bedrock_region = "us-west-2" 
-bedrock_config = {
-    "region_name":bedrock_region,
-    "endpoint_url":"https://prod.us-west-2.frontend.bedrock.aws.dev"
-}
-    
-if accessType=='aws': # internal user of aws
-    boto3_bedrock = boto3.client(
-        service_name='bedrock’,
-        region_name=bedrock_config["region_name"],
-        endpoint_url=bedrock_config["endpoint_url"],
-    )
-else: # preview user
-    boto3_bedrock = boto3.client(
-        service_name='bedrock’,
-        region_name=bedrock_config["region_name"],
-    )
-modelId = 'amazon.titan-tg1-large’
-llm = Bedrock(model_id=modelId, client=boto3_bedrock) 
+
+boto3_bedrock = boto3.client(
+    service_name='bedrock’,
+    region_name=bedrock_region,
+)
+
+modelId = 'anthropic.claude-v2’
+llm = Bedrock(
+    model_id=modelId, 
+    client=boto3_bedrock, 
+    model_kwargs=parameters)
 ```
 
 
