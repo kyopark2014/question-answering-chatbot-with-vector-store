@@ -44,8 +44,6 @@ print('enableConversationMode: ', enableConversationMode)
 enableReference = os.environ.get('enableReference', 'false')
 enableRAG = os.environ.get('enableRAG', 'true')
 
-conversationMothod = 'ConversationalRetrievalChain' # ConversationalRetrievalChain or PromptTemplate
-
 # opensearch authorization - id/passwd
 opensearch_account = os.environ.get('opensearch_account')
 opensearch_passwd = os.environ.get('opensearch_passwd')
@@ -297,20 +295,10 @@ def create_ConversationalRetrievalChain(vectorstore):
         # return_source_documents=True, # retrieved source (not allowed)
         return_generated_question=False, # generated question
     )
-    #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
-    #qa.combine_docs_chain.llm_chain.prompt = PROMPT
-    #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
     
     return qa
 
 def get_answer_using_template(query, vectorstore, rag_type):        
-    #summarized_query = summerize_text(query)        
-    #    if rag_type == 'faiss':
-    #        query_embedding = vectorstore.embedding_function(summarized_query)
-    #        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-    #    elif rag_type == 'opensearch':
-    #        relevant_documents = vectorstore.similarity_search(summarized_query)
-    
     if rag_type == 'faiss':
         query_embedding = vectorstore.embedding_function(query)
         relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
@@ -513,24 +501,21 @@ def lambda_handler(event, context):
 
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':
-                            if conversationMothod == 'PromptTemplate':
-                                msg = get_answer_using_template_with_history(text, vectorstore, rag_type, chat_memory)
-                                                              
-                                storedMsg = str(msg).replace("\n"," ") 
-                                chat_memory.save_context({"input": text}, {"output": storedMsg})                  
-                            else: # ConversationalRetrievalChain
-                                if isReady==False:
-                                    isReady = True
-                                    qa = create_ConversationalRetrievalChain(vectorstore)
+                            if isReady==False:
+                                isReady = True
+                                qa = create_ConversationalRetrievalChain(vectorstore)
 
-                                result = qa(text)
-                                print('result: ', result)    
-                                msg = result['answer']
+                            result = qa(text)
+                            print('result: ', result)    
+                            msg = result['answer']
 
-                                # extract chat history
-                                chats = memory_chain.load_memory_variables({})
-                                chat_history_all = chats['chat_history']
-                                print('chat_history_all: ', chat_history_all)
+                            # storedMsg = str(msg).replace("\n"," ") 
+                            chat_memory.save_context({"input": text}, {"output": msg})  
+
+                            # extract chat history
+                            chats = memory_chain.load_memory_variables({})
+                            chat_history_all = chats['chat_history']
+                            print('chat_history_all: ', chat_history_all)
                             
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
