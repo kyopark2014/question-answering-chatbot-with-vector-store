@@ -411,7 +411,8 @@ def create_ConversationalRetrievalChain(vectorstore):
         return_generated_question=False, # generated question
     )
     #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
-    qa.combine_docs_chain.llm_chain.prompt = PROMPT
+    #qa.combine_docs_chain.llm_chain.prompt = PROMPT
+    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
     
     return qa
 
