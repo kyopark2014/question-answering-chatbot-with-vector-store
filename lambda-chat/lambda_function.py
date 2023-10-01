@@ -234,88 +234,16 @@ def summerize_text(text):
 
     return summary
 
-def get_answer_using_template_with_history(query, vectorstore, rag_type, chat_memory):  
-    condense_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.  
+def get_prompt():
+    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
-    {chat_history}
-        
-    Human: {question}
+    {context}
+
+    Question: {question}
 
     Assistant:"""
-    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)     
-        
-    # extract chat history
-    chats = chat_memory.load_memory_variables({})
-    chat_history_all = chats['history']
-    print('chat_history_all: ', chat_history_all)
 
-    # use last two chunks of chat history
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=2000,
-        chunk_overlap=0,
-        separators=["\n\n", "\n", ".", " ", ""],
-        length_function = len)
-    texts = text_splitter.split_text(chat_history_all) 
-
-    pages = len(texts)
-    print('pages: ', pages)
-
-    if pages >= 2:
-        chat_history = f"{texts[pages-2]} {texts[pages-1]}"
-    elif pages == 1:
-        chat_history = texts[0]
-    else:  # 0 page
-        chat_history = ""
-    
-    # load related docs
-    print('reg_type: ', rag_type)
-    if rag_type == 'faiss':
-        query_embedding = vectorstore.embedding_function(query)
-        relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-    elif rag_type == 'opensearch':
-        relevant_documents = vectorstore.similarity_search(query)
-    print('relevant_documents: ', relevant_documents)
-    print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
-    print('----')
-    for i, rel_doc in enumerate(relevant_documents):
-        body = rel_doc.page_content
-        # print('body: ', body)        
-        chat_history = f"{chat_history}\nHuman: {body}"  # append relevant_documents 
-        print(f'## Document {i+1}: {rel_doc.page_content}')
-    print('---')
-
-    # test code for similarity_search_with_score
-    #print('reg_type: ', rag_type)    
-    #if rag_type == 'faiss':
-    #    query_embedding = vectorstore.embedding_function(query)
-    #    relevant_documents = vectorstore.similarity_search_by_vector(query_embedding)
-    #elif rag_type == 'opensearch':
-    #    kwargs = {"score_threshold":0.8}
-    #    relevant_documents = vectorstore.similarity_search_with_score(query=query, k=3, **kwargs)
-    #print('relevant_documents: ', relevant_documents)
-
-    #print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
-    #print('----')
-    #for i, rel_doc in enumerate(relevant_documents):
-    #    body = rel_doc.page_content
-    #    #print('body: ', body)
-        
-    #    chat_history = f"{chat_history}\nHuman: {body}"  # append relevant_documents 
-    #    print(f'## Document {i+1}: {rel_doc.page_content}')
-    #print('---')
-
-    print('chat_history:\n ', chat_history)
-
-    # make a question using chat history
-    result = llm(CONDENSE_QUESTION_PROMPT.format(question=query, chat_history=chat_history))
-
-    # add refrence
-    if len(relevant_documents)>=1 and enableReference=='true':
-        reference = get_reference(relevant_documents)
-        # print('reference: ', reference)
-        return result+reference
-    else:
-        return result
+    return PromptTemplate.from_template(prompt_template)
 
 # We are also providing a different chat history retriever which outputs the history as a Claude chat (ie including the \n\n)
 from langchain.schema import BaseMessage
@@ -355,42 +283,7 @@ def create_ConversationalRetrievalChain(vectorstore):
     Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
 
-    # combine any retrieved documents.
-    #qa_prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-    #{context}
-
-    #Question: {question}
-    
-    #Assistant:"""    
-    
-    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-        
-    {context}
-
-    Question: {question}
-
-    Assistant:"""
-    
-    PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
-
-    #qa_prompt_template = """\n\nHuman:
-    #Here is the context, inside <context></context> XML tags.    
-    #Based on the context as below, answer the question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-    #<context>
-    #{context}
-    #</context>
-
-    #Human: Use at maximum 5 sentences to answer the following question.
-    #{question}
-
-    #If the answer is not in the context, say "I don't know"
-
-    #Assistant:
-    #"""  
+    PROMPT = get_prompt()
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
