@@ -291,7 +291,6 @@ def get_prompt_using_languange_type(query):
         
     return PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 
-
 def create_ConversationalRetrievalChain(vectorstore):  
     condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
