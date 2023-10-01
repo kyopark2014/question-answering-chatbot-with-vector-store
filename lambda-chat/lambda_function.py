@@ -232,17 +232,6 @@ def summerize_text(text):
 
     return summary
 
-def get_prompt():
-    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-        
-    {context}
-
-    Question: {question}
-
-    Assistant:"""
-
-    return PromptTemplate.from_template(prompt_template)
-
 # We are also providing a different chat history retriever which outputs the history as a Claude chat (ie including the \n\n)
 from langchain.schema import BaseMessage
 _ROLE_MAP = {"human": "\n\nHuman: ", "ai": "\n\nAssistant: "}
@@ -263,17 +252,19 @@ def _get_chat_history(chat_history):
             )
     return buffer
 
+def get_prompt():
+    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        
+    {context}
 
+    Question: {question}
+
+    Assistant:"""
+
+    return PromptTemplate.from_template(prompt_template)
 
 def create_ConversationalRetrievalChain(vectorstore):  
-    #condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    
-    #{chat_history}
-    
-    #Human: {question}
-
-    #Assistant:"""
-    condense_template = """To create condense_question, given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
     Chat History:
     {chat_history}
