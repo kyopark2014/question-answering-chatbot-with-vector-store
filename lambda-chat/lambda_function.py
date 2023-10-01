@@ -235,17 +235,15 @@ def summerize_text(text):
     return summary
 
 def get_prompt():
-    prompt_template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
     {context}
 
     Question: {question}
 
     Assistant:"""
-    
-    QA_PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
+
+    return PromptTemplate.from_template(prompt_template)
 
 # We are also providing a different chat history retriever which outputs the history as a Claude chat (ie including the \n\n)
 from langchain.schema import BaseMessage
