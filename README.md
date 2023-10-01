@@ -58,27 +58,17 @@ llm = Bedrock(
     model_kwargs=parameters)
 ```
 
-
 ### Embedding
 
-[BedrockEmbeddings](https://python.langchain.com/docs/integrations/text_embedding/bedrock)과 [langchain.embeddings.bedrock.BedrockEmbeddings](https://api.python.langchain.com/en/latest/embeddings/langchain.embeddings.bedrock.BedrockEmbeddings.html)을 참조하여 Embedding을 합니다.
-
-```python
-from langchain.embeddings import BedrockEmbeddings
-bedrock_embeddings = BedrockEmbeddings(client=boto3_bedrock)
-```
-
-현재 Bodrock은 "amazon.titan-e1t-medium"와 "amazon.titan-embed-g1-text-02"을 제공하고 있습니다. "amazon.titan-e1t-medium"은 input vector와 output vector가 각각 512, 4096이며, "amazon.titan-embed-g1-text-02"d은 input과 output vector가 각각 8192, 1536입니다. 아래와 같이 model_id 파라메터를 이용하여 설정합니다.
+[BedrockEmbeddings](https://python.langchain.com/docs/integrations/text_embedding/bedrock)과 [langchain.embeddings.bedrock.BedrockEmbeddings](https://api.python.langchain.com/en/latest/embeddings/langchain.embeddings.bedrock.BedrockEmbeddings.html)을 참조하여 Embedding을 수행합니다. 여기서 사용하는 amazon.titan-embed-text-v1은 8k token을 지원합니다.
 
 ```python
 bedrock_embeddings = BedrockEmbeddings(
     client=boto3_bedrock,
     region_name = bedrock_region,
-    model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
+    model_id = 'amazon.titan-embed-text-v1'
 )
 ```
-
-
 
 ### 문서 읽어오기
 
@@ -371,24 +361,22 @@ return result['result']
 대화(Conversation)을 위해서는 Chat History를 이용한 Prompt Engineering이 필요합니다. 여기서는 Chat History를 위한 chat_memory와 RAG에서 document를 retrieval을 하기 위한 memory를 이용합니다.
 
 ```python
-# memory for conversation
-chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='AI')
-
-# memory for retrival docs
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='AI')
+memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 ```
 
 Chat history를 위한 condense_template과 document retrieval시에 사용하는 prompt_template을 아래와 같이 정의하고, [ConversationalRetrievalChain](https://api.python.langchain.com/en/latest/chains/langchain.chains.conversational_retrieval.base.ConversationalRetrievalChain.html)을 이용하여 아래와 같이 구현합니다.
 
-
 ```python
-def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
-    condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+def create_ConversationalRetrievalChain(vectorstore):  
+    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+
     Chat History:
     {chat_history}
-    Human: {question}
-    AI:"""
+    Follow Up Input: {question}
+    Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
+
+    PROMPT = get_prompt()
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
@@ -396,47 +384,30 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
             search_type="similarity", search_kwargs={"k": 3}
         ),         
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
-        chain_type='stuff', # 'refine'
+        combine_docs_chain_kwargs={'prompt': PROMPT},  
+
+        memory=memory_chain,
+        get_chat_history=_get_chat_history,
         verbose=False, # for logging to stdout
-        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
         
-        memory=memory,
-        #max_tokens_limit=300,
-        return_source_documents=True, # retrieved source
+        chain_type='stuff', # 'refine'
+        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain                
         return_generated_question=False, # generated question
     )
+    
+    return qa
 
-    # combine any retrieved documents.
-    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
+def get_prompt():
+    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        
     {context}
 
     Question: {question}
-    AI:"""
-    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
-    
-    # extract chat history
-    chats = chat_memory.load_memory_variables({})
-    chat_history = chats['history']
-    print('chat_history: ', chat_history)
 
-    # make a question using chat history
-    result = qa({"question": query, "chat_history": chat_history})    
-    print('result: ', result)    
-    
-    # get the reference
-    source_documents = result['source_documents']
-    print('source_documents: ', source_documents)
+    Assistant:"""
 
-    if len(source_documents)>=1 and enableReference == 'true':
-        reference = get_reference(source_documents)
-        #print('reference: ', reference)
-        return result['answer']+reference
-    else:
-        return result['answer']
+    return PromptTemplate.from_template(prompt_template)
 ```        
-
-
 
 ### AWS CDK로 인프라 구현하기
 
