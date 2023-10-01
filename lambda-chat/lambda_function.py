@@ -277,7 +277,10 @@ def create_ConversationalRetrievalChain(vectorstore):
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         retriever=vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 3}
+            search_type="similarity", 
+            search_kwargs={
+                "k": 3
+            }
         ),         
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
         combine_docs_chain_kwargs={'prompt': PROMPT},  
@@ -512,9 +515,7 @@ def lambda_handler(event, context):
                                 isReady = True
                                 qa = create_ConversationalRetrievalChain(vectorstore)
 
-                            #result = qa(text)
-                            print('text: ', text)   
-                            result = qa({"question": text})
+                            result = qa(text)
                             print('result: ', result)    
                             msg = result['answer']
 
