@@ -338,7 +338,8 @@ def get_answer_using_template(query, vectorstore, rag_type):
         retriever=vectorstore.as_retriever(
             search_type="similarity", 
             search_kwargs={
-                "k": 3, 'score_threshold': 0.8
+                #"k": 3, 'score_threshold': 0.8
+                "k": 3
             }
         ),
         return_source_documents=True,
