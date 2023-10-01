@@ -5,7 +5,7 @@
 ConversationBufferMemory를 아래와 같이 정의합니다. 
 
 ```python
-memory = ConversationBufferMemory(
+chat_memory = ConversationBufferMemory(
   memory_key="chat_history",
   return_messages=True,
   input_key="question",
@@ -18,7 +18,7 @@ dialog를 추가할 경우에는 아래와 같이 보기 편하게 answer에서 
 
 ```python
 storedMsg = str(msg).replace("\n"," ") 
-memory_chain.save_context({"input": text}, {"output": storedMsg})
+chat_memory.save_context({"input": text}, {"output": storedMsg})
 ```
 
 chat history를 로그로 볼때는  아래와 같이 합니다.
