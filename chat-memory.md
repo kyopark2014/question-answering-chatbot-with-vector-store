@@ -47,6 +47,9 @@ memory_chain.chat_memory.add_ai_message(msg)
 memory에서 chat history를 추출할 때는 아래와 같이 합니다.
 
 ```python
+from langchain.schema import BaseMessage
+_ROLE_MAP = {"human": "\n\nHuman: ", "ai": "\n\nAssistant: "}
+
 chat_history = extract_chat_history_from_memory(memory_chain)
 
 def extract_chat_history_from_memory(memory_chain):
