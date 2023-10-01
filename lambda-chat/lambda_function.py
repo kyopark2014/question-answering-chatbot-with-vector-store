@@ -377,7 +377,8 @@ def create_ConversationalRetrievalChain(vectorstore):
 
     If the answer is not in the context, say "I don't know"
 
-    Assistant:"""  
+    Assistant:
+    """  
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
@@ -423,7 +424,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     
     print('length of relevant_documents: ', len(relevant_documents))
 
-    prompt_template = """\n\nHuman: Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
     {context}
 
