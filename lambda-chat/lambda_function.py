@@ -44,8 +44,6 @@ print('enableConversationMode: ', enableConversationMode)
 enableReference = os.environ.get('enableReference', 'false')
 enableRAG = os.environ.get('enableRAG', 'true')
 
-conversationMothod = 'ConversationalRetrievalChain' # ConversationalRetrievalChain or PromptTemplate
-
 # opensearch authorization - id/passwd
 opensearch_account = os.environ.get('opensearch_account')
 opensearch_passwd = os.environ.get('opensearch_passwd')
@@ -265,7 +263,7 @@ def _get_chat_history(chat_history):
             )
     return buffer
 
-memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
 
 def create_ConversationalRetrievalChain(vectorstore):  
     #condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
@@ -377,7 +375,7 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
-def load_chatHistory(userId, allowTime, chat_memory):
+def load_chatHistory(userId, allowTime, memory_chain):
     dynamodb_client = boto3.client('dynamodb')
 
     response = dynamodb_client.query(
@@ -399,7 +397,9 @@ def load_chatHistory(userId, allowTime, chat_memory):
             print('text: ', text)
             print('msg: ', msg)        
 
-            chat_memory.save_context({"input": text}, {"output": msg})             
+            #memory_chain.save_context({"input": text}, {"output": msg})            
+            memory_chain.chat_memory.add_user_message(text)
+            memory_chain.chat_memory.add_ai_message(msg) 
 
 def getAllowTime():
     d = datetime.datetime.now() - datetime.timedelta(days = 2)
@@ -421,7 +421,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, isReady, map, qa, conversation
+    global modelId, llm, vectorstore, isReady, map, qa, conversation, memory_chain
     global enableConversationMode, enableReference, enableRAG  # debug
     
     # memory for conversation
@@ -429,14 +429,14 @@ def lambda_handler(event, context):
         chat_memory = map[userId]
         print('chat_memory exist. reuse it!')
     else: 
-        chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
-        map[userId] = chat_memory
+        memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+        map[userId] = memory_chain
         print('chat_memory does not exist. create new one!')
 
         allowTime = getAllowTime()
-        load_chatHistory(userId, allowTime, chat_memory)
+        load_chatHistory(userId, allowTime, memory_chain)
 
-        conversation = ConversationChain(llm=llm, verbose=False, memory=chat_memory)      
+        #conversation = ConversationChain(llm=llm, verbose=False, memory=chat_memory)              
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
@@ -492,9 +492,9 @@ def lambda_handler(event, context):
                 enableConversationMode = 'false'
                 msg  = "Conversation mode is disabled"
             elif text == 'clearMemory':
-                chat_memory = ""
-                chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
-                map[userId] = chat_memory
+                memory_chain = ""
+                memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+                map[userId] = memory_chain
                 print('initiate the chat memory!')
                 msg  = "The chat memory was intialized in this session."
             elif text == 'enableRAG':
@@ -502,13 +502,7 @@ def lambda_handler(event, context):
                 msg  = "RAG is enabled"
             elif text == 'disableRAG':
                 enableRAG = 'false'
-                msg  = "RAG is disabled"
-            elif text == 'clearMemory':
-                chat_memory = ""
-                chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='Assistant')
-                map[userId] = chat_memory
-                print('initiate the chat memory!')
-                msg  = "The chat memory was intialized in this session."
+                msg  = "RAG is disabled"                
             else:
                 if rag_type == 'faiss' and isReady == False: 
                     msg = llm(HUMAN_PROMPT+text+AI_PROMPT)
@@ -518,26 +512,22 @@ def lambda_handler(event, context):
                     print(f"query size: {querySize}, workds: {textCount}")
 
                     if querySize<1800 and enableRAG=='true': # max 1985
-                        if enableConversationMode == 'true':
-                            if conversationMothod == 'PromptTemplate':
-                                msg = get_answer_using_template_with_history(text, vectorstore, rag_type, chat_memory)
-                                                              
-                                storedMsg = str(msg).replace("\n"," ") 
-                                chat_memory.save_context({"input": text}, {"output": storedMsg})                  
-                            else: # ConversationalRetrievalChain
-                                if isReady==False:
-                                    isReady = True
-                                    qa = create_ConversationalRetrievalChain(vectorstore)
+                        if enableConversationMode == 'true':                                                              
+                                #storedMsg = str(msg).replace("\n"," ") 
+                                #chat_memory.save_context({"input": text}, {"output": storedMsg})                  
 
-                                result = qa(text)
-                                print('result: ', result)    
-                                msg = result['answer']
+                            if isReady==False:
+                                isReady = True
+                                qa = create_ConversationalRetrievalChain(vectorstore)
 
-                                # extract chat history
-                                chats = memory_chain.load_memory_variables({})
-                                chat_history_all = chats['chat_history']
-                                print('chat_history_all: ', chat_history_all)
-                            
+                            result = qa(text)
+                            print('result: ', result)    
+                            msg = result['answer']
+
+                            # extract chat history
+                            chats = memory_chain.load_memory_variables({})
+                            chat_history_all = chats['chat_history']
+                            print('chat_history_all: ', chat_history_all)                            
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
                     else:
