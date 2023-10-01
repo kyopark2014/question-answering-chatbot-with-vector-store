@@ -398,7 +398,7 @@ def create_ConversationalRetrievalChain(vectorstore):
             search_type="similarity", search_kwargs={"k": 3}
         ),         
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
-        #combine_docs_chain_kwargs={'prompt': qa_prompt_template},  
+        combine_docs_chain_kwargs={'prompt': PROMPT},  
 
         memory=memory_chain,
         get_chat_history=_get_chat_history,
@@ -412,7 +412,7 @@ def create_ConversationalRetrievalChain(vectorstore):
     )
     #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
     #qa.combine_docs_chain.llm_chain.prompt = PROMPT
-    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
+    #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
     
     return qa
 
