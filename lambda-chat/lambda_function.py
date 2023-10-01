@@ -255,7 +255,7 @@ def _get_chat_history(chat_history):
             )
     return buffer
 
-def get_prompt():
+def get_prompt_basic():
     prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
     {context}
@@ -265,6 +265,32 @@ def get_prompt():
     Assistant:"""
 
     return PromptTemplate.from_template(prompt_template)
+
+def get_prompt():
+    # check korean
+    pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
+    word_kor = pattern_hangul.search(str(query))
+    print('word_kor: ', word_kor)
+        
+    if word_kor:
+        prompt_template = """다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
+        
+        {context}
+            
+        Question: {question}
+
+        Assistant:"""
+    else:
+        prompt_template = """Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+            
+        {context}
+            
+        Question: {question}
+
+        Assistant:"""
+        
+    return PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+
 
 def create_ConversationalRetrievalChain(vectorstore):  
     condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
@@ -352,17 +378,19 @@ def get_answer_using_template(query, vectorstore, rag_type):
     
     print('length of relevant_documents: ', len(relevant_documents))
 
-    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    #prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
-    {context}
+    #{context}
 
-    Question: {question}
+    #Question: {question}
 
-    Assistant:"""
+    #Assistant:"""
     
-    PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
+    #PROMPT = PromptTemplate(
+    #    template=prompt_template, input_variables=["context", "question"]
+    #)
+
+    PROMPT = get_prompt()
 
     qa = RetrievalQA.from_chain_type(
         llm=llm,
