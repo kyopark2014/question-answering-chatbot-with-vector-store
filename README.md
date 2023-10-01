@@ -428,23 +428,21 @@ def get_prompt():
 
 ### 실행결과
 
-채팅창에 "Tell me how to use ChatGPT in AWS."라고 입력합니다. 대규모 언어 모델은 가장 근사한 답을 찾아서 전달하므로 전형적인 환각(hallucination) 응답을 얻었습니다.
+[fsi_faq_ko.csv](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/blob/main/fsi_faq_ko.csv)을 다운로드 하고, 채팅창의 파일 아이콘을 선택하여 업로드합니다.
 
-![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/a769d1e5-7d7d-467d-825f-77786ef806fa)
+![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/a8d0e353-8ab8-4637-922a-78d57d49e60c)
 
-[gen-ai-aws.pdf](./gen-ai-aws.pdf)을 다운로드 한 후에 채팅창 아래의 파일 아이콘을 선택하여 업로드합니다. 업로드가 끝나면 아래와 같이 "gen-ai-aws.pdf"을 요약하여 보여줍니다.
+채팅창에 "이체를 할수 없다고 나옵니다. 어떻게 해야 하나요?” 라고 입력하고 결과를 확인합니다.
+![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/70f58f09-ac3c-490d-9226-c02fdae5e4b0)
 
-![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/aceae3f4-d406-4736-b468-c0e960b49aa9)
+채팅창에 "간편조회 서비스를 영문으로 사용할 수 있나요?” 라고 입력합니다. 이때의 결과는 ＂아니오”입니다.
 
-"gen-ai-aws.pdf"는 AWS의 Generative AI에 대한 정보를 가지고 있으므로, 동일한 질문을 했을때에 아래와 같이 이전과 다른 정확한 답변을 얻을 수 있습니다.
+![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/2550827d-e311-42e9-95ea-af5ade0562e9)
 
-![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/bfd0d183-580b-49be-83de-f57d019a1fec)
+채팅창에 "공동인증서 창구발급 서비스는 무엇인가요?"라고 입력하고 결과를 확인합니다.
 
+![image](https://github.com/kyopark2014/question-answering-chatbot-with-vector-store/assets/52392004/6faa85a0-025b-47be-8cde-1d1c07bafc79)
 
-
-#### Chatbot 동작 시험시 주의할점
-
-일반적인 chatbot들은 지속적인 세션을 유지 관리하기 위해서는 websocket 등을 사용하지만, 여기서 사용한 Chatbot은 API를 테스트하기 위하여 RESTful API를 사용하고 있습니다. 따라서, LLM에서 응답이 일정시간(30초)이상 지연되는 경우에 브라우저에서 답변을 볼 수 없습니다. 따라서 긴 응답시간이 필요한 경우에 CloudWatch에서 [lambda-chat](./lambda-chat/lambda_function.py)의 로그를 확인하거나, DynamoDB에 저장된 call log를 확인합니다.
 
 
 ### 리소스 정리하기
