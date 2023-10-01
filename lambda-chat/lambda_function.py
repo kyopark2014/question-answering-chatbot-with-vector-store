@@ -255,7 +255,7 @@ def _get_chat_history(chat_history):
             )
     return buffer
 
-def get_prompt_basic():
+def get_prompt():
     prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
     {context}
@@ -266,7 +266,7 @@ def get_prompt_basic():
 
     return PromptTemplate.from_template(prompt_template)
 
-def get_prompt():
+def get_prompt_using_languange_type(query):
     # check korean
     pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
     word_kor = pattern_hangul.search(str(query))
@@ -390,7 +390,7 @@ def get_answer_using_template(query, vectorstore, rag_type):
     #    template=prompt_template, input_variables=["context", "question"]
     #)
 
-    PROMPT = get_prompt()
+    PROMPT = get_prompt_using_languange_type(query)
 
     qa = RetrievalQA.from_chain_type(
         llm=llm,
