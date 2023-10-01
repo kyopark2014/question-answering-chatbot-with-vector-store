@@ -1,6 +1,6 @@
 # Chat Memory를 활용하는 방법
 
-## Prefix 활용하기
+## Prefix 활용하여 chat memory를 이용하기
 
 ConversationBufferMemory를 아래와 같이 정의합니다. 
 
@@ -29,7 +29,7 @@ chat_history_all = chats['history']
 print('chat_history_all: ', chat_history_all)
 ```
 
-## 기본 설정을 활용하기
+## ConversationalRetrievalChain을 위한 chat memory 정의하기
 
 아래와 같이 memory chain을 정의합니다.
 
