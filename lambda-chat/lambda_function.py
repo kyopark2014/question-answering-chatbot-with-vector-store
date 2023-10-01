@@ -96,7 +96,7 @@ map = dict() # Conversation
 bedrock_embeddings = BedrockEmbeddings(
     client=boto3_bedrock,
     region_name = bedrock_region,
-    model_id = 'amazon.titan-embed-g1-text-02' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02
+    model_id = 'amazon.titan-embed-text-v1' # amazon.titan-e1t-medium, amazon.titan-embed-g1-text-02 amazon.titan-embed-text-v1
 )
     
 # load documents from s3 for pdf and txt
@@ -364,21 +364,33 @@ def create_ConversationalRetrievalChain(vectorstore):
     
     #Assistant:"""    
     
-    qa_prompt_template = """\n\nHuman:
-    Here is the context, inside <context></context> XML tags.    
-    Based on the context as below, answer the question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-    <context>
+    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        
     {context}
-    </context>
 
-    Human: Use at maximum 5 sentences to answer the following question.
-    {question}
+    Question: {question}
 
-    If the answer is not in the context, say "I don't know"
+    Assistant:"""
+    
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
 
-    Assistant:
-    """  
+    #qa_prompt_template = """\n\nHuman:
+    #Here is the context, inside <context></context> XML tags.    
+    #Based on the context as below, answer the question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    #<context>
+    #{context}
+    #</context>
+
+    #Human: Use at maximum 5 sentences to answer the following question.
+    #{question}
+
+    #If the answer is not in the context, say "I don't know"
+
+    #Assistant:
+    #"""  
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
@@ -398,7 +410,8 @@ def create_ConversationalRetrievalChain(vectorstore):
         # return_source_documents=True, # retrieved source (not allowed)
         return_generated_question=False, # generated question
     )
-    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
+    #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
+    qa.combine_docs_chain.llm_chain.prompt = PROMPT
     
     return qa
 

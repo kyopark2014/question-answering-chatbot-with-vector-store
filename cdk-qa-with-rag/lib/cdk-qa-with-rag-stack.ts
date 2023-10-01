@@ -28,7 +28,7 @@ const accessType = "preview"; // aws or preview
 const bedrock_region = "us-east-1";  // "us-east-1" "us-west-2" 
 const enableConversationMode = 'true'; 
 const enableReference = 'false';
-const enableRAG = 'false';
+const enableRAG = 'true';
 
 export class CdkQaWithRagStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
