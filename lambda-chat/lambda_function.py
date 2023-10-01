@@ -234,17 +234,6 @@ def summerize_text(text):
 
     return summary
 
-def get_prompt():
-    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-        
-    {context}
-
-    Question: {question}
-
-    Assistant:"""
-
-    return PromptTemplate.from_template(prompt_template)
-
 # We are also providing a different chat history retriever which outputs the history as a Claude chat (ie including the \n\n)
 from langchain.schema import BaseMessage
 _ROLE_MAP = {"human": "\n\nHuman: ", "ai": "\n\nAssistant: "}
@@ -267,15 +256,9 @@ def _get_chat_history(chat_history):
 
 memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-def create_ConversationalRetrievalChain(vectorstore):  
-    #condense_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    
-    #{chat_history}
-    
-    #Human: {question}
-
-    #Assistant:"""
-    condense_template = """To create condense_question, given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+def create_ConversationalRetrievalChain(vectorstore):      
+    # condense_question_prompt: The prompt to use to condense the chat history and new question into a standalone question.
+    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
     Chat History:
     {chat_history}
@@ -283,7 +266,18 @@ def create_ConversationalRetrievalChain(vectorstore):
     Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
 
-    PROMPT = get_prompt()
+    # The prompt for combine_docs_chain
+    prompt_template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        
+    {context}
+
+    Question: {question}
+
+    Assistant:"""
+    
+    QA_PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
@@ -291,7 +285,7 @@ def create_ConversationalRetrievalChain(vectorstore):
             search_type="similarity", search_kwargs={"k": 3}
         ),         
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
-        combine_docs_chain_kwargs={'prompt': PROMPT},  
+        combine_docs_chain_kwargs={'prompt': QA_PROMPT},  
 
         memory=memory_chain,
         get_chat_history=_get_chat_history,
