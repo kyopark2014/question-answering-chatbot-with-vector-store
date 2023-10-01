@@ -30,6 +30,7 @@ from langchain.vectorstores import OpenSearchVectorSearch
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationChain
+from langchain.chains import LLMChain
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
@@ -51,6 +52,8 @@ opensearch_passwd = os.environ.get('opensearch_passwd')
 # from requests_aws4auth import AWS4Auth
 # credentials = boto3.Session().get_credentials()
 # awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
+
+conversationMothod = 'ManualIntegration' # ConversationalRetrievalChain or ManualIntegration
 
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
@@ -301,6 +304,32 @@ def create_ConversationalRetrievalChain(vectorstore):
     
     return qa
 
+def extract_chat_history_from_memory(memory_chain):
+    chat_history = []
+    chats = memory_chain.load_memory_variables({})    
+    for dialogue_turn in chats['chat_history']:
+        role_prefix = _ROLE_MAP.get(dialogue_turn.type, f"{dialogue_turn.type}: ")
+        chat_history.append(f"{role_prefix[2:]}{dialogue_turn.content}")
+
+    return chat_history
+
+def get_generated_prompt(query):    
+    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+
+    Chat History:
+    {chat_history}
+    Follow Up Input: {question}
+    Standalone question:"""
+    CONDENSE_QUESTION_PROMPT = PromptTemplate(
+        template = condense_template, input_variables = ["chat_history", "question"]
+    )
+    
+    chat_history = extract_chat_history_from_memory(memory_chain)
+    #print('chat_history: ', chat_history)
+    
+    question_generator_chain = LLMChain(llm=llm, prompt=CONDENSE_QUESTION_PROMPT)
+    return question_generator_chain.run({"question": query, "chat_history": chat_history})
+
 def get_answer_using_template(query, vectorstore, rag_type):        
     #summarized_query = summerize_text(query)        
     #    if rag_type == 'faiss':
@@ -416,22 +445,22 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global modelId, llm, vectorstore, isReady, map, qa, conversation, memory_chain
+    global modelId, llm, vectorstore, isReady, map, qa, memory_chain
     global enableConversationMode, enableReference, enableRAG  # debug
     
     # memory for conversation
     if userId in map:
-        chat_memory = map[userId]
-        print('chat_memory exist. reuse it!')
+        memory_chain = map[userId]
+        print('memory_chain exist. reuse it!')
     else: 
         memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         map[userId] = memory_chain
-        print('chat_memory does not exist. create new one!')
+        print('memory_chain does not exist. create new one!')
 
         allowTime = getAllowTime()
         load_chatHistory(userId, allowTime, memory_chain)
 
-        #conversation = ConversationChain(llm=llm, verbose=False, memory=chat_memory)              
+        #conversation = ConversationChain(llm=llm, verbose=False, memory=memory_chain)              
     
     if rag_type == 'opensearch':
         vectorstore = OpenSearchVectorSearch(
@@ -508,21 +537,31 @@ def lambda_handler(event, context):
 
                     if querySize<1800 and enableRAG=='true': # max 1985
                         if enableConversationMode == 'true':                                                              
-                                #storedMsg = str(msg).replace("\n"," ") 
-                                #chat_memory.save_context({"input": text}, {"output": storedMsg})                  
+                            if(conversationMothod == 'ConversationalRetrievalChain'):    
+                                if isReady==False:
+                                    isReady = True
+                                    qa = create_ConversationalRetrievalChain(vectorstore)
 
-                            if isReady==False:
-                                isReady = True
-                                qa = create_ConversationalRetrievalChain(vectorstore)
+                                result = qa(text)
+                                print('result: ', result)    
+                                msg = result['answer']
 
-                            result = qa(text)
-                            print('result: ', result)    
-                            msg = result['answer']
+                                # extract chat history
+                                chats = memory_chain.load_memory_variables({})
+                                chat_history_all = chats['chat_history']
+                                print('chat_history_all: ', chat_history_all)
+                                
+                            else: 
+                                generated_prompt = get_generated_prompt(text) # generate new prompt using chat history
+                                print('generated_prompt: ', generated_prompt)
+                                msg = get_answer_using_template(text, vectorstore, rag_type) 
 
-                            # extract chat history
-                            chats = memory_chain.load_memory_variables({})
-                            chat_history_all = chats['chat_history']
-                            print('chat_history_all: ', chat_history_all)                            
+                                chat_history_all = extract_chat_history_from_memory(memory_chain) # debugging
+                                print('chat_history_all: ', chat_history_all)
+
+                                memory_chain.chat_memory.add_user_message(text)  # append new diaglog
+                                memory_chain.chat_memory.add_ai_message(msg)
+
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
                     else:
