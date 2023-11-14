@@ -586,8 +586,8 @@ def lambda_handler(event, context):
                                 chat_history_all = extract_chat_history_from_memory(memory_chain) # debugging
                                 print('chat_history_all: ', chat_history_all)
 
-                                memory_chain.chat_memory.add_user_message(text)  # append new diaglog
-                                memory_chain.chat_memory.add_ai_message(msg)
+                            memory_chain.chat_memory.add_user_message(text)  # append new diaglog
+                            memory_chain.chat_memory.add_ai_message(msg)
 
                         else:
                             msg = get_answer_using_template(text, vectorstore, rag_type)  # using template   
