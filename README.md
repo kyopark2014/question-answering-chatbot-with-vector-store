@@ -47,7 +47,7 @@ from langchain.llms.bedrock import Bedrock
 bedrock_region = "us-west-2" 
 
 boto3_bedrock = boto3.client(
-    service_name='bedrock’,
+    service_name='bedrock-runtime',
     region_name=bedrock_region,
 )
 
@@ -324,20 +324,25 @@ wrapper_store = VectorStoreIndexWrapper(vectorstore = vectorstore)
 answer = wrapper_store.query(question = query, llm = llm)
 ```
 
-#### Template를 이용하여 질문하는 방법
+#### RetrievalQA을 이용하여 질문하는 방법
 
-Template를 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용하여, 일반적으로 vectorstore에서 query를 이용하는 방법보다 나은 결과를 얻습니다.
+RetrievalQA 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용합니다.
 
 ```python
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
-prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+            
+<context>
+{context}
+</context>
+            
+<question>            
+{question}
+</question>
 
-{ context }
-
-Question: { question }
-Assistant: """
+Assistant:"""
 PROMPT = PromptTemplate(
     template = prompt_template, input_variables = ["context", "question"]
 )
@@ -356,22 +361,23 @@ result = qa({ "query": query })
 return result['result']
 ```
 
-#### Conversation
+#### ConversationalRetrievalChain
 
-대화(Conversation)을 위해서는 Chat History를 이용한 Prompt Engineering이 필요합니다. 여기서는 Chat History를 위한 chat_memory와 RAG에서 document를 retrieval을 하기 위한 memory를 이용합니다.
+대화(Conversation)을 위해서는 Chat History를 이용한 Prompt Engineering이 필요합니다. 여기서는 Chat History를 위한 chat_memory와 RAG에서 document를 retrieval을 하기 위한 memory를 이용합니다. ConversationalRetrievalChain에서 return_source_documents을 사용하기 위해서는 output_key를 'answer"로 하여야 합니다.
 
 ```python
-memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+memory_chain = ConversationBufferWindowMemory(memory_key="chat_history", output_key='answer', return_messages=True)        
 ```
 
 Chat history를 위한 condense_template과 document retrieval시에 사용하는 prompt_template을 아래와 같이 정의하고, [ConversationalRetrievalChain](https://api.python.langchain.com/en/latest/chains/langchain.chains.conversational_retrieval.base.ConversationalRetrievalChain.html)을 이용하여 아래와 같이 구현합니다.
 
 ```python
 def create_ConversationalRetrievalChain(vectorstore):  
-    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+    condense_template = """Given the following <history> and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
-    Chat History:
-    {chat_history}
+    <history>
+    {history}
+    </history>
     Follow Up Input: {question}
     Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
@@ -381,7 +387,10 @@ def create_ConversationalRetrievalChain(vectorstore):
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         retriever=vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 3}
+            search_type="similarity", 
+            search_kwargs={
+                "k": 3
+            }
         ),         
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
         combine_docs_chain_kwargs={'prompt': PROMPT},  
@@ -392,17 +401,21 @@ def create_ConversationalRetrievalChain(vectorstore):
         
         chain_type='stuff', # 'refine'
         rephrase_question=True,  # to pass the new generated question to the combine_docs_chain                
+        return_source_documents=True, # retrieved source (not allowed)
         return_generated_question=False, # generated question
-    )
-    
+    )   
     return qa
 
 def get_prompt():
-    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """\n\nHuman: Using the following <context>, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
+    <context>
     {context}
+    </context>
 
-    Question: {question}
+    <question>            
+    {question}
+    </question>
 
     Assistant:"""
 
