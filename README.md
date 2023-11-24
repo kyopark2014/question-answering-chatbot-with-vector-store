@@ -326,39 +326,95 @@ answer = wrapper_store.query(question = query, llm = llm)
 
 #### RetrievalQA을 이용하여 질문하는 방법
 
-RetrievalQA 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용합니다.
+chat history와 질문(question)을 이용하여 새로운 질문을 생성합니다. 
 
 ```python
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+def get_revised_question(query):    
+    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
-prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    Chat History:
+    {chat_history}
+    Follow Up Input: {question}
+    Standalone question:"""
+    CONDENSE_QUESTION_PROMPT = PromptTemplate(
+        template = condense_template, input_variables = ["chat_history", "question"]
+    )
+    
+    chat_history = extract_chat_history_from_memory(memory_chain)
+    #print('chat_history: ', chat_history)
+    
+    question_generator_chain = LLMChain(llm=llm, prompt=CONDENSE_QUESTION_PROMPT)
+    return question_generator_chain.run({"question": query, "chat_history": chat_history})
+
+revised_question = get_revised_question(text)
+```
+
+RetrievalQA 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용하여 아래와 같이 RAG를 수행한 결과를 얻을 수 있습니다.
+
+```python
+msg = get_answer_using_template(text, vectorstore, rag_type)
+
+def get_answer_using_template(query, vectorstore, rag_type):            
+    PROMPT = get_prompt_using_languange_type(query)
+
+    qa = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", 
+            search_kwargs={
+                #"k": 3, 'score_threshold': 0.8
+                "k": 3
+            }
+        ),
+        return_source_documents=True,
+        chain_type_kwargs={"prompt": PROMPT}
+    )
+    result = qa({"query": query})
+    print('result: ', result)
+    source_documents = result['source_documents']
+    print('source_documents: ', source_documents)
+
+    if len(relevant_documents)>=1 and enableReference=='true':
+        reference = get_reference(source_documents)
+        #print('reference: ', reference)
+
+        return result['result']+reference
+    else:
+        return result['result']
+
+def get_prompt_using_languange_type(query):
+    # check korean
+    pattern_hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+') 
+    word_kor = pattern_hangul.search(str(query))
+    print('word_kor: ', word_kor)
+        
+    if word_kor:
+        prompt_template = """\n\nHuman: 다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
+        
+        <context>
+        {context}
+        </context>
             
-<context>
-{context}
-</context>
+        <question>            
+        {question}
+        </question>
+
+        Assistant:"""
+    else:
+        prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
             
-<question>            
-{question}
-</question>
+        <context>
+        {context}
+        </context>
+            
+        <question>            
+        {question}
+        </question>
 
-Assistant:"""
-PROMPT = PromptTemplate(
-    template = prompt_template, input_variables = ["context", "question"]
-)
-
-qa = RetrievalQA.from_chain_type(
-    llm = llm,
-    chain_type = "stuff",
-    retriever = vectorstore.as_retriever(
-        search_type = "similarity", search_kwargs = { "k": 3 }
-    ),
-    return_source_documents = True,
-    chain_type_kwargs = { "prompt": PROMPT }
-)
-result = qa({ "query": query })
-
-return result['result']
+        Assistant:"""
+        
+    return PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 ```
 
 #### ConversationalRetrievalChain
@@ -372,6 +428,9 @@ memory_chain = ConversationBufferWindowMemory(memory_key="chat_history", output_
 Chat history를 위한 condense_template과 document retrieval시에 사용하는 prompt_template을 아래와 같이 정의하고, [ConversationalRetrievalChain](https://api.python.langchain.com/en/latest/chains/langchain.chains.conversational_retrieval.base.ConversationalRetrievalChain.html)을 이용하여 아래와 같이 구현합니다.
 
 ```python
+qa = create_ConversationalRetrievalChain(vectorstore)
+result = qa({"question": text})
+
 def create_ConversationalRetrievalChain(vectorstore):  
     condense_template = """Given the following <history> and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
