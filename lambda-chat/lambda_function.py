@@ -51,7 +51,7 @@ opensearch_passwd = os.environ.get('opensearch_passwd')
 # credentials = boto3.Session().get_credentials()
 # awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
 
-conversationMothod = 'ConversationalRetrievalChain' # ConversationalRetrievalChain or RetrievalQA
+conversationMothod = 'RetrievalQA' # ConversationalRetrievalChain or RetrievalQA
 
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
@@ -580,7 +580,7 @@ def lambda_handler(event, context):
                                     isReady = True
                                     qa = create_ConversationalRetrievalChain(vectorstore)
 
-                                result = qa(text)
+                                result = qa({"question": text})
                                 print('result: ', result)    
 
                                 msg = result['answer']
