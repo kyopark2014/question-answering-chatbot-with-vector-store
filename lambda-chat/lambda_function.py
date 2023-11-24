@@ -305,7 +305,7 @@ def create_ConversationalRetrievalChain(vectorstore):
     condense_template = """Given the following <history> and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
     <history>
-    {history}
+    {chat_history}
     </history>
     Follow Up Input: {question}
     Standalone question:"""
