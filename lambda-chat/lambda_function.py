@@ -600,7 +600,7 @@ def lambda_handler(event, context):
                             else: 
                                 revised_question = get_revised_question(text) # generate new prompt using chat history
                                 print('revised_question: ', revised_question)
-                                msg = get_answer_using_template(text, vectorstore, rag_type) 
+                                msg = get_answer_using_template(revised_question, vectorstore, rag_type) 
 
                                 chat_history_all = extract_chat_history_from_memory(memory_chain) # debugging
                                 print('chat_history_all: ', chat_history_all)
