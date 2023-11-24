@@ -352,7 +352,7 @@ revised_question = get_revised_question(text)
 RetrievalQA 이용하는 방법은 [RetrievalQA](https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_qa)을 이용하여 아래와 같이 RAG를 수행한 결과를 얻을 수 있습니다.
 
 ```python
-msg = get_answer_using_template(text, vectorstore, rag_type)
+msg = get_answer_using_template(revised_question, vectorstore, rag_type)
 
 def get_answer_using_template(query, vectorstore, rag_type):            
     PROMPT = get_prompt_using_languange_type(query)
