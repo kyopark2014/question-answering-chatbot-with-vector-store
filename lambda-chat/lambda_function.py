@@ -305,7 +305,7 @@ def create_ConversationalRetrievalChain(vectorstore):
     condense_template = """Given the following <history> and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
     <history>
-    {chat_history}
+    {history}
     </history>
     Follow Up Input: {question}
     Standalone question:"""
@@ -580,7 +580,7 @@ def lambda_handler(event, context):
                                     isReady = True
                                     qa = create_ConversationalRetrievalChain(vectorstore)
 
-                                result = qa({"question": text})
+                                result = qa(text)
                                 print('result: ', result)    
 
                                 msg = result['answer']
