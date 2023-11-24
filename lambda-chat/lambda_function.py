@@ -478,6 +478,7 @@ def lambda_handler(event, context):
     print('type: ', type)
     body = event['body']
     print('body: ', body)
+    print('rag_type: ', rag_type)
 
     global modelId, llm, vectorstore, isReady, map, qa, memory_chain
     global enableConversationMode, enableReference, enableRAG  # debug
