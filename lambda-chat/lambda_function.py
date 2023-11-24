@@ -51,7 +51,7 @@ opensearch_passwd = os.environ.get('opensearch_passwd')
 # credentials = boto3.Session().get_credentials()
 # awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
 
-conversationMothod = 'ManualIntegration' # ConversationalRetrievalChain or ManualIntegration
+conversationMothod = 'ConversationalRetrievalChain' # ConversationalRetrievalChain or RetrievalQA
 
 modelId = os.environ.get('model_id')
 print('model_id: ', modelId)
