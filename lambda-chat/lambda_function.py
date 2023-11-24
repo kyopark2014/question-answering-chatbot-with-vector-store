@@ -554,8 +554,7 @@ def lambda_handler(event, context):
                 enableConversationMode = 'false'
                 msg  = "Conversation mode is disabled"
             elif text == 'clearMemory':
-                memory_chain = ""
-                memory_chain = ConversationBufferWindowMemory(memory_key="chat_history", output_key='answer', return_messages=True)
+                memory_chain.clear()
                 map[userId] = memory_chain
                 print('initiate the chat memory!')
                 msg  = "The chat memory was intialized in this session."
