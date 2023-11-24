@@ -28,7 +28,7 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores import OpenSearchVectorSearch
 from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import ConversationChain
 from langchain.chains import LLMChain
 
@@ -77,10 +77,10 @@ def get_parameter(modelId):
         }
     elif modelId == 'anthropic.claude-v1' or modelId == 'anthropic.claude-v2':
         return {
-            "max_tokens_to_sample":1024,
+            "max_tokens_to_sample":8191,
             "temperature":0.1,
             "top_k":250,
-            "top_p": 0.9,
+            "top_p":0.9,
             "stop_sequences": [HUMAN_PROMPT]            
         }
 parameters = get_parameter(modelId)
@@ -256,11 +256,15 @@ def _get_chat_history(chat_history):
     return buffer
 
 def get_prompt():
-    prompt_template = """Using the following conversation, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """\n\nHuman: Using the following <context>, answer friendly for the newest question. If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
+    <context>
     {context}
+    </context>
 
-    Question: {question}
+    <question>            
+    {question}
+    </question>
 
     Assistant:"""
 
@@ -273,29 +277,38 @@ def get_prompt_using_languange_type(query):
     print('word_kor: ', word_kor)
         
     if word_kor:
-        prompt_template = """다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
+        prompt_template = """\n\nHuman: 다음은 Human과 Assistant의 친근한 대화입니다. Assistant은 상황에 맞는 구체적인 세부 정보를 충분히 제공합니다. Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
         
+        <context>
         {context}
+        </context>
             
-        Question: {question}
+        <question>            
+        {question}
+        </question>
 
         Assistant:"""
     else:
-        prompt_template = """Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        prompt_template = """\n\nHuman: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
             
+        <context>
         {context}
+        </context>
             
-        Question: {question}
+        <question>            
+        {question}
+        </question>
 
         Assistant:"""
         
     return PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 
 def create_ConversationalRetrievalChain(vectorstore):  
-    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+    condense_template = """Given the following <history> and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
-    Chat History:
-    {chat_history}
+    <history>
+    {history}
+    </history>
     Follow Up Input: {question}
     Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
@@ -320,7 +333,7 @@ def create_ConversationalRetrievalChain(vectorstore):
         #max_tokens_limit=300,
         chain_type='stuff', # 'refine'
         rephrase_question=True,  # to pass the new generated question to the combine_docs_chain                
-        # return_source_documents=True, # retrieved source (not allowed)
+        return_source_documents=True, # retrieved source (not allowed)
         return_generated_question=False, # generated question
     )
     #qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(qa_prompt_template) 
@@ -338,7 +351,7 @@ def extract_chat_history_from_memory(memory_chain):
 
     return chat_history
 
-def get_generated_prompt(query):    
+def get_revised_question(query):    
     condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
     Chat History:
@@ -480,7 +493,7 @@ def lambda_handler(event, context):
         memory_chain = map[userId]
         print('memory_chain exist. reuse it!')
     else: 
-        memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+        memory_chain = ConversationBufferWindowMemory(memory_key="chat_history", output_key='answer', return_messages=True)
         map[userId] = memory_chain
         print('memory_chain does not exist. create new one!')
 
@@ -544,7 +557,7 @@ def lambda_handler(event, context):
                 msg  = "Conversation mode is disabled"
             elif text == 'clearMemory':
                 memory_chain = ""
-                memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+                memory_chain = ConversationBufferWindowMemory(memory_key="chat_history", output_key='answer', return_messages=True)
                 map[userId] = memory_chain
                 print('initiate the chat memory!')
                 msg  = "The chat memory was intialized in this session."
@@ -571,7 +584,15 @@ def lambda_handler(event, context):
 
                                 result = qa(text)
                                 print('result: ', result)    
+
                                 msg = result['answer']
+                                print('\nquestion: ', result['question'])    
+                                print('answer: ', result['answer'])    
+                                print('chat_history: ', result['chat_history'])    
+                                print('source_documents: ', result['source_documents']) 
+
+                                if len(result['source_documents'])>=1 and enableReference=='true':
+                                    msg = msg+get_reference(result['source_documents'])
 
                                 # extract chat history
                                 chats = memory_chain.load_memory_variables({})
@@ -579,8 +600,8 @@ def lambda_handler(event, context):
                                 print('chat_history_all: ', chat_history_all)
                                 
                             else: 
-                                generated_prompt = get_generated_prompt(text) # generate new prompt using chat history
-                                print('generated_prompt: ', generated_prompt)
+                                revised_question = get_revised_question(text) # generate new prompt using chat history
+                                print('revised_question: ', revised_question)
                                 msg = get_answer_using_template(text, vectorstore, rag_type) 
 
                                 chat_history_all = extract_chat_history_from_memory(memory_chain) # debugging
