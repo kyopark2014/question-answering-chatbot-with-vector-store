@@ -580,7 +580,7 @@ def lambda_handler(event, context):
                                     isReady = True
                                     qa = create_ConversationalRetrievalChain(vectorstore)
 
-                                result = qa(text)
+                                result = qa({"question": text})
                                 print('result: ', result)    
 
                                 msg = result['answer']
