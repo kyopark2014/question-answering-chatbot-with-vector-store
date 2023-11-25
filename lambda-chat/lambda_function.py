@@ -302,13 +302,14 @@ def get_prompt_using_languange_type(query):
     return PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 
 def create_ConversationalRetrievalChain(vectorstore):  
-    condense_template = """Given the following <history> and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+    condense_template = """\n\nHuman: Given the following <history> and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
     <history>
     {history}
     </history>
     Follow Up Input: {question}
-    Standalone question:"""
+    
+    Assistant: Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
 
     PROMPT = get_prompt()
@@ -350,12 +351,13 @@ def extract_chat_history_from_memory(memory_chain):
     return chat_history
 
 def get_revised_question(query):    
-    condense_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+    condense_template = """\n\nHuman: Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
     Chat History:
     {chat_history}
     Follow Up Input: {question}
-    Standalone question:"""
+    
+    Assistant: Standalone question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate(
         template = condense_template, input_variables = ["chat_history", "question"]
     )
